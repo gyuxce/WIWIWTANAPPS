@@ -14,7 +14,8 @@ Repo ini dibuat dari source handoff developer sebelumnya dan sudah disanitasi su
 1. Baca [docs/PROJECT_STRUCTURE.md](docs/PROJECT_STRUCTURE.md) untuk peta folder.
 2. Baca [docs/SETUP_CHECKLIST.md](docs/SETUP_CHECKLIST.md) sebelum menjalankan project.
 3. Siapkan file rahasia sesuai [docs/SECRETS_REQUIRED.md](docs/SECRETS_REQUIRED.md).
-4. Jalankan backend dulu, lalu CMS, lalu mobile app.
+4. Untuk Windows local smoke test, baca [docs/LOCAL_DEV_WINDOWS.md](docs/LOCAL_DEV_WINDOWS.md).
+5. Jalankan backend dulu, lalu CMS, lalu mobile app.
 
 ## Stack Utama
 

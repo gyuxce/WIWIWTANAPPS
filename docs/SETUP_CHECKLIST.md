@@ -28,6 +28,8 @@ php artisan serve
 
 Jika memakai data production/staging dump, pastikan tidak menjalankan migration destruktif sebelum dicek.
 
+Untuk smoke test Windows tanpa MySQL/MariaDB, lihat `docs/LOCAL_DEV_WINDOWS.md`.
+
 ## 3. Microservices
 
 - Copy env/config rahasia sesuai `docs/SECRETS_REQUIRED.md`.
