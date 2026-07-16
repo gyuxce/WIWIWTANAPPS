@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Activate Account - Wiwitan</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope&family=Red+Hat+Display:wght@700&display=swap"
+    rel="stylesheet">
+  <style>
+
+    .email_container {
+      display: grid;
+      place-content: center;
+      /* min-height: 100vh; */
+    }
+
+    .email_wrapper {
+      display: grid;
+      grid-auto-flow: row;
+      place-content: center;
+      max-width: 306px;
+      text-align: left;
+    }
+
+    .email_wrapper .logo {
+      display: flex;
+      gap: 16px;
+      align-content: center;
+      align-self: center;
+      justify-content: center;
+    }
+
+    .email_wrapper .logo .wiwitan {
+      height: 80px;
+    }
+
+    .email_wrapper .status {
+      font-family: "Manrope";
+      font-size: 20px;
+      line-height: 27px;
+      font-weight: 600;
+      letter-spacing: -0.07px;
+      margin-top: 24px;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    .email_wrapper .description {
+      font-family: "Manrope";
+      font-size: 14px;
+      line-height: 19px;
+      margin-bottom: 24px;
+    }
+
+    .email_wrapper .button {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 36px;
+      text-align: center;
+    }
+
+    .email_wrapper a {
+      font-family: "Manrope";
+      width: 162px;
+      background-color: #0D3AA1;
+      padding: 8px 16px;
+      border-radius: 6px;
+      border: none;
+      color: white;
+      text-decoration: none;
+      margin-bottom: 8px;
+    }
+  </style>
+</head>
+
+<body class="email_container">
+  <main class="email_wrapper">
+    <div class="logo">
+      <img class="wiwitan"
+        src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIcAAACoCAYAAADKHf3pAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAABdFSURBVHgB7V1NcBtHdn7dAxDQOhtD6y0nqUrKo5JIuXKIyE129eNsCB5zEnXLTaBFb6WSg6hTqnIReMshVZRumzK1BC+p3ESe9kgoiS1qt2JDN1uQSqOc4yycZC2QmOnOe90z4AACQAAEMA2qvyoJM8DMsGf6m9fvr18DWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWPQLBhYteHzlihvfr2eztaVyuQZvId5Kcuzl87nMwUGeAyyCEK5gbF5KmWOM5Xqc5jH6x1glkPIpBEHlo1//ugKnGG8NOYgQ2Xr9Nm7mJf6D0YAIU/YBtn+6v1+GU4ZTT45/u3IlnwK4O0JCdIMiSh1gfWl/34NTgFNLjgmS4g3gQy2dBpKcOnLsoUKZBdhKghTtmHaScDhF+Pzy5dszUn5pAjEI2I5CBvn62ZUrBZhCnArJYZK06Aop71178uQOTBGmnhx7P/7xfMZxHuKmC+bDOwBYmpZhZqqHFXRY3URifAnTQQyCq4YZJDRMAaaWHEgMskRKMH1wGRKaiA2GYyqHlZAYRZhy4MMvXN3f3wZDMXXkIIsEGLsHpwQmE2SqyBEqn1/CaQJjNen7SybGaaZG5yBzNbRKThco4If3RbEfMAwpmBKEfgwXhgBGXGsU9wDOXwkhPCGlxziv8SCoccep+eF1pRA5zpjLOXeZlJfwuPljIrWjgpt5/XoLP2+AQZiKYWVIPaOMnbvrMLZz9QR+BYrRIFHmUcTexDaM1wRl7M61x4+N0aeMJwcNJ+QS7/MN9lC6bH8vm723MIYEHUoECq2kRRiHbwX1j4NM5pwpyUXGDytZiqweT4xygAGucedUhBKoQNsUL8E36y6MkiSof2Tr9Q3cWgEDYLTkUEoowMseh5CkWP9of78ECeHzq1fXsFMpiciFEQGJvmRC8pDR1kpWv5kdgdLk/plsdiFJYhBIR8A3bAk3R+arSPW470nCWMnRQ2p4+GatHPdmue5fu47TmOdc5riEnGCA47ioVKulsfkTVGheyo1RWDgmSA9jdY6szuJqBWMVtBxu/LSD9XHhwmqec1iUEvIMpCul73GQuwKc8oHf8DyvNHYlj6QYKq1lbPcenHCYCaVHGRKEkZJjb34+N5PJvIy/gQLF9jvZ7FrcCnHdQm5mJnUbJKzhbg6JUQYmthsNsTMJMnSDsmqkfHhS0/cgmz2bpOVipOSYyWaXkbUtxPjz/f1CtN9CCqlJQYrp8+ebZTAAZNUgwZcymcwWEmQZhkTm4KCAH4n5PYwkBzqurqMDS223E2N2tjDPIP0Qx3YX1VL0drIbvUhBRHIcJ59iONQAz0kmPCm5N24iLVUqNSTIChLEHVaC4BB6HRIkh3HDyocfFtxf5L7SiijqGGgNLES/zc397Cb6uOlh5aSQ9xtBUOw2fMzOflxAY+wma0kdlEgM5qlLA7nU5aMAeGVQokReU3yzFkVbx6uJT+iuDxjbPSSdoV6vZbLZoROSkhxajJMcLmvsRdukfEbbITFKakfCevXFg2Kn84lcQZDaOiKFrKHde//Q9++dVA8ha4Tc6CpXlTGSam+A4j9oZhNJljN0D9lsmaQf+UKGsWJm6nUalkqQAIwix9zc6t0c/x+XtimtP4qJUIeLQGjxisR49nyz2Ol8GnJEkNrT+kpEiuDEpKBUgazjbEg9Wy6ChwTZRcWzEghRo0BeM3CnpYlysdM5LCTTUBh3PKcHjCGHJgAUf48f7ODuMr5tr6LfRJBGaSKpw0vPnneXGEQM0MTwDhvBEpLCgxMiCvpFpCDS9jv9kXJFMRxPltTQKYFMiEVICMaQQ4j0BomFD2fq6i3Ht1E5q7TuQMonAHb4etfzjwg0MmK0pCPqCdR3BnFMhQk8BbxOcWjfB+cuJAQj3OeKAFIuU8fOp7916TtHSk//ysO3Tpa6dTgNR5pAsjYOYihXfSYztMeShseDen0B73Fw7ywG4764du0DSABGSA4GDnUu6puwix1CQazorYNGw7+RTvNlMj87nUumKvZegc5nkq33Sww1PcBx1HiOimINpUIt6nxSPJvEoMDe48dFOCHItMWPhc+uXr3HdKCub/xWiHMQG2YnhcTJcf78reVo2Pibd/9Tv1nYWdHvoTJZ6nZ+Ok2imoYTqH39fLOnT4BM0DT6UHDIKrRYDuhTcfDjs8uXa6hM7jRnzkm589GTJ0UYIZBoayiVLg0yO48nNC8n8WGFcxa+RbL0p6lvNSnwLe73fAqkccdfYFKs9zoOQ+sbSIA9dK6tETGk/hte7B+o73W+hkvfnTlzZlx5FStygHtMColKjtBCydM2ejq3nUj5GvDBffWVGko6So2wis8eXjMyCVVi0O+cOVOJx2koHiK02akSeGg4WRiT84l0EBy67oMhofluSJQcQcNZY0p2SXRnPyjDD/VsdBYbVk6KbL3+EDtaE6NHjmboUynRP5Qyyyj+d2CMOKzX72FwsV/HmAsJINFhBR1H19UnOqvi38sRPYzQ4sjrP9Z/8u61MRODoBRUzvtNEPIgASRGDhpSIkX0wPdH3hl7Ohm4QNvkuDIpqzsC6j9jJ+FJkBg5goDn9Zb0IvNTHL0hLpwQM1piuOHuOhgIMp37UUzF2yY5MDQVuYXL0Xep2EMgsxNOAB66rOMxGhOBSngZDEWCOocOKKG+8TT6Jt6J/ARJMuGQkqfthhC7YDB8IR4de0w2O7hndQRIUiFV5ECzsv3GPfqPvIh7bdWE+0X2KNDl/cWvfmX0uC6aYYIuQMvtrcrnoNB6tO37fjs56E1yaSPDGE0wXhrk4VB4Peb6Htl0gX7Qku8Beo4uSsAK5XNQ4k+nck9pziuyxzXZMPGYESERySFlKrLta+25FiL+MNBxRQ6sfiUI6SkznEfJQt5H+/tFmBCQGJRg1FK0LvS4kmNti6ZZkGndft5x+pDQL0siSIQcjAk33HpDItDE55YviCDHlGskL2jkHg+dSl440WgioE5nodlMEVyacyKDYEHqaY1edBxJtM+vXHnZgexet2uLBKcnJJJDSiF6BnyLssarzzff6ER6gBDGN9oK1nucMq+YUmI9OoaK27eVSijjTa1MykJpmXzVwdEWTr5uz+VoqSoYu992eNf2989BQkhEcnDJe7qMI12BknVxzKYE40h3oBUOaNoCvakkxpUHtBlIo87Z31+apOmaVnkoCl4nRxu1JYhNjA79Gqqq4HEFW1jCk5qMnCsbiVLqeCqsgh1OM9rPKTGNXkWmpUOZtiEU4xhaP5uEF5RHOZ60zEYX+PV6U4/CkMFKkyCvX/cMvPkTVqjbkYi1IpiosR68JM9hOK0wH/o7yvHAGBgIlF6/6fbbzPe+54LQueoHmUwZlex1mlOLJ62hEt3ND+MlPVc22cAbY26338TR0HLTxHpZEWQk5ZDE3drJhbiuD5YVMsvDmfnqPCI/6VUdrpu4yz8RcggRWSmya6eHpRU8yqGcqdfXwFBg6H1HDRPYzky9/rDdEqFitM0k5VgUNpBSSQya1dYhbO/xhPUNQiLWSjiNQGn4hw3/bLd5JWH1nC1VDknKBVNrhv/rT36ynOI8qnRISrQyx5E087GUgZbZe6EV87LT9cKCNEVIGIlIjnodmmRIp9Nut+Pi0oOqCYKhIBc9xkhodp4HZFFJuUb/4rmolL0eP6eHReVRTTMwAImQgyQFgzCmIIL5XsdGZiA9aMrQgjGDpNrs7Cfzg55HBCHHW2RRxS2pa0+e3Og35XCc6YmDIrE0QdmMofSe7kca+2dXr94P0/m3cEyvjGt40cOdmhzlwRAe1pNaVCopKeEyVnEkl88hmbL9o1TBXjh8/boIExhefD/lUnYazW3VM+3Ghw75Kh4YlpSUGDkE88t6S7pqYlIPUL5ly/By+fIGjAGqFEOoTKIfZgPb5cKYEM9X+U5wKDfO3jEtKSkxcoSF29TYmkmlCscdrxxC6B5XO+g86hThHAUODxsr4bCSm0mn96jWGIwBYWEWRYx//F/X+/v/+KVxeSeJOsGkkMruFwyOHVoI5DyiqKc6F30H4yAIKcvcCZY0QaTLGexdnF0dqRQJ2+3S9uZv/whe+FmjhpMIyZKjKcIh3+8bStMJI+/puAhCk6Q0QXSWGv6dNZIic7O3tnqRhMpbxhOZOiE+Qfufv/sD+OLw+9BoiDIYiEScYHHMzq5SsZU8lXGqvnjQtyf0369cKcWSiIs4Xo/l7dPpBQwJyNyjb5mHf7QipR4WGYMcisFvhWSlXiWk4sTY+e592Hn9PjV+99mzzbGb6MPAAHLo3A7crKG39NwgVXhaZqyjBxK9qDfGZeaSZMO/tcwY/0BGbn/GPC6Dpwf+zI7n/dzrdi7FXMKZd3naf3yQ8/7p//7QpW0hYcmUKojtSJwcBBTXL9Wb2aOkUzegi73IjuacJl4LvR1ksnIpH0bxE9KZVv7rj9/F+y2QXvOs+iCxZJ7jYAQ5YtIDQunhDXI+dYCj/R8u7TMDlglXGWI6LK+GDLUgEOcrH//mYiWKK0kQK9XqL0pgKIwgByGSHhQCr1Y3B/ZOxtZCuRl9lwRJwiHkdlTqIfy6mbo4N/vJS1Dlt6FSfb65AAbDGHKo2uVM5Vqi1xTufP315lDBp07roEyCJFQpiDvO9TZSeGFeqbLKVHkqqRXSYSTkpGEMOQiz52/dY7qYCymnCyd5eB0Xy6E5JEJsMyHKo1iNkaRVgEoqVVyOT0kI81nvx1eMiqcpDKNbJQGjyKFqmqdpaVA1vFQaDX9ppIVlW6Ey2X0MAKKSWKF5ur3c10QEymelysVIhqhsk9t2mFpX7p0zZ0rxyGosoOearoTGYRQ5CBQux3C+WjsWTcZStfpgBUYApZOg2x2029rtdpxSHGPFY9qmRnQ+nvNtlCA73XI+I19OWO1wwfThJIJx5CBcuPDxGmdcB9cYFNFJNFIHV6zEUx5791K/VYIj4lD+J5LhaT8rT5JXVZutVFtV3njx4oFxMZRuMJIchLkLq0VsnfZfjIEg7YiGDdqOV++j2hjR+rODRk3jCui06BlxGEsOwqQJMkrEJcY0EoNgNDkIrQRhOxRST3IVpuNASnU6nXrImvmj00kMggOG45v//qL83g9+RGtU5HH3Q8dx/ur7v/snu7VaxTiCkK8m5Ti/ZGHtESbhDhLjH2BKYTw5CESQH7w3/woZksfd33ccvvbeD38E33zzxSMwACQt3n//z/6O6dxRKs5fwwjtX6IH9F9gimH8sBKH9hc4e0fhc+ahX2Elyaim9uyyragyIlUOaPj+yrSYq70wVeSI0KKHKMgSLbcxyQ5RIXymZvvnwzbUqDD/cfXXpwlTSQ6CkiK+sxFffVHPWxXb44p00vCRSfGCYPw6a3GXnx5pEcfUkiOCeoOpXgeLu8dpkT9RDgTsBkFQPol1o60PjgR0FtFzS0RsektNW7J01Jh6ckTQY78s4C3dbP+N4jTYsbSa9VNfMo+8nL6f8tqPS6eDHAbmXFpmVDDnEgORb00PVFerSQHblP96WkkR4dSQI0L0pjPpXAemOncE5RuQEMDR7R08Snq160ni1JGjHSRRHBDzEocFyv1kjJbW6EUY6YFkNYrUUn4oSpBytfrpicP704hTT45uoGkErd/Ua2+LRLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwGBjGZZ+ronEzqdtSilemFXA1uW3jQGLLeHXDTNrZAAlU0Rjmzt+qPTOohlbacYrYttvUtosXVnPxSdN6QaFsOB/mdExzMHG58qY0k1yOYLbaeECrasf3U6nU/Ezaf0n/0g43chWEQWGc5OBOUAwajqraV31uluhuBEExDQ6Y2LZxwDhy0EI4+LEGBiIcKoxs2zhg4rBiYQgsOSy6wpLDoiuM0zneRhzVFOFu9F0gZSUIgspJS0lFJSioGA3tMylfCYByP4VnmmZjuH67Wi9NSrk9SNUaPDdcJTp4NIhzaO7C6l3JmEvFUarVTbVm7Pnzt5Z5uEp1o9G4Q0qgfnhpVQtdCLE7SP3w2dlb6Ivg73Ipnw5SzE2vSO0s0na1+qkqzq+LxOnKQdg2VaAuapteBFDqVZmAlUGvMN1Ep2f6ZtG5N9FvnbOobdj53rPnm+tUMy0IUlvdr808CcF6r+umYo3PcQYFvSMGqu/JQBb0jaiypqV+z5OMitPLvK7hBYocjipSr6/H2DtF/Khls5ATgf4Of3+FH32TA8fN6xIkFcIv427f5NA1T2VUQmpFt0e46AAr0Db6Nbbxw2u2TcbPpXtqQ9sznZ1d3WB9WD66c3l+bvbW4mEjuNPNudZsG1NEeSQCoCrKvYrU0PFbF2dXL30dvpjtsDpHAqC66HFi6MJzYuWwkTpH/1DyLNAKC/jL9tFZrJBOp/aOW9qdEK54FR4nS7QC5WHDP/ususloO35dWjOXFlXudB2rc5wQoV+GxZchk0KsVF90FtfhSgoFvSc9IVm3IrtUamoHh4diVJiXymZTXXX8fgmOhaRh40a4LHwT4d8qx69LBMH277a3w0qOCULpddESG9h5OEwcu6bs0erYtHy6HmYuXlw9djgi0rUTo/26dEy0z1qK/mpYckwUsim+qWP6tURiy6crfUMK6L1EO4PdfgwKOkYrvJp058797Qfx3y05JgSyHmKlsEuD1jBVw5eE++FujoaxbsdKKfpW2IWQ0TUhxV+3DFeWHBOC9FNHkVoBuzAEeMovRdssNJs7/i3JPegT6XTQHHo44y3KriXHhCCkXlWBcBgEZRgCJD1YqHugknAJRgzZZvpackwIjB89+JMkAqGZq85lynk4XlhyWHSFJceEgBZGU1q0WwUDYh4mhCY5GPObjW9XTHoh7rFjTJ6FoSD7FrPk5ocBgGLYpU8V+xjsvKgDR5ILSqssRNtp52AFhoCO90wOTXI0GkeBIsHger8X0GuRhJCw2O95LaYdg1e9jg29kLqTeP+KWJu55/bjetYHFnLRIn7o2q7ACOD7Pl1H3wOD2/22JQ4Gzl2YIJrkICUp7hDpZUfH0dbgXD/eO4IQqea6KP3Y5VK7kwdqG+fsdrxtM6lUX22j6QcQae5MbMMIoJTQmJ8ik04N1NHK7Q5HFs8k0KJz4Fuy3vyBsS1kt9vr5E4NJu9dGP7vcd7PbsbdyP2E+YdqW7svgB3fttnZQouLu9EQZRgRDn3/XuQGp3iGfn7Ho2Vl6wmihRzaaxdF7KQ7k07vdRrnaEi4OHfrYfwhyiNPG4pkuddJgpAo1TcqStF3GE5fhz6gXL3Nv9G9bfQ3KBwea1uNSdEMSWPbvuzUKVHbGKT2msdKdn+U67aR9Ii7wamNc7OfvOwmCel7vJe9+HMO0xsmgjeishgMWptJp2hcn49i/ngDd/GpVvDtxZuS8yKIa8y0ihFG/16UKnMXVmvhqo05lCAbc7Ord/VwQDckVVQRb/RorEVpMEiKf/XFgzW85mKPtrntyS0S+J1nzz8tYdtyzRUlVaesrkVtCxN18u1tG8dKj6Q/ofRaYiAe6iXCpEvRXLwPjKLqztftEfSM3didqOeMv1MeiAsTwBumLLEbY/9LMUkAauhAEU1JPSxmStHDxQYvRdE/WpZbqLc09OIpKaISegphp0U5BrVwteYiDIhn1c0FiA0xbW3Lx77Hh+0vVKuflqK2Uc5Ep7aFw8+J29YvaOWnMNK6Hb+P1vYwt/mLhDK+tAu9oqzjQM+5suEiv0W0wy7hkSEpaJkrXhEg73cLHukUNY5vIr95tGwWMl+yCgexe+CLUjcvYXxaoef93OvVtqDhrKGncLG9bYEU291SCXu1DR/GI9IL+mlbpymPR6s/9T8dMroPcofH24M/0UKDu+0LDXZ7PieZjjlMuy0sLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCw0/h+7ms5Db/oJJAAAAABJRU5ErkJggg=="
+        alt="Wiwitan Logo" />
+    </div>
+    <div class="status">Activate Your Account</div>
+    <div class="description">
+      You can activate your account by clicking the “Activate Now” button below
+    </div>
+    <div class="button">
+      <a href="{{.url}}">Activate Account Here</a>
+    </div>
+  </main>
+</body>
+
+</html>

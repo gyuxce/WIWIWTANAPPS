@@ -1,0 +1,4 @@
+{
+  "watcher.unstable_lazySha1": true,
+  "watcher.unstable_autoSaveCache": { "debounceMs": 5000, "enabled": true }
+}

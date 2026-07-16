@@ -1,0 +1,11 @@
+{
+  "java.compile.nullAnalysis.mode": "automatic",
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "i18n-ally.localesPaths": [
+    "src/i18n",
+    "src/i18n/language"
+  ],
+  "java.configuration.updateBuildConfiguration": "disabled",
+}

@@ -1,0 +1,8 @@
+{
+  "apps": [
+    {
+      "name": "62dolphin",
+      "script": "./62dolphin"
+    }
+  ]
+}

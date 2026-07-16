@@ -1,0 +1,21 @@
+{
+  "migIndex": 1,
+  "data": [
+    {
+      "path": "src/assets/fonts/CenturyGothic-Bold.ttf",
+      "sha1": "194388a12999c4d643ab58aeabec0a49535ebeeb"
+    },
+    {
+      "path": "src/assets/fonts/CenturyGothic-Italic.ttf",
+      "sha1": "967d66fc97165155fc763a043e9c8cae6edc6d75"
+    },
+    {
+      "path": "src/assets/fonts/CenturyGothic.ttf",
+      "sha1": "8f77dcba946e3703813eee2e91d74b5ee3807b23"
+    },
+    {
+      "path": "src/assets/fonts/OpificioNeue.ttf",
+      "sha1": "6fe5f04d1f26c5cdd6260dc7eb9ef7886103760d"
+    }
+  ]
+}

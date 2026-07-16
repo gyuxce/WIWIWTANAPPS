@@ -1,0 +1,40 @@
+secrets-local/
+
+# Environment files
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# Dependencies
+/node_modules/
+/vendor/
+/Pods/
+
+# Build outputs
+/build/
+/dist/
+/coverage/
+/.gradle/
+android/.gradle/
+mobile/android/.gradle/
+mobile/android/app/build/
+mobile/android/build/
+mobile/ios/build/
+backend/storage/logs/*.log
+backend/bootstrap/cache/*.php
+
+# Credentials and signing assets
+*.keystore
+*.jks
+*.p12
+*.pem
+*.key
+*firebase-adminsdk*.json
+GoogleService-Info.plist
+google-services.json
+
+# Local OS/editor noise
+.DS_Store
+Thumbs.db
+*.swp

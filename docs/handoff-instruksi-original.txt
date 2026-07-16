@@ -1,0 +1,71 @@
+Backend: wiwitan-be-laravel-staging.zip
+Framework = Laravel
+php version = 8.2
+php extension = *refer ke dokumentasi laravel*
+
+instruksi instalasi
+//pastikan database sudah ter-setup dan terisi
+//pastikan php dan semua extensi sudah ter-install
+//copy 62dolphin ke /microservices/Dolphin/bin, pastikan memiliki permission execute
+//copy be.env ke / dan sesuaikan
+//copy dolphin.env ke /microservices/Dolphin/bin dan sesuaikan
+composer install
+//pastikan permission sudah terpasang dengan benar, karena folder2 ini butuh write access:
+- bootstrap/cache
+- storage
+
+instruksi jalan dev
+1. jalankan service dolphin di terminal terpisah:
+- masuk ke /microservices/Dolphin/bin
+- ./62dolphin
+
+2. jalankan service Laravel di terminal terpisah:
+- php artisan serve
+
+instruksi jalan prod
+1. daftarkan dolphin sebagai system.d service (tidak perlu di expose di portforward apache/nginx)
+2. daftarkan laravel di apache/nginx conf sebagai domain api.wiwitanbaru.com, base folder di /public. di rekomendasikan menggunakan php-fpm sock.
+
+CMS: wiwitan-cms-react-js-main.zip
+Framework = React+Vite
+
+instruksi instalasi:
+1. pastikan node sudah terinstall
+2. copy .env ke / dan sesuaikan
+3. npm install
+
+instruksi jalan dev:
+1. npm run start
+
+instruksi jalan prod:
+1. npm run build
+2. static files akan terbuat di folder /build
+3. daftarkan di apache/nginx conf sebagai domain cs.wiwitanbaru.com, base folder di /build
+
+Mobile: wiwitan-mobile-react-native-WWT-939.zip
+android studio:
+SDK Platform: Android 14.0, API 34
+Android SDK Build Tools: 35.0.1
+NDK: 28.2.13676358
+Android SDK CLI tools: 19.0
+CMake: 3.30.3
+Android Emulator: 36.1.9
+Android Emulator Hypervisor Driver: 2.2.0
+Android SDK Platform-Tools: 36.0.0
+Google USB Driver: 13
+
+instruksi instalasi:
+1. pastikan android studio, node dan yarn sudah terinstall
+2. pastikan android studio sudah menggunakan semua requirement yang ada di atas
+2. copy .env ke / dan sesuaikan
+3. copy wiwitan.keystore ke /android/app (untuk build prod)
+4. yarn install
+
+instruksi jalan dev (android):
+1. npx react-native start --reset-cache (di terminal terpisah)
+2. yarn android:dev:debug (dari /android, di terminal terpisah)
+
+instruksi build prod (android):
+1. sesuaikan .env
+2. yarn android:prod
+3. hasil build proses di play store

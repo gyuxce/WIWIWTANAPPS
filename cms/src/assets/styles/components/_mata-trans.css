@@ -1,0 +1,8 @@
+.form-login-label {
+    color: var(--grey-shades-choose-1-gray-800, #1F2937) !important;
+    font-feature-settings: 'clig' off, 'liga' off !important;
+    font-size: 0.875rem !important;
+    font-style: normal !important;
+    font-weight: 700 !important;
+    line-height: 150% !important;
+}

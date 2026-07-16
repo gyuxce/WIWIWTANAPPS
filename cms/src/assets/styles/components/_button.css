@@ -1,0 +1,19 @@
+.button {
+  @apply font-semibold focus:outline-none whitespace-nowrap;
+
+  &.radius-round {
+    @apply rounded-lg;
+  }
+
+  &.radius-circle {
+    @apply rounded-full;
+  }
+
+  &.radius-none {
+    @apply rounded-none;
+  }
+}
+
+.shadow-custom {
+  box-shadow: -1.5px 1.5px 0px 0px #000;
+}

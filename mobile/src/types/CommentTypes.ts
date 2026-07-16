@@ -1,0 +1,63 @@
+import { LikeType } from "./ForumTypes";
+
+export type CommentType = {
+  item: {};
+  id: string;
+  created_at: string;
+  updated_at: string;
+  comment: string;
+  parent_id: string;
+  user_id: number;
+  post_id: number;
+  is_publish: boolean;
+  is_publish_label: string;
+  is_update: boolean;
+  count_like: number;
+  count_report: number;
+  total_child: number;
+  showAllReplies?: boolean;
+  page?: number;
+  is_like_by_user: boolean;
+  like: LikeType;
+  user: UserCommentType;
+  child: {
+    id: string;
+    created_at: string;
+    updated_at: string;
+    comment: string;
+    parent_id: string;
+    user_id: number;
+    post_id: number;
+    is_publish: boolean;
+    is_publish_label: string;
+    is_update: boolean;
+    count_like: number;
+    count_report: number;
+    total_child: number;
+    isNew?: boolean;
+    user?: UserCommentType;
+    is_like_by_user: boolean;
+    like: LikeType;
+  }[];
+};
+
+export type UserCommentType = {
+  id: string;
+  name: string;
+  email: string;
+  google_id: string;
+  facebook_id: string;
+  apple_id: string;
+  phone: string;
+  address: string;
+  birthplace: string;
+  dob: string;
+  is_active: string;
+  bloodtype_label: string;
+  last_education_label: string;
+  status_training_label: string;
+  training_program_label: string;
+  info_register_label: string;
+  other_register_information: string;
+  created_at: string;
+};

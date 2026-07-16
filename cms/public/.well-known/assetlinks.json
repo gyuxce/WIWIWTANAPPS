@@ -1,0 +1,14 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.wiwitan",
+      "sha256_cert_fingerprints": [
+        "73:38:CB:70:B8:9A:1C:F2:F7:68:1E:A3:4B:C6:C9:4B:B2:B4:D1:9C:A1:F7:ED:5C:6D:B7:FB:DE:F3:32:47:F5",
+        "B8:C5:23:CE:7B:C0:19:3E:ED:BD:81:F1:67:75:4E:56:CF:6D:1E:6E:A5:DD:F4:19:95:AC:93:7C:FF:C1:63:2A",
+        "FA:C6:17:45:DC:09:03:78:6F:B9:ED:E6:2A:96:2B:39:9F:73:48:F0:BB:6F:89:9B:83:32:66:75:91:03:3B:9C"
+      ]
+    }
+  }
+]

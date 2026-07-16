@@ -1,0 +1,8 @@
+{
+  "apps": [
+    {
+      "name": "app_aggregrator",
+      "script": "php artisan ser"
+    }
+  ]
+}
