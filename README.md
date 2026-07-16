@@ -1,20 +1,47 @@
-# Wiwitan Monorepo
+# WIWITAN Apps
 
-This repository contains the Wiwitan system recovered from the handoff archives:
+Monorepo untuk ekosistem Wiwitan:
 
-- `mobile/` - React Native mobile app.
-- `backend/` - Laravel API and microservices.
-- `cms/` - React admin/CMS web app.
-- `docs/` - handoff notes and project documentation.
+- `mobile/` - aplikasi mobile React Native.
+- `backend/` - API Laravel dan microservices.
+- `cms/` - dashboard/admin CMS berbasis React.
+- `docs/` - dokumentasi handoff, struktur, dan kebutuhan setup.
 
-## First Setup
+Repo ini dibuat dari source handoff developer sebelumnya dan sudah disanitasi supaya file rahasia tidak masuk Git.
 
-1. Copy the required secret files from a secure storage location into the right project folders.
-2. Install and run the backend first, because both the mobile app and CMS depend on the API.
-3. Run the CMS against the backend API.
-4. Run the mobile app with the development Android flavor.
+## Mulai Dari Mana?
 
-## Common Commands
+1. Baca [docs/PROJECT_STRUCTURE.md](docs/PROJECT_STRUCTURE.md) untuk peta folder.
+2. Baca [docs/SETUP_CHECKLIST.md](docs/SETUP_CHECKLIST.md) sebelum menjalankan project.
+3. Siapkan file rahasia sesuai [docs/SECRETS_REQUIRED.md](docs/SECRETS_REQUIRED.md).
+4. Jalankan backend dulu, lalu CMS, lalu mobile app.
+
+## Stack Utama
+
+Backend:
+
+- Laravel 10
+- PHP 8.1/8.2
+- Composer
+- Database SQL
+- Redis/Horizon/Telescope bila fitur queue/monitoring dipakai
+
+CMS:
+
+- React 18
+- Create React App
+- Tailwind CSS
+- npm
+
+Mobile:
+
+- React Native 0.77.3
+- Expo modules
+- TypeScript
+- Firebase Auth/Messaging
+- Android SDK 35
+
+## Command Cepat
 
 Backend:
 
@@ -41,14 +68,18 @@ yarn start
 yarn android:dev:debug
 ```
 
-Production Android build:
+Build Android production:
 
 ```sh
 cd mobile
 yarn build:aab:prod
 ```
 
-## Notes
+## Aturan Repo
 
-The original handoff instructions are preserved in `docs/handoff-instruksi-original.txt`.
-Do not commit secrets, keystores, service account JSON files, or real `.env` files.
+- Jangan commit `.env`, keystore, Firebase service account JSON, atau credential lain.
+- Update README/dokumentasi setiap ada perubahan setup, command, env, atau struktur folder.
+- Simpan catatan keputusan teknis di `docs/`.
+- Pastikan perubahan mobile yang bergantung backend juga dicatat kebutuhan API-nya.
+
+Instruksi original dari developer sebelumnya tetap disimpan di [docs/handoff-instruksi-original.txt](docs/handoff-instruksi-original.txt).
