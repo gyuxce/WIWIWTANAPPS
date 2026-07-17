@@ -1,4 +1,5 @@
 secrets-local/
+work/
 
 # Environment files
 .env

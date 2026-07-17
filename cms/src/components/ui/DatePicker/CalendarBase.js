@@ -6,7 +6,7 @@ import DateTable from './tables/DateTable'
 import MonthTable from './tables/MonthTable'
 import YearTable from './tables/YearTable'
 
-const CalendarBase = forwardRef((props) => {
+const CalendarBase = forwardRef((props, ref) => {
 
 	const {
 		className,

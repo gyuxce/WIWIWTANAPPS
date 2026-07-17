@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use App\Models\Base\Token;
 use App\Services\Dolphin\Dolphin as ServiceDolphin;
 use App\Services\Dolphin\DolphinAuth;
+use App\Services\Dolphin\LocalAuth;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -24,6 +25,18 @@ class Dolphin
         }
 
         $dolphin = new ServiceDolphin();
+
+        if (LocalAuth::enabled() && $localToken = (new LocalAuth())->verify($token)) {
+            DolphinAuth::$id = $localToken->user_id;
+            DolphinAuth::$uuid = $localToken->id;
+            DolphinAuth::$issued_at = $localToken->issued_at;
+            DolphinAuth::$expired_at = $localToken->expired_at;
+
+            $user = DolphinAuth::user();
+            if ($user) {
+                return $next($request);
+            }
+        }
 
         $res = $dolphin->verify($token);
         if ($res?->getStatusCode() === 200) {

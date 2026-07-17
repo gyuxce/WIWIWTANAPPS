@@ -19,7 +19,7 @@ class Dolphin
     public function fetch($method, $uri, $body = [], $auth = '')
     {
         try {
-            $uri = config('62dolphin.url') . $uri;
+            $uri = config('dolphin.url') . $uri;
 
             if (!empty($body)) {
                 $body = ['json' => $body];

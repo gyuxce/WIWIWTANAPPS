@@ -44,21 +44,29 @@ Mobile:
 
 ## Command Cepat
 
+Windows local development sudah diverifikasi dengan SQLite dan fallback auth lokal. Detailnya ada di [docs/LOCAL_DEV_WINDOWS.md](docs/LOCAL_DEV_WINDOWS.md).
+
 Backend:
 
-```sh
-cd backend
-composer install
-php artisan serve
+```powershell
+.\scripts\backend-composer-install.ps1
+.\scripts\backend-migrate-sqlite.ps1
+.\scripts\backend-serve.ps1
 ```
 
 CMS:
 
-```sh
+```powershell
 cd cms
 npm install
 npm run start
 ```
+
+Login CMS local seed:
+
+- URL: `http://127.0.0.1:3000`
+- Email: `admin@62teknologi.com`
+- Password: `password`
 
 Mobile:
 

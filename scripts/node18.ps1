@@ -1,2 +1,2 @@
 . "$PSScriptRoot\dev-env.ps1"
-node @args
+& (Join-Path $NodeRoot "node.exe") @args

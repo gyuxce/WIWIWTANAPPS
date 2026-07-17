@@ -76,6 +76,57 @@ Then open:
 http://127.0.0.1:8000
 ```
 
+Smoke test constants API:
+
+```powershell
+curl.exe http://127.0.0.1:8000/api/v1/constants
+```
+
+## Local Auth Fallback
+
+The original backend delegates sign-in and token verification to the Dolphin microservice. That service is not required for the current Windows smoke test. When `APP_ENV=local`, the backend can issue and verify local development tokens through `App\Services\Dolphin\LocalAuth`.
+
+This fallback is intentionally local-only. Production and staging should keep using the Dolphin service.
+
+The fallback uses the existing `users` table and stores refresh sessions in the `tokens` table.
+
+Seed CMS admin login:
+
+```text
+Email: admin@62teknologi.com
+Password: password
+```
+
+## CMS Setup
+
+Create local CMS env:
+
+```powershell
+Copy-Item cms\.env.example cms\.env
+```
+
+Use the local backend API host:
+
+```env
+REACT_APP_API_HOST=http://127.0.0.1:8000/api/v1
+REACT_APP_DEFAULT_PASSWORD=password
+REACT_APP_MAX_UPLOAD_SIZE=5242880
+```
+
+Install and start CMS:
+
+```powershell
+cd cms
+npm install --legacy-peer-deps
+npm run start
+```
+
+Then open:
+
+```text
+http://127.0.0.1:3000
+```
+
 ## Windows Notes
 
 Laravel Horizon requires `pcntl` and `posix`, which are Linux/Unix PHP extensions. On Windows development, Composer install uses:
@@ -93,3 +144,5 @@ Production should still run on Linux with the proper PHP extensions and queue pr
 - SQLite migrations run when each migration subfolder is called explicitly.
 - `DevDatabaseSeeder` imports the development Excel seed data.
 - `php artisan serve` responds on `http://127.0.0.1:8000`.
+- CMS starts on `http://127.0.0.1:3000`.
+- CMS login succeeds with the seed admin account and redirects to `/dashboard`.

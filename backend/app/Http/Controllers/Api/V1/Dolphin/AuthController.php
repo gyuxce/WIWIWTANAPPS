@@ -18,6 +18,7 @@ use App\Models\Base\User;
 use App\Models\Master\Cities;
 use App\Models\Training\UserExam;
 use App\Services\Dolphin\Dolphin;
+use App\Services\Dolphin\LocalAuth;
 use App\Services\Sailfish\Sailfish;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
@@ -47,8 +48,11 @@ class AuthController extends Controller
     {
         $req = app($this->signinValidator);
 
-        $res = $this->dolphin->signIn($req->all());
+        $res = LocalAuth::enabled()
+            ? (new LocalAuth())->signIn($req)
+            : $this->dolphin->signIn($req->all());
         $data = json_decode($res->content(), true);
+
         $status = $data['status'] ?? 'success';
         $message = $data['message'] ?? 'success';
 
@@ -288,7 +292,7 @@ class AuthController extends Controller
             ]);
         }
 
-        Token::where('user_id', $data->user_id)->forceDelete();
+        Token::where('user_id', $data->user_id)->delete();
 
         return response()->json([
             "status" => "success"
@@ -298,6 +302,10 @@ class AuthController extends Controller
     public function refreshToken()
     {
         $req = app($this->refreshTokenValidator);
+
+        if (LocalAuth::enabled()) {
+            return (new LocalAuth())->refresh($req->input('refresh_token'));
+        }
 
         return $this->dolphin->refreshToken($req->all());
     }

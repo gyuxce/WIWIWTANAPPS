@@ -41,9 +41,9 @@ BaseService.interceptors.response.use(
 
     if (unauthorizedCode.includes(response.status)) {
       try {
-        const resp = await axios.post(`${appConfig.apiPrefix}auth/tokens/refresh-token`, { refresh_token });
-        const { data } = resp?.response?.data || {};
-        if (authorizedCode.includes(resp?.response?.status) && remember_me === true) {
+        const resp = await axios.post(`${appConfig.apiPrefix}tokens/refresh`, { refresh_token });
+        const { data } = resp?.data || {};
+        if (authorizedCode.includes(resp?.status) && remember_me === true) {
           store.dispatch(
             setToken({
               access_token: data.access_token,
