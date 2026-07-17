@@ -16,7 +16,8 @@ Repo ini dibuat dari source handoff developer sebelumnya dan sudah disanitasi su
 3. Siapkan file rahasia sesuai [docs/SECRETS_REQUIRED.md](docs/SECRETS_REQUIRED.md).
 4. Untuk Windows local smoke test, baca [docs/LOCAL_DEV_WINDOWS.md](docs/LOCAL_DEV_WINDOWS.md).
 5. Untuk hasil audit CMS terakhir, baca [docs/CMS_AUDIT.md](docs/CMS_AUDIT.md).
-6. Jalankan backend dulu, lalu CMS, lalu mobile app.
+6. Untuk menjalankan aplikasi siswa Android lokal, baca [docs/MOBILE_LOCAL_ANDROID.md](docs/MOBILE_LOCAL_ANDROID.md).
+7. Jalankan backend dulu, lalu CMS, lalu mobile app.
 
 ## Stack Utama
 
@@ -71,11 +72,12 @@ Login CMS local seed:
 
 Mobile:
 
-```sh
+```powershell
 cd mobile
 yarn install
 yarn start
-yarn android:dev:debug
+cd android
+.\gradlew.bat app:installDevelopmentDebug
 ```
 
 Build Android production:
