@@ -34,7 +34,35 @@ Untuk build Android di Windows, install dan siapkan:
 - JDK yang kompatibel dengan React Native/Android Gradle Plugin.
 - Emulator Android atau HP Android dengan USB debugging.
 
-Environment penting:
+## Setup Android Studio Pertama Kali
+
+Setelah Android Studio selesai di-install:
+
+1. Buka Android Studio.
+2. Jika muncul setup wizard, pilih `Standard`.
+3. Tunggu semua komponen selesai di-download.
+4. Buka `More Actions` > `SDK Manager`.
+5. Di tab `SDK Platforms`, centang `Android 15.0 ("VanillaIceCream")` atau platform dengan API level 35.
+6. Di tab `SDK Tools`, centang:
+   - `Android SDK Build-Tools`
+   - `Android SDK Platform-Tools`
+   - `Android Emulator`
+   - `Android SDK Command-line Tools (latest)`
+7. Klik `Apply` dan tunggu sampai selesai.
+8. Buka `More Actions` > `Virtual Device Manager`.
+9. Klik `Create Device`, pilih device seperti `Pixel 7` atau `Pixel 8`.
+10. Pilih system image API 35, download jika belum ada.
+11. Finish, lalu klik tombol play untuk menjalankan emulator.
+
+Setelah itu cek dari terminal:
+
+```powershell
+.\scripts\android-env.ps1
+adb devices
+emulator -list-avds
+```
+
+Environment penting yang dimuat oleh script:
 
 ```powershell
 $env:ANDROID_HOME="$env:LOCALAPPDATA\Android\Sdk"
@@ -46,6 +74,12 @@ Jika memakai JDK bawaan Android Studio:
 ```powershell
 $env:JAVA_HOME="C:\Program Files\Android\Android Studio\jbr"
 $env:Path="$env:JAVA_HOME\bin;$env:Path"
+```
+
+Lebih praktisnya, jalankan:
+
+```powershell
+.\scripts\android-env.ps1
 ```
 
 ## File Lokal
@@ -113,5 +147,5 @@ Script `yarn android:dev:debug` masih memakai gaya Unix `./gradlew`, jadi di Win
 - `mobile/.env` sudah disiapkan untuk Android emulator.
 - `debug.keystore` dan `google-services.json` sudah bisa direstore dari `secrets-local`.
 - Login screen mobile sudah mengirim `is_mobile: "1"`.
-- Build Android belum diverifikasi di mesin ini karena `adb` dan `JAVA_HOME` belum tersedia di PATH.
+- Build Android belum diverifikasi penuh. Android SDK dan ADB sudah ditemukan setelah Android Studio terpasang, tetapi API 35, emulator/AVD, dan JAVA_HOME masih perlu dicek dari Android Studio.
 - Install dependency sempat gagal di cache Yarn global dengan error `EPERM`, lalu retry cache lokal timeout sebelum `node_modules` terbentuk.
