@@ -97,6 +97,15 @@ Email: admin@62teknologi.com
 Password: password
 ```
 
+Seed student/mobile login:
+
+```text
+Email: user1@62teknologi.com
+Password: password
+```
+
+Student accounts have `role_id = null`, so they are intentionally blocked from the CMS. Use student accounts only through the mobile app or mobile API login with `is_mobile=1`.
+
 ## CMS Setup
 
 Create local CMS env:
