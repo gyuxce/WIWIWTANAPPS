@@ -131,7 +131,6 @@ const Sistem = () => {
                   <div className="h-10 p-3 bg-white rounded-lg shadow border border-black justify-center items-center gap-2 inline-flex">
                     <button
                       type="submit"
-                      loading={isSubmitting}
                       disabled={isSubmitting}
                       className="text-center text-black text-sm font-normal font-goth leading-[21px] cursor-pointer"
                     >

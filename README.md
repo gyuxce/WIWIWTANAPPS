@@ -15,7 +15,8 @@ Repo ini dibuat dari source handoff developer sebelumnya dan sudah disanitasi su
 2. Baca [docs/SETUP_CHECKLIST.md](docs/SETUP_CHECKLIST.md) sebelum menjalankan project.
 3. Siapkan file rahasia sesuai [docs/SECRETS_REQUIRED.md](docs/SECRETS_REQUIRED.md).
 4. Untuk Windows local smoke test, baca [docs/LOCAL_DEV_WINDOWS.md](docs/LOCAL_DEV_WINDOWS.md).
-5. Jalankan backend dulu, lalu CMS, lalu mobile app.
+5. Untuk hasil audit CMS terakhir, baca [docs/CMS_AUDIT.md](docs/CMS_AUDIT.md).
+6. Jalankan backend dulu, lalu CMS, lalu mobile app.
 
 ## Stack Utama
 

@@ -72,10 +72,11 @@ export const PageTable = (props) => {
             Cell: (props) => {
               const row = props.row.original;
               const val = getValueByKey(row, el.key);
+              const progressValue = Number(val) || 0;
               return (
                 <div className="flex items-center justify-center text-xs">
                   <span className="w-20 text-end mr-1">{`${val} %`}</span>
-                  <Progress className="!h-3" color="indigo-500" showInfo={false} percent={val} />
+                  <Progress className="!h-3" color="indigo-500" showInfo={false} percent={progressValue} />
                 </div>
               );
             },

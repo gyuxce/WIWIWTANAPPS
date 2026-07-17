@@ -8,6 +8,7 @@ use App\Models\Base\User;
 use App\Models\Base\UserMobileUsage;
 use App\Repositories\BaseRepository;
 use App\Models\Master\Certification;
+use Carbon\Carbon;
 use DateTime;
 
 class DashboardRepository extends BaseRepository
@@ -84,7 +85,7 @@ class DashboardRepository extends BaseRepository
                 $totalAvarageFromEachDay += $data->average_screentime_usage;
             }
 
-            $firstDate = new DateTime($datas[0]->date);
+            $firstDate = $this->parseUsageDate($datas[0]->date);
             $now = new DateTime('now');
             $interval = $firstDate->diff($now);
             $numberOfDays = $interval->days + 1;
@@ -103,5 +104,14 @@ class DashboardRepository extends BaseRepository
         }
 
         return $response;
+    }
+
+    private function parseUsageDate($date): DateTime
+    {
+        if (is_numeric($date)) {
+            return Carbon::create(1899, 12, 30)->addDays((int) $date)->toDateTime();
+        }
+
+        return new DateTime($date);
     }
 }

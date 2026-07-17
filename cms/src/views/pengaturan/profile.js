@@ -156,7 +156,6 @@ const Profile = (props) => {
                   <div className="h-10 p-3 bg-white rounded-lg shadow border border-black justify-center items-center gap-2 inline-flex">
                     <button
                       type="submit"
-                      loading={isSubmitting || loading}
                       disabled={isSubmitting || loading}
                       className={`${
                         isSubmitting || loading ? null : 'cursor-pointer'
