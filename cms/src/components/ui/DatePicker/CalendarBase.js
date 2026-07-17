@@ -142,7 +142,7 @@ const CalendarBase = forwardRef((props, ref) => {
 	}
 
 	return (
-		<div className={classNames('picker-view', className)} {...rest}>
+		<div ref={ref} className={classNames('picker-view', className)} {...rest}>
 			{selectionState === 'year' && (
 				<YearTable
 					value={yearSelection}
