@@ -17,7 +17,6 @@ import { useAuth } from "hooks/useAuth";
 import { getCourseImageAndColor } from "utils/Utils";
 import { useTraining } from "hooks/useTraining";
 import moment from "moment";
-import Text from "components/Text";
 import NavigationService from "utils/NavigationService";
 import { useExam } from "hooks/useExam";
 import { t } from "i18next";

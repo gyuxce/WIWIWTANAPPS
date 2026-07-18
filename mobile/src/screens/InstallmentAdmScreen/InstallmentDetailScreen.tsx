@@ -263,7 +263,7 @@ const InstallmentDetailScreen = () => {
           })}
           <Space height={20} />
         </View>
-        {/* {installmentDetail?.left_amount > 0 && !isLoading && (
+        {installmentDetail?.left_amount > 0 && !isLoading && (
           <View style={{ marginHorizontal: scaledHorizontal(25) }}>
             <Button
               isLoading={isUploading}
@@ -302,7 +302,7 @@ const InstallmentDetailScreen = () => {
               }}
             />
           </View>
-        )} */}
+        )}
         {installmentDetail?.left_amount === 0 && !isLoading && (
           <CardPaymentPaid />
         )}

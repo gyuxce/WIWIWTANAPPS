@@ -1,6 +1,5 @@
 import Text from "components/Text";
 import colors from "configs/colors";
-import { usePayment } from "hooks/usePayment";
 import { t } from "i18next";
 import React from "react";
 import { TouchableOpacity, View } from "react-native";
@@ -12,8 +11,6 @@ interface Props {
 }
 
 const PaymentTab = ({ active = "admin" }: Props) => {
-  const { paymentStatusType } = usePayment();
-
   const handleClickAdm = () => {
     NavigationService.replace("PaymentAdministration");
   };

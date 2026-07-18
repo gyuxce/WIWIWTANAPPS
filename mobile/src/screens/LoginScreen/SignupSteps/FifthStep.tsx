@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { View, Image, TouchableOpacity } from "react-native";
 import Space from "components/Space";
 import Text from "components/Text";

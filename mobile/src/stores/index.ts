@@ -97,7 +97,7 @@ const rootReducerWithReset = (
   if (action.type === "RESET_ALL_STATE") {
     // Create a new state object with initial state for each slice
     const initialState = rootReducer(undefined, {
-      type: undefined,
+      type: "@@INIT",
     });
 
     return initialState;

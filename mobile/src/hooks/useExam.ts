@@ -13,13 +13,37 @@ import {
   onGetLessonClass,
   onGetLessonClassByDate,
   onGetTrainingModuleProgress,
-  onModuleDetail,
 } from "stores/exam/examSlice";
 import { ErrorStatus } from "utils/ErrorStatus";
 import type { StatusTestType } from "types/UserTypes";
 import type { ExamProgressType } from "types/ExamTypes";
 
 import { useAuth } from "./useAuth";
+
+type ModuleContentProgress = {
+  title: string;
+  id: string;
+  isOpen: boolean;
+  total: number;
+  total_finished: number;
+};
+
+type ModuleGroupProgress = {
+  title: string;
+  total: number;
+  total_finished: number;
+  content: ModuleContentProgress[];
+};
+
+type ModuleLevelProgress = {
+  level_module: number;
+  title: string;
+  isOpen: boolean;
+  total: number;
+  total_finished: number;
+  level_module_label: string;
+  child: ModuleGroupProgress[];
+};
 
 export const useExam = () => {
   const dispatch = useDispatch();
@@ -178,32 +202,35 @@ export const useExam = () => {
 
   const getModuleDetail = async (param?: any) => {
     try {
-      let new_data = [];
-      const resp = await apiModuleDetail(auth?.accessToken, param);
+      let new_data: ModuleLevelProgress[] = [];
+      const resp = (await apiModuleDetail(auth?.accessToken, param)) as {
+        data?: any[];
+      };
       if (resp?.data) {
         let data = resp?.data;
-        data.forEach(element => {
+        data.forEach((element: any) => {
           let cek_level = new_data.find(
             x => x.level_module == element.level_module,
           );
-          let content = element.content.map((content, i) => {
+          let content = element.content.map((content: any) => {
             let cont = {
               title: content.title,
               id: content.id,
               isOpen: false,
               total: content.materialContent.length,
               total_finished: content.materialContent.filter(
-                x => x.progress && x.progress.status == 1,
+                (x: any) => x.progress && x.progress.status == 1,
               ).length,
             };
 
             return cont;
           });
-          let child = {
+          let child: ModuleGroupProgress = {
             title: element.title,
             total: content.length,
             total_finished: content.filter(
-              x => x.total == x.total_finished && x.total != 0,
+              (x: ModuleContentProgress) =>
+                x.total == x.total_finished && x.total != 0,
             ).length,
             content: [...content],
           };
@@ -212,7 +239,10 @@ export const useExam = () => {
               x => x.level_module == element.level_module,
             );
 
-            new_data[indexLevel].child.push(child);
+            const levelItem = new_data[indexLevel];
+            if (levelItem) {
+              levelItem.child.push(child);
+            }
           } else {
             new_data.push({
               level_module: element.level_module,
@@ -229,7 +259,8 @@ export const useExam = () => {
           let mapping = { ...x };
           mapping.total = x.child.length;
           mapping.total_finished = x.child.filter(
-            x => x.total == x.total_finished && x.total != 0,
+            (x: ModuleGroupProgress) =>
+              x.total == x.total_finished && x.total != 0,
           ).length;
           return mapping;
         });

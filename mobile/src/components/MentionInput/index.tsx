@@ -4,11 +4,11 @@ import { View, TextInput, Text, StyleSheet } from "react-native";
 const MentionInput = () => {
   const [inputText, setInputText] = useState("");
 
-  const handleInputChange = text => {
+  const handleInputChange = (text: string) => {
     setInputText(text);
   };
 
-  const formatText = text => {
+  const formatText = (text: string) => {
     const boldRegex = /\[([^\]]+)\]/g;
     let currentIndex = 0;
     const formattedText = [];

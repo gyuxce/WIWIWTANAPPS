@@ -87,6 +87,13 @@ Audit layar aplikasi siswa Android lokal.
 - Perbaikan mobile: tab kelas virtual dan asesmen sekarang memiliki loading state, pesan error fetch, dan empty state setelah filter/search.
 - Catatan UI: setelah patch ini, perlu install ulang APK dan ulang tap tab virtual/asesmen di emulator untuk verifikasi visual penuh.
 
+### Stabilisasi TypeScript Mobile
+
+- Perbaikan typing dilakukan pada progress bar, input, mention input, kalender, payment screen, payment status, auth signup, dan hook exam/payment.
+- Tombol upload bukti bayar cicilan administrasi diaktifkan kembali karena handler upload sudah ada tetapi blok UI sebelumnya ter-comment.
+- Verifikasi: `corepack yarn tsc --noEmit --pretty false` berhasil tanpa error.
+- Verifikasi: `app:assembleDevelopmentDebug` berhasil setelah cleanup TypeScript.
+
 ## Temuan Lanjutan
 
 - Untuk audit materi pelatihan penuh, siapkan seed user dengan `is_subscription_active = 1`, payment training completed, dan `training_program` yang sesuai dengan `course_items.program_type`.

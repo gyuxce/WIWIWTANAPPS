@@ -1,7 +1,6 @@
 import Button from "components/Button";
 import Card from "components/Card";
 import icons from "configs/icons";
-import images from "configs/images";
 import React from "react";
 import { View, Image } from "react-native";
 import { scaledHorizontal } from "utils/ScaledService";
@@ -18,6 +17,7 @@ interface SectionStatusProps {
     title: string;
     onPressDetail?: () => void;
     isChecklist: boolean;
+    status?: number;
   }[];
   image: any;
   icon: any;

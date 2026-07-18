@@ -10,16 +10,17 @@ import { usePayment } from "hooks/usePayment";
 import { numberToRupiah } from "utils/Utils";
 import PaymentScreen from "components/PaymentScreen";
 import { t } from "i18next";
-import NavigationService from "utils/NavigationService";
 
 const FullPaymentDetailScreen = ({ route }: any) => {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading] = useState(false);
   const { transaction } = usePayment();
 
   const prepareData = () => {
     //validate
-    if (!transaction) { return; }
-    // if (!transaction || !transaction.installment) { 
+    if (!transaction) {
+      return;
+    }
+    // if (!transaction || !transaction.installment) {
     //   NavigationService.replace("PaymentAdministration");
     // }
   };

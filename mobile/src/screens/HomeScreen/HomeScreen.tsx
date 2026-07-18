@@ -37,7 +37,6 @@ import NavigationService from "utils/NavigationService";
 import { scaledHorizontal, scaledVertical } from "utils/ScaledService";
 import { getCourseImageAndColor, getStatus, isCloseToRight } from "utils/Utils";
 import * as Calendar from "expo-calendar";
-import { useNavigation } from "@react-navigation/core";
 import dayjs from "dayjs";
 import { DateProps, EventProps } from "types/CalendarTypes";
 import { generateDate } from "utils/Calendar";
@@ -51,7 +50,6 @@ const HomeScreen = () => {
   const { auth, getMe, user } = useAuth();
   const [phase, setPhase] = useState(0);
   const [isSubscriptionActive, setIsSubscriptionActive] = useState(0);
-  const navigation = useNavigation();
   const [seminarQuery] = useState({
     type: "pagination",
     relations: ["cover"],
@@ -290,87 +288,96 @@ const HomeScreen = () => {
           </View>
         )}
 
-        {(phase === 3 || phase === 4 || phase === 5) && isSubscriptionActive === 1 && (
-          <>
-            <Section textTitle="Status" textJapan="進捗" />
-            <Space height={30} />
+        {(phase === 3 || phase === 4 || phase === 5) &&
+          isSubscriptionActive === 1 && (
+            <>
+              <Section textTitle="Status" textJapan="進捗" />
+              <Space height={30} />
 
-            <SectionLesson data={trainingModuleProgress} />
-            <Space height={30} />
-            <Section
-              textTitle="Kelas Virtual Minggu Ini"
-              textJapan="今週のオンライン授業"
-            />
-            <Space height={30} />
-            {weekClass?.length > 0 ? (
-              <SectionNextClass
-                hideBtnDetail={weekClass?.length === 0}
-                data={weekClass?.map((item: any) => ({
-                  image: getCourseImageAndColor(item?.course?.type_label)
-                    ?.image,
-                  headLine: item?.course?.title,
-                  title: item?.title,
-                  date: item?.event?.started_at
-                    ? moment(item?.event?.started_at).format(
-                        "dddd, DD/MM/YYYY HH:mm",
-                      )
-                    : "-",
-                }))}
+              <SectionLesson data={trainingModuleProgress} />
+              <Space height={30} />
+              <Section
+                textTitle="Kelas Virtual Minggu Ini"
+                textJapan="今週のオンライン授業"
               />
-            ) : (
-              <View>
-                <Text textAlign="center">
-                  Tidak ada kelas virtual minggu ini.
-                </Text>
-              </View>
-            )}
+              <Space height={30} />
+              {weekClass?.length > 0 ? (
+                <SectionNextClass
+                  hideBtnDetail={weekClass?.length === 0}
+                  data={weekClass?.map((item: any) => ({
+                    image: getCourseImageAndColor(item?.course?.type_label)
+                      ?.image,
+                    headLine: item?.course?.title,
+                    title: item?.title,
+                    date: item?.event?.started_at
+                      ? moment(item?.event?.started_at).format(
+                          "dddd, DD/MM/YYYY HH:mm",
+                        )
+                      : "-",
+                  }))}
+                />
+              ) : (
+                <View>
+                  <Text textAlign="center">
+                    Tidak ada kelas virtual minggu ini.
+                  </Text>
+                </View>
+              )}
 
-            <Space height={30} />
-            <Section
-              textTitle="Jadwal Kelas Virtual"
-              textJapan="オンライン授業のスケジュール"
-            />
-            <Space height={30} />
-            <SectionSchedule
-              dataFilter={dataFilter}
-              event={lessonClass}
-              today={today}
-              setToday={setToday}
-              selectedDate={selectedDate}
-              setSelectedDate={setSelectedDate}
-              listDate={listDate}
-              setLisDate={setLisDate}
-              modalDetail={modalDetail}
-              modalFilter={modalFilter}
-              setModalDetail={setModalDetail}
-              setModalFilter={setModalFilter}
-              detailEvent={detailEvent}
-              setDetailEvent={setDetailEvent}
-              selectedFilter={selectedFilter}
-              setSelectedFilter={setSelectedFilter}
-            />
-          </>
-        )}
-        {(phase === 3 || phase === 4 || phase === 5) && isSubscriptionActive !== 1 && (
-          <View style={{
-            marginHorizontal: scaledHorizontal(25),
-            backgroundColor: '#FFECEC',
-            borderColor: '#FF4D4F',
-            borderWidth: 1,
-            borderRadius: 10,
-            paddingVertical: 12,
-            paddingHorizontal: 14,
-            alignItems: 'center',
-            justifyContent: 'center',
-            marginBottom: 12,
-          }}>
-            <Text style={{
-              fontSize:14
-            }}>{t("unpaid_due_payment")}</Text>
-          </View>
-        )}
-        {(phase === 2 || ((phase === 3 || phase === 4 || phase === 5) && isSubscriptionActive !== 1)) && (
-          
+              <Space height={30} />
+              <Section
+                textTitle="Jadwal Kelas Virtual"
+                textJapan="オンライン授業のスケジュール"
+              />
+              <Space height={30} />
+              <SectionSchedule
+                dataFilter={dataFilter}
+                event={lessonClass}
+                today={today}
+                setToday={setToday}
+                selectedDate={selectedDate}
+                setSelectedDate={setSelectedDate}
+                listDate={listDate}
+                setLisDate={setLisDate}
+                modalDetail={modalDetail}
+                modalFilter={modalFilter}
+                setModalDetail={setModalDetail}
+                setModalFilter={setModalFilter}
+                detailEvent={detailEvent}
+                setDetailEvent={setDetailEvent}
+                selectedFilter={selectedFilter}
+                setSelectedFilter={setSelectedFilter}
+              />
+            </>
+          )}
+        {(phase === 3 || phase === 4 || phase === 5) &&
+          isSubscriptionActive !== 1 && (
+            <View
+              style={{
+                marginHorizontal: scaledHorizontal(25),
+                backgroundColor: "#FFECEC",
+                borderColor: "#FF4D4F",
+                borderWidth: 1,
+                borderRadius: 10,
+                paddingVertical: 12,
+                paddingHorizontal: 14,
+                alignItems: "center",
+                justifyContent: "center",
+                marginBottom: 12,
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: 14,
+                }}
+              >
+                {t("unpaid_due_payment")}
+              </Text>
+            </View>
+          )}
+        {(phase === 2 ||
+          ((phase === 3 || phase === 4 || phase === 5) &&
+            isSubscriptionActive !== 1)) && (
           <View>
             <Section textTitle="Status" textJapan="進捗" />
             <Space height={30} />

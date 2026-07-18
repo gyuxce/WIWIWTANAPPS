@@ -5,6 +5,7 @@ import Text from "components/Text";
 import images from "configs/images";
 import React, { useEffect, useState } from "react";
 import { Alert, Image, ScrollView, View } from "react-native";
+import type { DimensionValue } from "react-native";
 import globalStyles from "utils/GlobalStyles";
 import { documentDirectory, createDownloadResumable } from "expo-file-system";
 import colors from "configs/colors";
@@ -42,6 +43,7 @@ const DownloadScreen = ({ route }: Prop) => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
   let intervalId: any = null;
+  const progressPercentage = Math.min(Math.max(progress * 100, 0), 100);
 
   useEffect(() => {
     const subscribe: any = navigation.addListener("beforeRemove", e => {
@@ -78,9 +80,8 @@ const DownloadScreen = ({ route }: Prop) => {
           documentDirectory + filename,
           { cache: true },
           (downloadProgress: any) => {
-            const progress =
-              downloadProgress.totalBytesWritten /
-              downloadProgress.totalBytesExpectedToWrite;
+            const totalBytes = downloadProgress.totalBytesExpectedToWrite || 1;
+            const progress = downloadProgress.totalBytesWritten / totalBytes;
 
             setProgress(progress);
           },
@@ -186,7 +187,7 @@ const DownloadScreen = ({ route }: Prop) => {
                 <View
                   style={{
                     height: 8,
-                    width: `${(progress * 100).toFixed().toString()}%`,
+                    width: `${progressPercentage.toFixed()}%` as DimensionValue,
                     backgroundColor: colors.accent,
                     borderRadius: 6,
                     marginVertical: 12,
@@ -205,7 +206,7 @@ const DownloadScreen = ({ route }: Prop) => {
                 }}
               >
                 <Text variant="OpificioNeueRegular" size={24}>
-                  {(progress * 100).toFixed()}
+                  {progressPercentage.toFixed()}
                 </Text>
                 <Text size={12}>%</Text>
               </View>

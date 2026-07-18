@@ -193,7 +193,7 @@ const PraTestScreen = () => {
         sourceId: defaultCalendarSource.id,
         //@ts-ignore
         source: defaultCalendarSource,
-        type: Calendar.EntityTypes.EVENT,
+        type: Calendar.CalendarType.LOCAL,
         name: "Wiwitan",
         ownerAccount: user?.email,
         accessLevel: Calendar.CalendarAccessLevel.OWNER,
@@ -238,7 +238,6 @@ const PraTestScreen = () => {
           { relativeOffset: -15, method: Calendar.AlarmMethod.ALARM },
           { relativeOffset: 0, method: Calendar.AlarmMethod.ALARM },
         ],
-        organizer: "Wiwitan",
         organizerEmail: "wiwitan@62teknologi.com",
       };
 

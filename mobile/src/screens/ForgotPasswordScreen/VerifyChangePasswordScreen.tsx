@@ -46,7 +46,7 @@ const VerifyChangePasswordScreen = ({ route }: Prop) => {
   }, []);
 
   useEffect(() => {
-    let interval: NodeJS.Timeout | undefined;
+    let interval: ReturnType<typeof setInterval> | undefined;
 
     if (isButtonDisabled && timer > 0) {
       interval = setInterval(() => {

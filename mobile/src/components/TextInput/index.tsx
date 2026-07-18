@@ -1,4 +1,4 @@
-import React, { memo, useState } from "react";
+import React, { useState } from "react";
 import type {
   ViewStyle,
   TextStyle,
@@ -46,7 +46,7 @@ interface Props {
   autoCapitalize?: "none" | "sentences";
   focusInput?: boolean;
   confirmPasword?: boolean;
-  textAreaHeight?: number | string;
+  textAreaHeight?: number;
   placeholderColor?: string;
   customBorder?: boolean;
   customText?: boolean;

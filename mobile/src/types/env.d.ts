@@ -11,3 +11,5 @@ declare module "@env" {
   export const PROD_KEY_ALIAS: string;
   export const PROD_KEY_PASSWORD: string;
 }
+
+declare module "redux-logger";

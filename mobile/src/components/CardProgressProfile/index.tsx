@@ -1,7 +1,11 @@
 import { StyleSheet, View } from "react-native";
 import Text from "components/Text";
 import React, { memo } from "react";
-import type { ImageSourcePropType, ViewStyle } from "react-native";
+import type {
+  DimensionValue,
+  ImageSourcePropType,
+  ViewStyle,
+} from "react-native";
 import colors from "configs/colors";
 import Avatar from "components/Avatar";
 import Space from "components/Space";
@@ -29,7 +33,7 @@ const CardProgressProfile = ({
       return 0;
     }
     const result = (progress / total) * 100;
-    return result.toFixed(0);
+    return Math.min(Math.max(Math.round(result), 0), 100);
   };
   return (
     <View style={[styles.wrapCard, style]}>
@@ -66,7 +70,10 @@ const CardProgressProfile = ({
           <View
             style={[
               styles.progress,
-              { backgroundColor: color, width: `${getPercentage()}%` },
+              {
+                backgroundColor: color,
+                width: `${getPercentage()}%` as DimensionValue,
+              },
             ]}
           />
         </View>

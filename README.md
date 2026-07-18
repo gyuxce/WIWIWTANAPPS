@@ -94,6 +94,7 @@ Audit mobile terakhir:
 - Fase pembayaran sudah diberi guard agar tidak crash saat detail cicilan seed lokal belum lengkap.
 - Fase pelatihan sudah bisa dibuka dengan seed lokal subscription aktif dan `training_program=2`.
 - Detail modul, level, grup materi, layar materi, handling error media, tab kelas virtual, dan tab asesmen sudah diaudit. Detailnya ada di [docs/MOBILE_SCREEN_AUDIT.md](docs/MOBILE_SCREEN_AUDIT.md).
+- TypeScript mobile sudah lolos `corepack yarn tsc --noEmit` dan build `developmentDebug` berhasil.
 
 Build Android production:
 

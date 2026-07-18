@@ -13,7 +13,7 @@ import {
   apiPayTransaction,
   apiGetLatestPayment,
   apiGetLatestTransaction,
-  apiConfirmPayment
+  apiConfirmPayment,
 } from "services/PaymentServices";
 import { useSelector, useDispatch } from "react-redux";
 import type { StoreStateType } from "stores";
@@ -32,13 +32,19 @@ import { useAuth } from "./useAuth";
 type ResponseTemplate = {
   status: "success" | "failed";
   data?: any | null;
-  message?: string | null;
+  message?: unknown;
 };
 
 export const usePayment = () => {
   const { auth } = useAuth();
-  const { detailPrice, paymentStatusType, paymentContent, paymentDocStatus, transaction, paymentLatest } =
-    useSelector((state: StoreStateType) => state.payment);
+  const {
+    detailPrice,
+    paymentStatusType,
+    paymentContent,
+    paymentDocStatus,
+    transaction,
+    paymentLatest,
+  } = useSelector((state: StoreStateType) => state.payment);
   const dispatch = useDispatch();
 
   const getPrice = async (param?: QueryType) => {
@@ -235,9 +241,7 @@ export const usePayment = () => {
     }
   };
 
-  const getLatestTransaction = async (param: {
-    price_type: number;
-  }) => {
+  const getLatestTransaction = async (param: { price_type: number }) => {
     try {
       const resp: any = await apiGetLatestTransaction(auth?.accessToken, param);
       if (resp?.status !== "success") {
@@ -264,7 +268,7 @@ export const usePayment = () => {
 
   const getLatestPayment = async (param: {
     price_type: number;
-  }):Promise<ResponseTemplate> => {
+  }): Promise<ResponseTemplate> => {
     try {
       const resp: any = await apiGetLatestPayment(auth?.accessToken, param);
       if (resp?.status !== "success") {
@@ -416,6 +420,6 @@ export const usePayment = () => {
     transaction,
     paymentLatest,
     getLatestTransaction,
-    confirmPayment
+    confirmPayment,
   };
 };

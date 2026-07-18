@@ -10,7 +10,7 @@ interface CheckbooxLoopProps {
     title: string;
     onPressDetail?: () => void;
     isChecklist?: boolean;
-    status: number;
+    status?: number;
   }[];
 }
 

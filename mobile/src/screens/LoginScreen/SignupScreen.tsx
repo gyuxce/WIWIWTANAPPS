@@ -13,7 +13,14 @@ import colors from "configs/colors";
 import Section from "components/Section";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import type { FirebaseAuthTypes } from "@react-native-firebase/auth";
-import { getAuth, getIdToken, GoogleAuthProvider, FacebookAuthProvider, AppleAuthProvider, signInWithCredential } from "@react-native-firebase/auth";
+import {
+  getAuth,
+  getIdToken,
+  GoogleAuthProvider,
+  FacebookAuthProvider,
+  AppleAuthProvider,
+  signInWithCredential,
+} from "@react-native-firebase/auth";
 import { AccessToken, LoginManager } from "react-native-fbsdk-next";
 import type {
   CityType,
@@ -35,7 +42,7 @@ import type { RouteProp } from "@react-navigation/core";
 import { CommonActions, useNavigation } from "@react-navigation/core";
 import type { StackNavigationProp } from "@react-navigation/stack";
 import type { RootStackParamList } from "types/NavigatorTypes";
-import { WEB_CLIENT_ID } from '@env';
+import { WEB_CLIENT_ID } from "@env";
 import LoadingModal from "components/LoadingModal/LoadingModal";
 import appleAuth from "@invertase/react-native-apple-authentication";
 import { apiPostSocialAccount } from "services/AuthServices";
@@ -141,7 +148,9 @@ const SignupScreen = ({ route }: Prop) => {
   const getPriceData = async () => {
     try {
       const resp = await getPrice();
-      setPrices(resp?.data);
+      if (resp?.status === "success" && "data" in resp) {
+        setPrices(resp.data);
+      }
     } catch (error) {
       window.console.log(error);
     }
@@ -159,11 +168,10 @@ const SignupScreen = ({ route }: Prop) => {
         googleTokens.accessToken,
       );
 
-      await signInWithCredential(authInstance, credential)
-        .then(({ user }) => {
-          setShowModal(true);
-          sosmedVerifyToken(user, "google");
-        });
+      await signInWithCredential(authInstance, credential).then(({ user }) => {
+        setShowModal(true);
+        sosmedVerifyToken(user, "google");
+      });
     } catch (e) {
       const err = (e as Error).message;
       window.console.log("Error : ", err);
@@ -177,15 +185,14 @@ const SignupScreen = ({ route }: Prop) => {
       const data = await AccessToken.getCurrentAccessToken();
 
       if (data) {
-        const credential = FacebookAuthProvider.credential(
-          data?.accessToken,
-        );
+        const credential = FacebookAuthProvider.credential(data?.accessToken);
 
-        await signInWithCredential(authInstance, credential)
-          .then(({ user }) => {
+        await signInWithCredential(authInstance, credential).then(
+          ({ user }) => {
             setShowModal(true);
             sosmedVerifyToken(user, "facebook");
-          });
+          },
+        );
       }
     } catch (e) {
       const err = (e as Error).message;
@@ -208,11 +215,12 @@ const SignupScreen = ({ route }: Prop) => {
         nonce,
       );
 
-      await signInWithCredential(authInstance, appleCredential)
-        .then(({ user }) => {
+      await signInWithCredential(authInstance, appleCredential).then(
+        ({ user }) => {
           setShowModal(true);
           sosmedVerifyToken(user, "apple", tempName);
-        });
+        },
+      );
     } else {
       // handle this - retry?
     }
@@ -224,51 +232,55 @@ const SignupScreen = ({ route }: Prop) => {
     tempName?: string,
   ) => {
     let isNewUser = false;
-    if (!user) { isNewUser = true; }
-    await apiPostSocialAccount(await getIdToken(user, true)).then(({ exist, data }) => {
-      if (data) {
-        dispatch(
-          onLogin({
-            auth: {
-              accessToken: data?.access_token,
-              refreshToken: data?.refresh_token,
-            },
-            user: data?.user,
-          }),
-        );
-        setShowModal(false);
-        const firstTimeLoginWithApple =
-          data?.user?.apple_id && !data?.user?.active_date;
-        if (firstTimeLoginWithApple) {
-          Alert.alert(
-            "Selamat datang!",
-            "Untuk meningkatkan pengalaman Anda, mohon perbarui nama profil Anda terlebih dahulu. \n Nama yang Anda masukkan akan digunakan untuk keperluan identifikasi dan pelayanan yang lebih personal. Data Anda akan disimpan secara aman sesuai dengan kebijakan privasi kami.",
-            [
-              {
-                text: "OK",
-                onPress: () => {
-                  navigation.dispatch(
-                    CommonActions.reset({
-                      index: 0,
-                      routes: [{ name: "HomeScreen" }],
-                    }),
-                  );
-                },
+    if (!user) {
+      isNewUser = true;
+    }
+    await apiPostSocialAccount(await getIdToken(user, true)).then(
+      ({ exist, data }) => {
+        if (data) {
+          dispatch(
+            onLogin({
+              auth: {
+                accessToken: data?.access_token,
+                refreshToken: data?.refresh_token,
               },
-            ],
-          );
-        } else {
-          navigation.dispatch(
-            CommonActions.reset({
-              index: 0,
-              routes: [{ name: "HomeScreen" }],
+              user: data?.user,
             }),
           );
+          setShowModal(false);
+          const firstTimeLoginWithApple =
+            data?.user?.apple_id && !data?.user?.active_date;
+          if (firstTimeLoginWithApple) {
+            Alert.alert(
+              "Selamat datang!",
+              "Untuk meningkatkan pengalaman Anda, mohon perbarui nama profil Anda terlebih dahulu. \n Nama yang Anda masukkan akan digunakan untuk keperluan identifikasi dan pelayanan yang lebih personal. Data Anda akan disimpan secara aman sesuai dengan kebijakan privasi kami.",
+              [
+                {
+                  text: "OK",
+                  onPress: () => {
+                    navigation.dispatch(
+                      CommonActions.reset({
+                        index: 0,
+                        routes: [{ name: "HomeScreen" }],
+                      }),
+                    );
+                  },
+                },
+              ],
+            );
+          } else {
+            navigation.dispatch(
+              CommonActions.reset({
+                index: 0,
+                routes: [{ name: "HomeScreen" }],
+              }),
+            );
+          }
+        } else {
+          isNewUser = true;
         }
-      } else { 
-        isNewUser = true;
-      }
-    });
+      },
+    );
     setShowModal(false);
     if (isNewUser) {
       const _tempName = tempName || user?.email?.split("@")?.[0];
@@ -328,7 +340,7 @@ const SignupScreen = ({ route }: Prop) => {
     };
 
     postSignup(data).then(({ id, message, status }) => {
-      if (id || status === 'success') {
+      if (id || status === "success") {
         if (isBySosmed) {
           NavigationService.replace("SignupSuccessScreen");
         } else {
@@ -344,15 +356,13 @@ const SignupScreen = ({ route }: Prop) => {
           );
         }
       } else {
-        if (typeof message !== 'string') {
+        if (typeof message !== "string") {
           message = JSON.stringify(message);
-        } 
+        }
         Alert.alert(
           "Registrasi gagal",
-          message ?? 'Terjadi kesalahan saat registrasi',
-          [
-            {text: "OK"},
-          ],
+          message ?? "Terjadi kesalahan saat registrasi",
+          [{ text: "OK" }],
         );
       }
     });

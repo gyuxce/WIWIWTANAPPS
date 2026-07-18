@@ -18,8 +18,6 @@ import { numberToRupiah } from "utils/Utils";
 import { t } from "i18next";
 
 const FullPaymentScreen = () => {
-  const [transaction, setTransaction] = useState(null);
-  const [payment, setPayment] = useState(null);
   const [isLoadingBtn, setIsloadingBtn] = useState(false);
   const {
     paymentContent,
@@ -28,8 +26,6 @@ const FullPaymentScreen = () => {
     getDetailPrice,
     //postPayment,
     initiateTransaction,
-    payTransaction,
-    getLatestPayment
   } = usePayment();
 
   // const dataPayment = [
@@ -55,7 +51,6 @@ const FullPaymentScreen = () => {
     initiateTransaction(body).then(({ data, status }) => {
       setIsloadingBtn(false);
       if (data && status === "success") {
-        setTransaction(data);
         if (data?.checkout_url) {
           NavigationService.navigate("WebViewScreen", {
             uri: data?.checkout_url,

@@ -1,5 +1,4 @@
 /* eslint-disable max-len */
-import images from "configs/images";
 import type { EventProps } from "types/CalendarTypes";
 
 export const eventData = [
