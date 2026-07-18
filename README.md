@@ -56,6 +56,8 @@ Backend:
 .\scripts\backend-serve.ps1
 ```
 
+`backend-serve.ps1` bind ke `0.0.0.0:8000` supaya Android emulator bisa mengakses API lewat `http://10.0.2.2:8000`.
+
 CMS:
 
 ```powershell
@@ -73,12 +75,17 @@ Login CMS local seed:
 Mobile:
 
 ```powershell
+.\scripts\android-env.ps1
 cd mobile
-yarn install
-yarn start
+corepack yarn install --frozen-lockfile
 cd android
-.\gradlew.bat app:installDevelopmentDebug
+.\gradlew.bat app:assembleDevelopmentDebug --no-daemon --stacktrace --max-workers=2
 ```
+
+Login mobile local seed:
+
+- Email: `user1@62teknologi.com`
+- Password: `password`
 
 Build Android production:
 

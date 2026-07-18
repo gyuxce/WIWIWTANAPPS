@@ -19,7 +19,7 @@ class ForumPostRepository extends BaseRepository
         $fiveDaysAgo = Carbon::now()->subDays(5);
 
         $trending = ForumPost::where('updated_at', ">=", $fiveDaysAgo)
-                    ->havingRaw('count_like + count_comment > 0')
+                    ->whereRaw('count_like + count_comment > 0')
                     ->orderByRaw('count_like + count_comment DESC');
         return $trending;
     }

@@ -150,9 +150,9 @@ export const useAuth = () => {
       const resp: any = await apiMe(token);
       if (resp?.data) {
         dispatch(onLogin({ auth: authToken, user: resp?.data }));
-        await apiGetPengaturanBahasa(auth?.accessToken).then(({ data }) => {
+        await apiGetPengaturanBahasa(authToken.accessToken).then(({ data }) => {
           if (data && data?.[0]?.value) {
-            if (String(user?.last_phase) >= data?.[0]?.value) {
+            if (String(resp?.data?.last_phase) >= data?.[0]?.value) {
               dispatch(onChangeLanguage("ja"));
               i18n.changeLanguage("ja");
             } else {

@@ -1,6 +1,13 @@
 $RepoRoot = Resolve-Path (Join-Path $PSScriptRoot "..")
 $WorkspaceRoot = Resolve-Path (Join-Path $RepoRoot "..")
-$ToolsRoot = Join-Path $WorkspaceRoot "tools"
+
+$ToolRootCandidates = @(
+    $env:WIWITAN_TOOLS_ROOT,
+    (Join-Path $WorkspaceRoot "tools"),
+    "C:\Users\yugeg\Documents\Codex\2026-07-16\dap\work\tools"
+) | Where-Object { $_ -and (Test-Path $_) }
+
+$ToolsRoot = $ToolRootCandidates | Select-Object -First 1
 
 $PhpRoot = Join-Path $ToolsRoot "php-8.2.32"
 $NodeRoot = Join-Path $ToolsRoot "node-v18.20.8-win-x64"

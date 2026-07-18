@@ -6,6 +6,7 @@ use App\Models\Base\Token;
 use App\Models\Base\User;
 use App\Services\Dolphin\Dolphin as ServiceDolphin;
 use App\Services\Dolphin\DolphinAuth;
+use App\Services\Dolphin\LocalAuth;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -25,6 +26,20 @@ class MobileAccess
         }
 
         $dolphin = new ServiceDolphin();
+
+        if (LocalAuth::enabled() && $localToken = (new LocalAuth())->verify($token)) {
+            $user = User::where('id', $localToken->user_id)->first();
+            if (!$user || $user->role_id != null) {
+                return $this->unauthorize();
+            }
+
+            DolphinAuth::$id = $localToken->user_id;
+            DolphinAuth::$uuid = $localToken->id;
+            DolphinAuth::$issued_at = $localToken->issued_at;
+            DolphinAuth::$expired_at = $localToken->expired_at;
+
+            return $next($request);
+        }
 
         $res = $dolphin->verify($token);
         if ($res?->getStatusCode() === 200) {

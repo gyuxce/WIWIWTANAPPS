@@ -6,7 +6,7 @@ import { API_URL } from '@env';
 const BaseService = (url: string, token?: string) => {
   const headers = new Headers();
   headers.append("Accept", "application/json");
-  if (token !== "") {
+  if (token) {
     headers.append("Authorization", "Bearer " + token);
   }
   return wretch(API_URL + url)

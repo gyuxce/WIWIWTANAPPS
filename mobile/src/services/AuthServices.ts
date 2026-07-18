@@ -3,7 +3,6 @@ import type {
   UserSignupProcessTypes,
   UserType,
 } from "types/UserTypes";
-import { API_URL } from '@env';
 import { onErrorState } from "stores/error/errorSlice";
 import icons from "configs/icons";
 
@@ -47,16 +46,15 @@ export const apiSignin = async (body: {
   password: string;
   is_mobile: string;
 }) => {
-  const headers = new Headers();
-  headers.append("Accept", "application/json");
-  headers.append("Content-Type", "application/json");
   try {
-    const resp = await fetch(API_URL + "/auth/sign-in", {
-      method: "POST",
-      headers: headers,
-      body: JSON.stringify(body),
-    });
-    const result = await resp.json();
+    const result = await BaseService("/auth/sign-in")
+      .json(body)
+      .post() as {
+      status?: string;
+      data?: unknown;
+      message?: string;
+      errors?: unknown;
+    };
     return {
       status: result?.status,
       data: result?.data,
@@ -66,6 +64,7 @@ export const apiSignin = async (body: {
   } catch (error) {
     return {
       status: "failed",
+      message: error instanceof Error ? error.message : String(error),
       error: error,
       data: null,
     };

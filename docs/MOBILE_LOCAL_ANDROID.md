@@ -26,6 +26,8 @@ Backend: http://127.0.0.1:8000
 CMS:     http://127.0.0.1:3000
 ```
 
+Untuk Android emulator, backend harus bind ke `0.0.0.0:8000` supaya bisa diakses dari app lewat `10.0.2.2`. Script `.\scripts\backend-serve.ps1` sudah memakai host tersebut.
+
 Untuk build Android di Windows, install dan siapkan:
 
 - Android Studio.
@@ -54,6 +56,8 @@ Setelah Android Studio selesai di-install:
 10. Pilih system image API 35, download jika belum ada.
 11. Finish, lalu klik tombol play untuk menjalankan emulator.
 
+Catatan: versi Android Emulator seperti `28.2.13676358` adalah versi tool emulator dari Android Studio, bukan versi Android OS aplikasi. Untuk project ini yang penting adalah API 35/Android 15 tersedia dan emulator bisa start.
+
 Setelah itu cek dari terminal:
 
 ```powershell
@@ -81,6 +85,8 @@ Lebih praktisnya, jalankan:
 ```powershell
 .\scripts\android-env.ps1
 ```
+
+Jika repo dipindah ke path pendek seperti `D:\wiwitan`, script `.\scripts\dev-env.ps1` tetap memakai portable PHP/Node dari workspace handoff lama jika folder `tools` belum ada di drive tersebut.
 
 ## File Lokal
 
@@ -142,10 +148,36 @@ cd mobile\android
 
 Script `yarn android:dev:debug` masih memakai gaya Unix `./gradlew`, jadi di Windows lebih aman memanggil `gradlew.bat` langsung.
 
+Untuk hanya membuat APK debug development:
+
+```powershell
+cd mobile\android
+.\gradlew.bat app:assembleDevelopmentDebug --no-daemon --stacktrace --max-workers=2
+```
+
+APK lokal akan dibuat di:
+
+```text
+mobile/android/app/build/outputs/apk/development/debug/app-development-debug.apk
+```
+
+Install APK ke emulator:
+
+```powershell
+.\scripts\android-env.ps1
+adb install -r .\mobile\android\app\build\outputs\apk\development\debug\app-development-debug.apk
+```
+
 ## Status Audit Lokal
 
 - `mobile/.env` sudah disiapkan untuk Android emulator.
 - `debug.keystore` dan `google-services.json` sudah bisa direstore dari `secrets-local`.
 - Login screen mobile sudah mengirim `is_mobile: "1"`.
-- Build Android belum diverifikasi penuh. Android SDK dan ADB sudah ditemukan setelah Android Studio terpasang, tetapi API 35, emulator/AVD, dan JAVA_HOME masih perlu dicek dari Android Studio.
-- Install dependency sempat gagal di cache Yarn global dengan error `EPERM`, lalu retry cache lokal timeout sebelum `node_modules` terbentuk.
+- Build Android development debug sudah terverifikasi dengan Gradle.
+- APK development debug sudah berhasil di-install ke emulator `Pixel_8`.
+- Login siswa lokal sudah terverifikasi dengan seed `user1@62teknologi.com` / `password`.
+- Backend lokal memakai fallback token `local.*`. Middleware `MobileAccess` sudah mendukung token lokal agar endpoint mobile bisa dites tanpa service Dolphin eksternal.
+- Endpoint HomeScreen penting yang sudah dites lokal:
+  - `GET /api/v1/mobile/base/users/user-files`
+  - `GET /api/v1/mobile/forum/posts?type_post=trending`
+- Query forum trending sudah dibuat kompatibel dengan SQLite lokal dengan memakai `whereRaw` untuk filter `count_like + count_comment > 0`.
