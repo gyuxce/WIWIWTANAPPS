@@ -94,6 +94,21 @@ Audit layar aplikasi siswa Android lokal.
 - Verifikasi: `corepack yarn tsc --noEmit --pretty false` berhasil tanpa error.
 - Verifikasi: `app:assembleDevelopmentDebug` berhasil setelah cleanup TypeScript.
 
+### Fresh Login Siswa Setelah Wipe Emulator
+
+- Emulator `Pixel_8` sudah di-wipe data, APK `developmentDebug` di-install ulang, lalu login siswa berhasil dengan `user1@62teknologi.com` / `password`.
+- Catatan input ADB: email harus diketik sebagai `user1@62teknologi.com`; input literal `user1%4062teknologi.com` ditolak validasi email mobile.
+- API login host `POST /api/v1/auth/sign-in` berhasil untuk credential siswa dan mengembalikan token lokal serta data user `user 1`.
+- Progress siswa terbuka dan menampilkan fase `Final Interview`; detail final interview terbuka tanpa crash.
+- Drawer siswa setelah login fresh menampilkan menu Home, Training Progress, Forum, Dokumen Saya, dan Profil.
+- Halaman training terbuka dan menampilkan kategori `Teori Bahasa Jepang`, `Praktik Bahasa Jepang`, serta `Soft Skill Bahasa Jepang`.
+- Detail training bisa dibuka dengan tap kartu kategori `Teori Bahasa Jepang`; tab `Modul`, `Virtual Class`, dan `Kuis/Test` tampil.
+- Tab `Virtual Class` dan `Kuis/Test` menampilkan data level `N4` dan `N5` sesuai counter. Level asesmen `N4` terbuka dan menampilkan kartu asesmen serta skor.
+- Catatan UX: tombol `Detail` pada kartu fase training terlihat clickable, tetapi saat audit tidak membuka detail; tap kartu kategori training adalah jalur yang berhasil.
+- Dokumen Saya sempat loading lebih lama, lalu daftar dokumen tampil. Nama file storage seed lokal masih terlalu panjang dan terpotong, sehingga beberapa item terlihat mirip.
+- Forum terbuka tanpa crash dan menampilkan empty state karena tidak ada trending post.
+- Notifikasi terbuka tanpa crash dan menampilkan empty state `Belum ada notifikasi` pada tab prioritas.
+
 ## Temuan Lanjutan
 
 - Untuk audit materi pelatihan penuh, siapkan seed user dengan `is_subscription_active = 1`, payment training completed, dan `training_program` yang sesuai dengan `course_items.program_type`.

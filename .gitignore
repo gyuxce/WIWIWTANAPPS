@@ -53,6 +53,13 @@ Thumbs.db
 /phase3-*.png
 /phase3-*.xml
 /media-*.png
+/audit-student-*.png
+/audit-student-*.xml
+/student-login-result*.png
+/window-after-student-login*.xml
+/window-current.xml
+/window-email-corrected.xml
+/window-login*.xml
 /RKStorage.sqlite
 /RKStorage.b64
 /metro.log
