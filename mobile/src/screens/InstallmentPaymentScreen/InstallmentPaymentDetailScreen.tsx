@@ -11,14 +11,13 @@ import {
   RefreshControl,
 } from "react-native";
 import globalStyles from "utils/GlobalStyles";
-import { scaledFontSize, scaledHorizontal } from "utils/ScaledService";
+import { scaledHorizontal } from "utils/ScaledService";
 import PaymentTab from "components/PaymentTab";
 import icons from "configs/icons";
 import Text from "components/Text";
 import { usePayment } from "hooks/usePayment";
 import { numberToRupiah } from "utils/Utils";
 import CardPaymentPaid from "components/CardPaymentPaid";
-import Toast from 'react-native-root-toast';
 import { t } from "i18next";
 import { Payment } from "types/PaymentTypes";
 import PaymentScreen from "components/PaymentScreen";
@@ -27,12 +26,11 @@ import CardPaymentInstallmentPaid from "components/CardPaymentInstallmentPaid";
 const InstallmentPaymentDetailScreen = () => {
   const [installments, setInstallments] = useState<Installment[]>([]);
   const [latestPayment, setLatestPayment] = useState<Payment | null>(null);
-  const [dueInstallment, setDueInstallment] = useState<Installment | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { paymentStatusType, transaction, getPaymentStatusType } = usePayment();
   const [dueDate, setDueDate] = useState<string | null>(null);
   const [dueAmount, setDueAmount] = useState<number | null>(null);
-  const [isOverdue, setIsOverdue] = useState<Boolean>(false);
+  const hasInstallmentDetail = Boolean(transaction?.installment?.period_length);
 
   interface Installment {
     index: number;
@@ -52,28 +50,28 @@ const InstallmentPaymentDetailScreen = () => {
   //   currency_code: string;
   // }
 
-  const toastConfig = {
-    duration: Toast.durations.SHORT,
-    position: Toast.positions.TOP,
-    shadow: true,
-    animation: true,
-    hideOnPress: true
-  };
-
   const generateInstallments = () => {
     setInstallments([]);
-    const monthly = transaction.total_amount / transaction.installment.period_length;
+    setDueAmount(null);
+    setLatestPayment(null);
+
+    if (!transaction?.installment?.period_length) {
+      return;
+    }
+
+    const monthly =
+      transaction.total_amount / transaction.installment.period_length;
     let result: Installment[];
     result = [];
     let i = 1;
 
     if (transaction.payments && transaction.payments.length > 0) {
       //filter paid payments
-      const paid_payments = transaction.payments.filter((p:Payment) => {
+      const paid_payments = transaction.payments.filter((p: Payment) => {
         return p.status === 3;
       });
 
-      paid_payments.forEach((p:Payment) => {
+      paid_payments.forEach((p: Payment) => {
         const paid_at = new Date(p.updated_at);
         const paid_formatted = paid_at.toLocaleString("ja-JP", {
           year: "numeric",
@@ -90,14 +88,19 @@ const InstallmentPaymentDetailScreen = () => {
           currency_code: p.currency_code,
         };
         result.push(subresult);
-        i ++;
+        i++;
       });
     }
 
-    setDueAmount(i >= transaction.installment.period_length || transaction.total_left_amount < monthly ? transaction.total_left_amount : monthly);
+    setDueAmount(
+      i >= transaction.installment.period_length ||
+        transaction.total_left_amount < monthly
+        ? transaction.total_left_amount
+        : monthly,
+    );
 
     setInstallments(result);
-  }
+  };
 
   // old method
   // const generateInstallments = () => {
@@ -175,8 +178,10 @@ const InstallmentPaymentDetailScreen = () => {
 
   const prepareData = () => {
     //validate
-    if (!transaction) { return; }
-    // if (!transaction || !transaction.installment) { 
+    if (!transaction) {
+      return;
+    }
+    // if (!transaction || !transaction.installment) {
     //   NavigationService.replace("InstallmentPaymentScreen");
     // }
 
@@ -192,15 +197,27 @@ const InstallmentPaymentDetailScreen = () => {
 
   useEffect(() => {
     //set due date
+    if (!paymentStatusType?.training_payment_due_date) {
+      setDueDate(null);
+      return;
+    }
+
     const due = new Date(paymentStatusType?.training_payment_due_date);
-    setDueDate(due.toLocaleString("ja-JP", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false, // 24-hour format
-    }));
+    if (Number.isNaN(due.getTime()) || due.getFullYear() <= 1970) {
+      setDueDate(null);
+      return;
+    }
+
+    setDueDate(
+      due.toLocaleString("ja-JP", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false, // 24-hour format
+      }),
+    );
   }, [paymentStatusType]);
 
   return (
@@ -241,98 +258,100 @@ const InstallmentPaymentDetailScreen = () => {
         )}
         {transaction?.total_left_amount === 0 && !isLoading && (
           <>
-          <CardPaymentPaid />
-          <Space height={20} />
+            <CardPaymentPaid />
+            <Space height={20} />
           </>
         )}
-        
+
         <View style={{ marginHorizontal: scaledHorizontal(25) }}>
           <Space height={24} />
-          <Text
-            size={12}
-            type={"reguler"}
-            variant="CenturyGothicBold"
-          >{t("installment_history_intro")}</Text>
-          {installments?.map((item: Installment, index: number) => {
-            return (
-              <View
-                key={index}
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  gap: 8,
-                  marginTop: 3,
-                  flex: 1,
-                }}
-              >
+          <Text size={12} type={"reguler"} variant="CenturyGothicBold">
+            {t("installment_history_intro")}
+          </Text>
+          {!hasInstallmentDetail && (
+            <Text size={12} type={"reguler"}>
+              {t("belum_tersedia")}
+            </Text>
+          )}
+          {hasInstallmentDetail &&
+            installments?.map((item: Installment, index: number) => {
+              return (
                 <View
+                  key={index}
                   style={{
-                    alignSelf: "flex-start",
                     flexDirection: "row",
                     alignItems: "center",
+                    justifyContent: "space-between",
                     gap: 8,
+                    marginTop: 3,
+                    flex: 1,
                   }}
                 >
-                  <Image
-                    source={icons.checklistBox}
-                    style={{ width: 18, height: 18, resizeMode: "cover" }}
-                  />
-                  <Text
-                    size={12}
-                    type={"reguler"}
-                    variant="CenturyGothicBold"
+                  <View
+                    style={{
+                      alignSelf: "flex-start",
+                      flexDirection: "row",
+                      alignItems: "center",
+                      gap: 8,
+                    }}
                   >
-                    #{item.index}: {item.paid_at} {item.currency_code} {numberToRupiah(item.amount)}
-                  </Text>
+                    <Image
+                      source={icons.checklistBox}
+                      style={{ width: 18, height: 18, resizeMode: "cover" }}
+                    />
+                    <Text
+                      size={12}
+                      type={"reguler"}
+                      variant="CenturyGothicBold"
+                    >
+                      #{item.index}: {item.paid_at} {item.currency_code}{" "}
+                      {numberToRupiah(item.amount)}
+                    </Text>
+                  </View>
                 </View>
-              </View>
-            );
-          })}
-          {transaction?.total_left_amount > 0 && (
+              );
+            })}
+          {hasInstallmentDetail &&
+            transaction?.total_left_amount > 0 &&
+            dueDate && (
+              <>
+                <Space height={24} />
+                <Text size={12} type={"reguler"} variant="CenturyGothicBold">
+                  {t("installment_due_intro")}
+                </Text>
+                <Text size={12} type={"bold"} variant="CenturyGothicBold">
+                  {dueDate}
+                </Text>
+              </>
+            )}
+          {hasInstallmentDetail && transaction?.total_left_amount > 0 && (
             <>
-            <Space height={24} />
-            <Text
-              size={12}
-              type={"reguler"}
-              variant="CenturyGothicBold"
-            >{t("installment_due_intro")}</Text>
-            <Text
-              size={12}
-              type={"bold"}
-              variant="CenturyGothicBold"
-            >
-              {dueDate}
-            </Text>
-            </>
-          )}
-          {transaction?.total_left_amount > 0 && (
-            <>
-            <Space height={24} />
-            <Text
-              size={12}
-              type={"reguler"}
-              variant="CenturyGothicBold"
-            >{t("installment_due_warning")}</Text>
+              <Space height={24} />
+              <Text size={12} type={"reguler"} variant="CenturyGothicBold">
+                {t("installment_due_warning")}
+              </Text>
             </>
           )}
         </View>
-        
-        
-        {transaction?.total_left_amount > 0 && latestPayment && latestPayment.status === 3 && !isLoading && (
+
+        {hasInstallmentDetail &&
+          transaction?.total_left_amount > 0 &&
+          latestPayment &&
+          latestPayment.status === 3 &&
+          !isLoading && (
+            <>
+              <CardPaymentInstallmentPaid />
+              <Space height={20} />
+            </>
+          )}
+        {hasInstallmentDetail && dueAmount && dueAmount > 0 && (
           <>
-          <CardPaymentInstallmentPaid />
-          <Space height={20} />
+            <Space height={20} />
+            <View>
+              <Space height={30} />
+              <PaymentScreen amount={dueAmount} />
+            </View>
           </>
-        )}
-        {dueAmount && dueAmount > 0 && (
-        <>
-        <Space height={20} />
-        <View>
-          <Space height={30} />
-          <PaymentScreen amount={dueAmount} />
-        </View>
-        </>
         )}
       </ScrollView>
     </View>

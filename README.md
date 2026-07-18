@@ -88,6 +88,12 @@ Login mobile local seed:
 - Email: `user1@62teknologi.com`
 - Password: `password`
 
+Audit mobile terakhir:
+
+- Layar siswa, dokumen, forum, dan progress fase sudah diaudit di emulator.
+- Fase pembayaran sudah diberi guard agar tidak crash saat detail cicilan seed lokal belum lengkap.
+- Materi pelatihan penuh masih butuh seed payment/subscription aktif. Detailnya ada di [docs/MOBILE_SCREEN_AUDIT.md](docs/MOBILE_SCREEN_AUDIT.md).
+
 Build Android production:
 
 ```sh

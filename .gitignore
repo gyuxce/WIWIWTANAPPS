@@ -46,6 +46,13 @@ Thumbs.db
 /mobile-audit-*.png
 /mobile-*.png
 /mobile-*.xml
+/current-drawer.png
+/current-drawer.xml
+/drawer-from-payment.png
+/drawer-from-payment.xml
 /RKStorage.sqlite
 /RKStorage.b64
 /metro.log
+/tsc-mobile.log
+/backend-serve.log
+/backend-serve.err
