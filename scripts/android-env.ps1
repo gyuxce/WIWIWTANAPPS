@@ -1,5 +1,6 @@
 $AndroidSdk = Join-Path $env:LOCALAPPDATA "Android\Sdk"
 $AndroidStudioJbrCandidates = @(
+    "D:\Android SDK\jbr",
     "C:\Program Files\Android\Android Studio\jbr",
     "C:\Program Files\Android\Android Studio\jre",
     "C:\Program Files\Android\Android Studio\plugins\android\jbr"
