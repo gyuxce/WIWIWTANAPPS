@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { ScrollView, View } from "react-native";
+import { ActivityIndicator, ScrollView, View } from "react-native";
 import Text from "components/Text";
 import Dropdown from "components/Dropdown/Dropdown";
 import { VirtualClassModuleType, VirtualClassType } from "types/TrainingTypes";
@@ -11,6 +11,7 @@ import VirtualClassActionSheet from "components/VirtualClassActionSheet";
 import dayjs from "dayjs";
 import { useTraining } from "hooks/useTraining";
 import { t } from "i18next";
+import colors from "configs/colors";
 
 interface Props {
   virtualClassList: VirtualClassModuleType[];
@@ -20,6 +21,8 @@ interface Props {
 const VirtualClass = ({ virtualClassList, categoryId }: Props) => {
   const { getVirtualClassList } = useTraining();
   const [query, setQuery] = useState({ q: "" });
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const actionSheetRef = useRef<BottomSheetModal>(null);
   const snapPoints = useMemo(() => [630], []);
   const timeout: any = useRef(null);
@@ -82,6 +85,12 @@ const VirtualClass = ({ virtualClassList, categoryId }: Props) => {
   useEffect(() => {
     clearTimeout(timeout.current);
     timeout.current = setTimeout(() => {
+      if (!categoryId) {
+        return;
+      }
+
+      setIsLoading(true);
+      setErrorMessage("");
       getVirtualClassList(
         categoryId,
         query?.q || "",
@@ -89,9 +98,15 @@ const VirtualClass = ({ virtualClassList, categoryId }: Props) => {
         selectedDate?.end_date,
         selectedFilter,
         selectedSort,
-      );
+      ).then(result => {
+        setIsLoading(false);
+        if (result?.status !== "success") {
+          setErrorMessage("Kelas virtual belum bisa dimuat.");
+        }
+      });
     }, 1000);
-  }, [query?.q, selectedDate, selectedFilter, selectedSort]);
+    return () => clearTimeout(timeout.current);
+  }, [categoryId, query?.q, selectedDate, selectedFilter, selectedSort]);
 
   const groupingAssessment = () => {
     const groups: { [key: number]: VirtualClassType[] } = {};
@@ -125,7 +140,22 @@ const VirtualClass = ({ virtualClassList, categoryId }: Props) => {
       />
       <Space height={10} />
       <ScrollView showsVerticalScrollIndicator={false}>
-        {virtualClassList.length > 0 ? (
+        {isLoading ? (
+          <ActivityIndicator
+            size="small"
+            color={colors.accent}
+            style={{ marginTop: 40 }}
+          />
+        ) : errorMessage !== "" ? (
+          <Text
+            size={12}
+            color={colors.red}
+            style={{ marginTop: 40 }}
+            textAlign="center"
+          >
+            {errorMessage}
+          </Text>
+        ) : virtualClassList.length > 0 ? (
           <View>
             {groupingAssessment()
               ?.sort((a, b) => {

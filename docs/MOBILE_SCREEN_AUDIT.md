@@ -78,11 +78,14 @@ Audit layar aplikasi siswa Android lokal.
 - Level `N4` menampilkan grup `Bahasa Jepang Menengah`, lalu grup tersebut menampilkan materi `Bahasa Jepang 1` dan `Bahasa Jepang 2`.
 - Layar detail materi terbuka untuk materi `Partikel dalam Kalimat` dan menampilkan judul, tipe konten, attachment file, serta area WebView/media.
 - Audit media: tabel `files` seed lokal berisi 3 file GCS (`jpg`, `mp3`, `mp4`) dan request host ke URL GCS mengembalikan `403 Forbidden`.
+- Perbaikan backend: `FileResource` sekarang mengembalikan URL `storage/...` saat file memakai adapter `local/public` dan file tersebut tersedia di `storage/app/public`.
 - Perbaikan mobile: `ContentDetailScreen` sekarang mengenali ekstensi image dan merender dokumen image langsung dengan `<Image>`, bukan dipaksa lewat Google Docs Viewer. Jika video/dokumen/media gagal dimuat, layar menampilkan pesan error singkat, bukan spinner kosong terus.
 - Catatan lanjut: agar preview media benar-benar tampil, file GCS dev bucket perlu dibuat accessible atau seed lokal perlu diarahkan ke file `storage/app/public` yang tersedia.
 - API tab virtual class untuk kategori Teori mengembalikan data: `N4` punya 2 kelas dan `N5` punya 2 kelas.
 - API tab asesmen untuk kategori Teori mengembalikan data: `N4` punya 2 asesmen dan `N5` punya 2 asesmen.
-- Catatan UI: percobaan tap tab virtual/asesmen terakhir terpotong karena emulator kembali ke launcher saat navigasi back dari detail materi. Tidak ada `AndroidRuntime`/`ReactNativeJS` fatal error pada log singkat. Perlu ulang audit UI tab setelah install APK terbaru dari build ini.
+- Perbaikan mobile: query tab virtual class dan asesmen sekarang dibangun dengan encoder query yang sama seperti endpoint lain, sehingga nilai kosong tidak terkirim sebagai `undefined`.
+- Perbaikan mobile: tab kelas virtual dan asesmen sekarang memiliki loading state, pesan error fetch, dan empty state setelah filter/search.
+- Catatan UI: setelah patch ini, perlu install ulang APK dan ulang tap tab virtual/asesmen di emulator untuk verifikasi visual penuh.
 
 ## Temuan Lanjutan
 

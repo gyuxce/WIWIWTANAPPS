@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { View } from "react-native";
+import { ActivityIndicator, View } from "react-native";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import dayjs from "dayjs";
 import AssesmentActionSheet from "components/AssesmentActionSheet";
@@ -11,6 +11,8 @@ import DropdownAssesment from "components/DropdownAssesment";
 import { useIsFocused } from "@react-navigation/core";
 import { AssesmentTypeResponse } from "types/TrainingTypes";
 import { t } from "i18next";
+import Text from "components/Text";
+import colors from "configs/colors";
 
 interface AsesmenProps {
   categoryId: string;
@@ -20,6 +22,8 @@ interface AsesmenProps {
 const Asesmen = ({ categoryId, icon }: AsesmenProps) => {
   const { assesmentList, getAssesmentList } = useTraining();
   const [query, setQuery] = useState({ q: "", lowest: "", highest: "" });
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const actionSheetRef = useRef<BottomSheetModal>(null);
   const snapPoints = useMemo(() => [330], []);
   const timeout: any = useRef(null);
@@ -83,15 +87,27 @@ const Asesmen = ({ categoryId, icon }: AsesmenProps) => {
   useEffect(() => {
     clearTimeout(timeout.current);
     timeout.current = setTimeout(() => {
+      if (!categoryId || !isFocused) {
+        return;
+      }
+
+      setIsLoading(true);
+      setErrorMessage("");
       getAssesmentList(
         categoryId,
         selectedDate?.start_date,
         selectedDate?.end_date,
         query?.highest,
         query?.lowest,
-      );
+      ).then(result => {
+        setIsLoading(false);
+        if (result?.status !== "success") {
+          setErrorMessage("Asesmen belum bisa dimuat.");
+        }
+      });
     }, 1000);
-  }, [isFocused, selectedDate]);
+    return () => clearTimeout(timeout.current);
+  }, [categoryId, isFocused, selectedDate, query?.highest, query?.lowest]);
 
   const groupingAssessment = () => {
     const groups: { [key: number]: AssesmentTypeResponse[] } = {};
@@ -110,6 +126,50 @@ const Asesmen = ({ categoryId, icon }: AsesmenProps) => {
     }));
   };
 
+  const displayedAssessment = groupingAssessment()
+    ?.sort((c, d) => {
+      if (selectedSort.id === "desc") {
+        return c.level_module - d.level_module; // Ascending
+      } else if (selectedSort.id === "asc") {
+        return d.level_module - c.level_module; // Descending
+      }
+
+      return 0;
+    })
+    .filter(item => {
+      if (query?.q && query.q !== "") {
+        const searchText = query.q.toLowerCase();
+        return item?.modules?.some(itm =>
+          String(itm?.title || "")
+            .toLowerCase()
+            .includes(searchText),
+        );
+      } else {
+        return true;
+      }
+    })
+    .filter(itm => {
+      return itm.modules?.some(it => {
+        if (!selectedFilter || selectedFilter.length === 0) {
+          return true;
+        } else if (selectedFilter.length === 2) {
+          return it.assesment && it.assesment.length > 0;
+        } else {
+          const filterId = selectedFilter[0]?.id;
+          switch (filterId) {
+            case "1":
+              return it.assesment?.some(item => item.assesmentStudent === null);
+            case "2":
+              return it.assesment?.some(
+                item => item?.assesmentStudent?.status === 1,
+              );
+            default:
+              return it.assesment && it.assesment.length > 0;
+          }
+        }
+      });
+    });
+
   return (
     <View>
       <SearchAndSort
@@ -126,48 +186,23 @@ const Asesmen = ({ categoryId, icon }: AsesmenProps) => {
 
       <Space height={10} />
 
-      {groupingAssessment()
-        ?.sort((c, d) => {
-          if (selectedSort.id === "desc") {
-            return c.level_module - d.level_module; // Ascending
-          } else if (selectedSort.id === "asc") {
-            return d.level_module - c.level_module; // Descending
-          }
-
-          return 0;
-        })
-        .filter(item => {
-          if (query?.q && query.q !== "") {
-            const searchRegex = new RegExp(query.q, "i");
-            return item?.modules?.some(itm => searchRegex.test(itm?.title));
-          } else {
-            return true;
-          }
-        })
-        .filter(itm => {
-          return itm.modules?.some(it => {
-            if (!selectedFilter || selectedFilter.length === 0) {
-              return true;
-            } else if (selectedFilter.length === 2) {
-              return it.assesment && it.assesment.length > 0;
-            } else {
-              const filterId = selectedFilter[0]?.id;
-              switch (filterId) {
-                case "1":
-                  return it.assesment?.some(
-                    item => item.assesmentStudent === null,
-                  );
-                case "2":
-                  return it.assesment?.some(
-                    item => item?.assesmentStudent?.status === 1,
-                  );
-                default:
-                  return it.assesment && it.assesment.length > 0;
-              }
-            }
-          });
-        })
-        .map((item, index) => {
+      {isLoading ? (
+        <ActivityIndicator
+          size="small"
+          color={colors.accent}
+          style={{ marginTop: 40 }}
+        />
+      ) : errorMessage !== "" ? (
+        <Text
+          size={12}
+          color={colors.red}
+          style={{ marginTop: 40 }}
+          textAlign="center"
+        >
+          {errorMessage}
+        </Text>
+      ) : displayedAssessment.length > 0 ? (
+        displayedAssessment.map((item, index) => {
           return (
             <View key={index}>
               <DropdownAssesment
@@ -180,7 +215,12 @@ const Asesmen = ({ categoryId, icon }: AsesmenProps) => {
               <Space height={10} />
             </View>
           );
-        })}
+        })
+      ) : (
+        <Text size={12} style={{ marginTop: 40 }} textAlign="center">
+          Tidak ada asesmen
+        </Text>
+      )}
 
       <Space height={110} />
       {/* <DropdownAssesment assesment={assesmentList} /> */}

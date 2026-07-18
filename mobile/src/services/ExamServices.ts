@@ -141,9 +141,13 @@ export const apiModuleVirtualClass = (
   end_date?: string,
 ) => {
   return BaseService(
-    `/mobile/training/module/materi/virtual-class?category_id=${category_id}&event_name=${event_name}&start_date=${
-      start_date || ""
-    }&end_date=${end_date || ""}`,
+    `/mobile/training/module/materi/virtual-class?` +
+      convertToQuery({
+        category_id,
+        event_name: encodeURIComponent(event_name || ""),
+        start_date: start_date || "",
+        end_date: end_date || "",
+      }),
     token,
   )
     .headers({ Authorization: "Bearer " + token })
@@ -159,11 +163,14 @@ export const apiModuleAssesment = (
   end_weight?: string,
 ) => {
   return BaseService(
-    `/mobile/training/module/materi/assesment?category_id=${category_id}&start_date=${
-      start_date || ""
-    }&end_date=${end_date || ""}&start_weight=${
-      start_weight || ""
-    }&end_weight=${end_weight || ""}`,
+    `/mobile/training/module/materi/assesment?` +
+      convertToQuery({
+        category_id,
+        start_date: start_date || "",
+        end_date: end_date || "",
+        start_weight: start_weight || "",
+        end_weight: end_weight || "",
+      }),
     token,
   )
     .headers({ Authorization: "Bearer " + token })
