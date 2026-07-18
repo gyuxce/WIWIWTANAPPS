@@ -69,9 +69,20 @@ Audit layar aplikasi siswa Android lokal.
 - Fase 4 Sertifikasi terbuka tanpa crash dan menampilkan card sertifikasi serta tab review kelulusan.
 - Fase 5 Wawancara Final terbuka tanpa crash dan menampilkan status wawancara serta keberangkatan.
 
+### Fase 3 Pelatihan
+
+- Seed lokal untuk audit: `user1@62teknologi.com` memakai `last_phase = 5`, `is_subscription_active = 1`, dan `training_program = 2`.
+- Catatan data: sebelumnya user seed memakai `training_program = 1`, sedangkan `course_items.program_type` lokal berisi `2`; akibatnya detail modul kosong walaupun progress parent menampilkan jumlah materi. Setelah `training_program` disamakan ke `2`, endpoint `/mobile/training/module/materi/content` mengembalikan konten.
+- Layar `TrainingScreen` terbuka tanpa redirect ke pembayaran dan menampilkan kategori `Teori Bahasa Jepang`, `Praktik Bahasa Jepang`, serta `Soft Skill Bahasa Jepang`.
+- Detail `Teori Bahasa Jepang` terbuka tanpa crash. Tab modul menampilkan level `N4` dan `N5`.
+- Level `N4` menampilkan grup `Bahasa Jepang Menengah`, lalu grup tersebut menampilkan materi `Bahasa Jepang 1` dan `Bahasa Jepang 2`.
+- Layar detail materi terbuka untuk materi `Partikel dalam Kalimat` dan menampilkan judul, tipe konten, attachment file, serta area WebView/media.
+- Catatan lanjut: area WebView/media pada beberapa materi masih terlihat loading lama di emulator lokal. Perlu audit lanjutan apakah file storage/media seed lokal tersedia dan apakah URL media dapat diakses dari emulator.
+- Tab virtual class dan asesmen perlu diaudit ulang dari detail training setelah kembali dari layar materi; data API menunjukkan virtual class dan asesmen tersedia untuk kategori Teori.
+
 ## Temuan Lanjutan
 
-- Untuk audit materi pelatihan penuh, siapkan seed user dengan `is_subscription_active = 1` atau payment training completed.
+- Untuk audit materi pelatihan penuh, siapkan seed user dengan `is_subscription_active = 1`, payment training completed, dan `training_program` yang sesuai dengan `course_items.program_type`.
 - Log debug Redux sangat verbose di Logcat. Ini membantu audit, tapi sebaiknya dimatikan untuk build release.
 - Warning Metro websocket `10.0.2.2:8081` muncul pada APK debug tanpa Metro berjalan. Ini tidak fatal selama APK punya bundled JS.
 - `backend/.env` lokal saat audit menunjuk ke SQLite workspace lama. Pastikan path database disamakan sebelum handoff ke environment baru.
