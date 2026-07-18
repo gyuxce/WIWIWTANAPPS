@@ -85,7 +85,14 @@ const SectionLesson = ({
 
         {!isCustom ? (
           <Button
-            onPress={() => NavigationService.navigate("TrainingScreen")}
+            onPress={() => {
+              if (onPressItem) {
+                onPressItem();
+                return;
+              }
+
+              NavigationService.navigate("TrainingScreen");
+            }}
             title={t("lihat_detail")}
             style={styles.buttonStyles}
             variant="CenturyGothicBold"
@@ -98,7 +105,14 @@ const SectionLesson = ({
           />
         ) : (
           <Button
-            onPress={() => NavigationService.navigate("TrainingScreen")}
+            onPress={() => {
+              if (onPressItem) {
+                onPressItem();
+                return;
+              }
+
+              NavigationService.navigate("TrainingScreen");
+            }}
             title={t("lihat_detail")}
             style={{
               paddingVertical: 12,

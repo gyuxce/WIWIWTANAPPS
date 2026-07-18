@@ -55,6 +55,8 @@ Thumbs.db
 /media-*.png
 /audit-student-*.png
 /audit-student-*.xml
+/fix-*.png
+/fix-*.xml
 /student-login-result*.png
 /window-after-student-login*.xml
 /window-current.xml

@@ -17,6 +17,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flex: 1,
   },
+  docInfoText: {
+    flex: 1,
+    paddingRight: 8,
+  },
   docInfoIcon: {
     width: 24,
     height: 24,

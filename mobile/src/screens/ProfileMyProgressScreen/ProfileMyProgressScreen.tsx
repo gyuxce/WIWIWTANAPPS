@@ -75,6 +75,18 @@ const ProfileMyProgressScreen = () => {
     });
   }, []);
 
+  const openFirstTrainingCategory = () => {
+    const firstCategory = trainingModuleProgress?.[0];
+
+    if (!firstCategory) {
+      return;
+    }
+
+    NavigationService.navigate("DetailTrainingScreen", {
+      categoryCourse: firstCategory,
+    });
+  };
+
   return (
     <View style={globalStyles().topSafeArea}>
       <Space height={Platform.OS === "android" ? 15 : 0} />
@@ -187,7 +199,11 @@ const ProfileMyProgressScreen = () => {
           />
         </Card>
         <Space height={20} />
-        <SectionLesson data={trainingModuleProgress} isCustom />
+        <SectionLesson
+          data={trainingModuleProgress}
+          isCustom
+          onPressItem={openFirstTrainingCategory}
+        />
         <Space height={20} />
         <Card
           style={{

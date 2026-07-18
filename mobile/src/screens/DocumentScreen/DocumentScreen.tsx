@@ -36,16 +36,26 @@ import { DOCUMENT_TYPE, USER_DOCUMENTS } from "./list";
 
 const DocInfo = ({
   file,
+  label,
   allowUpload = false,
   uploadText,
   onPress,
 }: {
   file?: any;
+  label?: string;
   allowUpload?: boolean;
   uploadText?: string;
   onPress?: any;
 }) => {
   const { t } = useTranslation();
+  const rawFilename = file?.filename || "";
+  const filenameParts = rawFilename.split(".");
+  const extension =
+    filenameParts.length > 1 ? filenameParts[filenameParts.length - 1] : "";
+  const shortFilename =
+    rawFilename.length > 24
+      ? `${rawFilename.slice(0, 10)}...${extension ? `.${extension}` : ""}`
+      : rawFilename;
 
   if (!file && allowUpload) {
     return (
@@ -76,15 +86,21 @@ const DocInfo = ({
     <View style={styles.docInfoWrapper}>
       <View style={styles.docInfo}>
         <Image style={styles.docInfoIcon} source={icons.document} />
-        <Text
-          size={12}
-          numberOfLines={1}
-          style={{ paddingRight: 20 }}
-          type="bold"
-          variant="CenturyGothicBold"
-        >
-          {file?.filename}
-        </Text>
+        <View style={styles.docInfoText}>
+          <Text
+            size={12}
+            numberOfLines={1}
+            type="bold"
+            variant="CenturyGothicBold"
+          >
+            {label ? `File ${label}` : t("dokumen")}
+          </Text>
+          {shortFilename ? (
+            <Text size={10} numberOfLines={1} color={colors.stone400}>
+              {shortFilename}
+            </Text>
+          ) : null}
+        </View>
       </View>
       <TouchableOpacity onPress={() => Linking.openURL(file?.url)}>
         <Image style={styles.docDownloadIcon} source={icons.download} />
@@ -206,6 +222,7 @@ const DocumentScreen = () => {
       value: (
         <DocInfo
           file={checkFile(userData, item?.slug, type)}
+          label={item?.label}
           allowUpload={item?.allowUpload}
           uploadText={item?.uploadText}
           onPress={
@@ -222,7 +239,12 @@ const DocumentScreen = () => {
     }));
   };
 
-  const filterDocs = (userData = userDocs, sort = selectedSort, query = q) => {
+  const filterDocs = (
+    userData = userDocs,
+    sort = selectedSort,
+    query = q,
+    activeFilter = selectedFilter,
+  ) => {
     let data: DocType[] = [
       {
         id: "pelatihan",
@@ -271,7 +293,7 @@ const DocumentScreen = () => {
       },
     ];
     // filter
-    data = data?.filter((item: DocType) => selectedFilter.includes(item?.id));
+    data = data?.filter((item: DocType) => activeFilter.includes(item?.id));
     // sort && search
     const _sortedData: DocType[] = [];
     data?.forEach((doc: any) => {
@@ -289,7 +311,7 @@ const DocumentScreen = () => {
       }
       if (query) {
         value = value?.filter((item: DocDataType) =>
-          item?.label.toLowerCase().includes(query),
+          item?.label?.toLowerCase().includes(query.toLowerCase()),
         );
       }
       _sortedData.push({ ...doc, data: value });
@@ -325,6 +347,12 @@ const DocumentScreen = () => {
     //}
   }, []);
 
+  useEffect(() => {
+    if (userDocs?.length) {
+      filterDocs(userDocs, selectedSort, q, selectedFilter);
+    }
+  }, [userDocs]);
+
   return (
     <View style={globalStyles().topSafeArea}>
       <Space height={Platform.OS === "android" ? 15 : 0} />
@@ -347,7 +375,7 @@ const DocumentScreen = () => {
           search={q}
           setSearch={val => {
             setQ(val);
-            filterDocs(userDocs, selectedSort, val);
+            filterDocs(userDocs, selectedSort, val, selectedFilter);
           }}
           actionSheetRef={actionSheetRef}
           btnText="Filter"
@@ -379,7 +407,7 @@ const DocumentScreen = () => {
         dataSort={dataSort}
         setSelectedSort={sort => {
           setSelectedSort(sort);
-          filterDocs(userDocs, sort);
+          filterDocs(userDocs, sort, q, selectedFilter);
         }}
         selectedSort={selectedSort}
       >
@@ -403,6 +431,7 @@ const DocumentScreen = () => {
                     currentFilter = [...selectedFilter, item?.id];
                   }
                   setSelectedFilter(currentFilter);
+                  filterDocs(userDocs, selectedSort, q, currentFilter);
                 }}
                 title={item?.title}
                 style={[

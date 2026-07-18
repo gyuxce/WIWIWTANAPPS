@@ -99,6 +99,18 @@ const TrainingScreen = () => {
     });
   };
 
+  const openFirstTrainingCategory = () => {
+    const firstCategory = trainingModuleProgress?.[0];
+
+    if (!firstCategory) {
+      return;
+    }
+
+    NavigationService.navigate("DetailTrainingScreen", {
+      categoryCourse: firstCategory,
+    });
+  };
+
   useEffect(() => {
     clearTimeout(timeout.current);
     timeout.current = setTimeout(() => {
@@ -148,7 +160,7 @@ const TrainingScreen = () => {
         <SectionLesson
           data={trainingModuleProgress}
           hideBtnDetail
-          //onPressItem={() => {}}
+          onPressItem={openFirstTrainingCategory}
         />
         <Space height={30} />
         <Card

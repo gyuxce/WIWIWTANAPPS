@@ -106,8 +106,12 @@ Audit layar aplikasi siswa Android lokal.
 - Tab `Virtual Class` dan `Kuis/Test` menampilkan data level `N4` dan `N5` sesuai counter. Level asesmen `N4` terbuka dan menampilkan kartu asesmen serta skor.
 - Catatan UX: tombol `Detail` pada kartu fase training terlihat clickable, tetapi saat audit tidak membuka detail; tap kartu kategori training adalah jalur yang berhasil.
 - Dokumen Saya sempat loading lebih lama, lalu daftar dokumen tampil. Nama file storage seed lokal masih terlalu panjang dan terpotong, sehingga beberapa item terlihat mirip.
+- Perbaikan lanjutan: item dokumen yang sudah di-upload sekarang menampilkan label fungsional seperti `File Ijazah`, `File CV`, dan `File Paspor`; filename storage mentah dipindah ke teks kecil di bawahnya dan dipendekkan.
+- Perbaikan lanjutan: list dokumen rebuild otomatis saat `userDocs` Redux selesai terisi, dan perubahan search/filter langsung memakai filter terbaru.
 - Forum terbuka tanpa crash dan menampilkan empty state karena tidak ada trending post.
 - Notifikasi terbuka tanpa crash dan menampilkan empty state `Belum ada notifikasi` pada tab prioritas.
+- Perbaikan lanjutan: tombol `Detail` pada section training sekarang menerima handler eksplisit. Dari `TrainingScreen` dan `Progress` siswa, tombol ini diarahkan ke `DetailTrainingScreen` memakai kategori training pertama yang tersedia, sehingga tidak lagi fallback ke layar training yang sama.
+- Verifikasi APK terbaru: `corepack yarn tsc --noEmit --pretty false` berhasil, build `app:assembleDevelopmentDebug` berhasil, APK berhasil di-install ke emulator, login siswa berhasil, dan Dokumen Saya menampilkan label `File Ijazah`, `File CV`, `File Paspor`, serta `File Hasil Tes Karakter`.
 
 ## Temuan Lanjutan
 
