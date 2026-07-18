@@ -17,7 +17,8 @@ Repo ini dibuat dari source handoff developer sebelumnya dan sudah disanitasi su
 4. Untuk Windows local smoke test, baca [docs/LOCAL_DEV_WINDOWS.md](docs/LOCAL_DEV_WINDOWS.md).
 5. Untuk hasil audit CMS terakhir, baca [docs/CMS_AUDIT.md](docs/CMS_AUDIT.md).
 6. Untuk menjalankan aplikasi siswa Android lokal, baca [docs/MOBILE_LOCAL_ANDROID.md](docs/MOBILE_LOCAL_ANDROID.md).
-7. Jalankan backend dulu, lalu CMS, lalu mobile app.
+7. Untuk hasil audit layar mobile, baca [docs/MOBILE_SCREEN_AUDIT.md](docs/MOBILE_SCREEN_AUDIT.md).
+8. Jalankan backend dulu, lalu CMS, lalu mobile app.
 
 ## Stack Utama
 

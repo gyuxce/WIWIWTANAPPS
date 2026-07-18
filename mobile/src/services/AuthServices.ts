@@ -3,6 +3,7 @@ import type {
   UserSignupProcessTypes,
   UserType,
 } from "types/UserTypes";
+import { API_URL } from "@env";
 import { onErrorState } from "stores/error/errorSlice";
 import icons from "configs/icons";
 

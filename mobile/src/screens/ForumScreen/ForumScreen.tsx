@@ -32,8 +32,11 @@ import { useTranslation } from "react-i18next";
 
 import {
   belajarDanPeluangDiLuarNegeri,
+  curhat,
+  diskusiUmum,
   hidupDanKerjaDiJepang,
   karirDiJepang,
+  pap,
   praktikalJepang,
   softSkill,
   teoriJepang,
@@ -184,44 +187,76 @@ const ForumScreen = () => {
           type: item?.type,
           totalDiscussion: item?.count_post || 0,
         };
+      case "PAP":
+        return {
+          ...pap,
+          id: item?.id,
+          type: item?.type,
+          totalDiscussion: item?.count_post || 0,
+        };
+      case "Curhat":
+        return {
+          ...curhat,
+          id: item?.id,
+          type: item?.type,
+          totalDiscussion: item?.count_post || 0,
+        };
+      case "Diskusi Umum":
+        return {
+          ...diskusiUmum,
+          id: item?.id,
+          type: item?.type,
+          totalDiscussion: item?.count_post || 0,
+        };
       default:
         return null;
     }
   };
 
   useEffect(() => {
-    setIsSearch(false);
-    setIsLoadingTopic(true);
-    getForumTopicType().then(val => {
-      if (val.status === "success") {
-        getTopicType({
-          type: "collection",
-          order_by: "count_post",
-          sort_by: "desc",
-        }).then(({ status, data }) => {
-          if (status === "success" && data) {
-            if (data?.length > 0) {
-              const updatedTopic = data?.map(item => populateData(item));
-              const updatedTopicPopuler = [...data]
-                .sort((a, b) => b.count_post - a.count_post)
-                .splice(0, 3)
-                .map(item => populateData(item));
+    const loadTopics = async () => {
+      setIsSearch(false);
+      setIsLoadingTopic(true);
 
-              const filteredUpdatedTopicPopuler: any =
-                updatedTopicPopuler.filter(item => item !== null);
+      try {
+        void getForumTopicType();
+        const { status, data } = await Promise.race([
+          getTopicType({
+            type: "collection",
+            order_by: "count_post",
+            sort_by: "desc",
+          }),
+          new Promise<{ status: "failed"; data?: ForumTopicType[] }>(
+            resolve => {
+              setTimeout(() => resolve({ status: "failed" }), 10000);
+            },
+          ),
+        ]);
 
-              const filteredUpdatedTopic: any = updatedTopic.filter(
-                item => item !== null,
-              );
+        if (status === "success" && data) {
+          const updatedTopic = data?.map(item => populateData(item));
+          const updatedTopicPopuler = [...data]
+            .sort((a, b) => b.count_post - a.count_post)
+            .map(item => populateData(item))
+            .filter(item => item !== null)
+            .slice(0, 3);
 
-              setTopic(filteredUpdatedTopic);
-              setTopicPopuler(filteredUpdatedTopicPopuler);
-              setIsLoadingTopic(false);
-            }
-          }
-        });
+          const filteredUpdatedTopicPopuler: any =
+            updatedTopicPopuler;
+
+          const filteredUpdatedTopic: any = updatedTopic.filter(
+            item => item !== null,
+          );
+
+          setTopic(filteredUpdatedTopic);
+          setTopicPopuler(filteredUpdatedTopicPopuler);
+        }
+      } finally {
+        setIsLoadingTopic(false);
       }
-    });
+    };
+
+    loadTopics();
   }, []);
 
   useEffect(() => {
@@ -502,30 +537,36 @@ const ForumScreen = () => {
                     <ActivityIndicator size={"large"} color={colors.black} />
                   ) : (
                     <View style={{ flex: 1 }}>
-                      {topicPopuler?.map((item, index) => {
-                        return (
-                          <TouchableOpacity
-                            key={index}
-                            onPress={() => {
-                              NavigationService.navigate(
-                                "ForumCategoryScreen",
-                                {
-                                  id: item?.id,
-                                  name: item?.title,
-                                },
-                              );
-                            }}
-                          >
-                            <ForumTopic
-                              title={item?.title}
-                              subtitle={item?.subtitle}
-                              totalDiscussion={item?.totalDiscussion}
-                              image={item?.image}
-                            />
-                            <Space height={20} />
-                          </TouchableOpacity>
-                        );
-                      })}
+                      {topicPopuler?.length > 0 ? (
+                        topicPopuler?.map((item, index) => {
+                          return (
+                            <TouchableOpacity
+                              key={index}
+                              onPress={() => {
+                                NavigationService.navigate(
+                                  "ForumCategoryScreen",
+                                  {
+                                    id: item?.id,
+                                    name: item?.title,
+                                  },
+                                );
+                              }}
+                            >
+                              <ForumTopic
+                                title={item?.title}
+                                subtitle={item?.subtitle}
+                                totalDiscussion={item?.totalDiscussion}
+                                image={item?.image}
+                              />
+                              <Space height={20} />
+                            </TouchableOpacity>
+                          );
+                        })
+                      ) : (
+                        <Text textAlign="center">
+                          Topik forum belum tersedia
+                        </Text>
+                      )}
                     </View>
                   )}
                 </View>

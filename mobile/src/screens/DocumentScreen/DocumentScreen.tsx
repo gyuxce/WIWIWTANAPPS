@@ -142,6 +142,7 @@ const DocumentScreen = () => {
   const { getUserDocs, userDocs } = useUser();
   const [docs, setDocs] = useState([] as DocType[]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isFetchingDocs, setIsFetchingDocs] = useState(false);
 
   const handlePickDocument = async (slug: string, type: number | string) => {
     try {
@@ -297,6 +298,7 @@ const DocumentScreen = () => {
   };
 
   const fetchData = async () => {
+    setIsFetchingDocs(true);
     getUserDocs({
       type: "collection",
       relations: ["file"],
@@ -309,6 +311,10 @@ const DocumentScreen = () => {
       if (status === "failed") {
         ErrorStatus(500, dispatch);
       }
+      setIsFetchingDocs(false);
+    }).catch(() => {
+      setIsFetchingDocs(false);
+      ErrorStatus(500, dispatch);
     });
   };
 
@@ -347,7 +353,11 @@ const DocumentScreen = () => {
           btnText="Filter"
           placeholder={t("cari_dokumen")}
         />
-        {docs.length > 0 ? (
+        {isFetchingDocs ? (
+          <View style={{ marginTop: 40 }}>
+            <ActivityIndicator size={"large"} color={colors.accent} />
+          </View>
+        ) : docs.length > 0 ? (
           <View style={styles.listDocContainer}>
             {docs?.map((item: DocType, i) => (
               <CardDocument

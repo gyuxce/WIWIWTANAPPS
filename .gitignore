@@ -43,3 +43,9 @@ Thumbs.db
 # Local emulator inspection artifacts
 /emulator-current.png
 /window.xml
+/mobile-audit-*.png
+/mobile-*.png
+/mobile-*.xml
+/RKStorage.sqlite
+/RKStorage.b64
+/metro.log
