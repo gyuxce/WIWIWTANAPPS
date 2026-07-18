@@ -93,7 +93,7 @@ Audit mobile terakhir:
 - Layar siswa, dokumen, forum, dan progress fase sudah diaudit di emulator.
 - Fase pembayaran sudah diberi guard agar tidak crash saat detail cicilan seed lokal belum lengkap.
 - Fase pelatihan sudah bisa dibuka dengan seed lokal subscription aktif dan `training_program=2`.
-- Detail modul, level, grup materi, dan layar materi sudah diaudit. Detailnya ada di [docs/MOBILE_SCREEN_AUDIT.md](docs/MOBILE_SCREEN_AUDIT.md).
+- Detail modul, level, grup materi, layar materi, dan handling error media sudah diaudit. Detailnya ada di [docs/MOBILE_SCREEN_AUDIT.md](docs/MOBILE_SCREEN_AUDIT.md).
 
 Build Android production:
 

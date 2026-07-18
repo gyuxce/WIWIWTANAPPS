@@ -175,6 +175,17 @@ export const videoExtensions = [
   "f4v",
 ];
 
+export const imageExtensions = [
+  "jpg",
+  "jpeg",
+  "png",
+  "gif",
+  "webp",
+  "bmp",
+  "heic",
+  "heif",
+];
+
 export const audioExtensions = [
   "mp3",
   "wav",

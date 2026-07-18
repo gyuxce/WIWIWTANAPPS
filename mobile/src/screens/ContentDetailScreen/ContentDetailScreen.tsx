@@ -28,7 +28,7 @@ import type { RootStackParamList } from "types/NavigatorTypes";
 import globalStyles from "utils/GlobalStyles";
 import NavigationService from "utils/NavigationService";
 import { scaledHorizontal, scaledVertical } from "utils/ScaledService";
-import { videoExtensions } from "utils/Utils";
+import { imageExtensions, videoExtensions } from "utils/Utils";
 
 type ModulDetailRouteType = RouteProp<
   RootStackParamList,
@@ -54,6 +54,17 @@ const ContentDetailScreen = ({ route }: Prop) => {
   const { auth } = useAuth();
   const webViewRef: any = useRef();
   const [isVideoLoading, setVideoLoading] = useState<boolean>(false);
+  const [mediaError, setMediaError] = useState("");
+
+  const fileUrl = param?.data?.file?.url || param?.data?.body_url || "";
+  const fileName = String(param?.data?.file?.filename || fileUrl).toLowerCase();
+  const normalizedFileName = fileName.split("?")[0] || "";
+  const isImageFile = imageExtensions.some(ext =>
+    normalizedFileName.endsWith("." + ext),
+  );
+  const isVideoFile = videoExtensions.some(ext =>
+    normalizedFileName.endsWith("." + ext),
+  );
 
   const backAction = () => {
     if (route?.params?.data?.body_type === 1) {
@@ -118,7 +129,11 @@ const ContentDetailScreen = ({ route }: Prop) => {
     return () => backHandler.remove();
   }, [durationMillis, completeMillis, param]);
 
-  const docUrl = encodeURIComponent(param?.data?.file?.url as string);
+  useEffect(() => {
+    setMediaError("");
+  }, [param?.data?.id]);
+
+  const docUrl = encodeURIComponent(fileUrl);
   const googleViewerUrl = `https://docs.google.com/viewer?url=${docUrl}&embedded=true`;
 
   return (
@@ -189,48 +204,53 @@ const ContentDetailScreen = ({ route }: Prop) => {
             style={{ height: 24, width: "100%", resizeMode: "contain" }}
           />
           <Space height={5} />
-          {param?.data?.body_type === 1 &&
-            param?.data?.file &&
-            videoExtensions.some(ext =>
-              param?.data?.file?.filename.endsWith("." + ext),
-            ) && (
-              <View
-                style={{ width: "100%", height: 200, minHeight: 200 }}
-                //ref={targetViewRef}
-              >
-                {isVideoLoading && (
-                  <ActivityIndicator size="small" color={colors.accent} />
-                )}
-                <Video
-                  ref={video}
-                  source={{
-                    uri: param?.data?.file?.url,
-                  }}
-                  onLoad={(status: any) => {
-                    setCompleteMillis(status?.durationMillis);
-                    setDurationMillis(
-                      status?.durationMillis - status?.positionMillis,
-                    );
-                  }}
-                  onLoadStart={() => setVideoLoading(true)}
-                  onReadyForDisplay={() => setVideoLoading(false)}
-                  style={{ height: "100%", width: "100%" }}
-                  useNativeControls
-                  shouldPlay={false}
-                  resizeMode={ResizeMode.CONTAIN}
-                  isLooping={false}
-                  positionMillis={
-                    Number(route?.params?.data?.progress?.duration) || 0
-                  }
-                  volume={80}
-                  onPlaybackStatusUpdate={(status: any) => {
-                    setCompleteMillis(status?.durationMillis);
+          {param?.data?.body_type === 1 && param?.data?.file && isVideoFile && (
+            <View
+              style={{ width: "100%", height: 200, minHeight: 200 }}
+              //ref={targetViewRef}
+            >
+              {isVideoLoading && (
+                <ActivityIndicator size="small" color={colors.accent} />
+              )}
+              <Video
+                ref={video}
+                source={{
+                  uri: param?.data?.file?.url,
+                }}
+                onLoad={(status: any) => {
+                  setCompleteMillis(status?.durationMillis);
+                  setDurationMillis(
+                    status?.durationMillis - status?.positionMillis,
+                  );
+                }}
+                onLoadStart={() => setVideoLoading(true)}
+                onReadyForDisplay={() => setVideoLoading(false)}
+                onError={() => {
+                  setVideoLoading(false);
+                  setMediaError("Media belum bisa diakses.");
+                }}
+                style={{ height: "100%", width: "100%" }}
+                useNativeControls
+                shouldPlay={false}
+                resizeMode={ResizeMode.CONTAIN}
+                isLooping={false}
+                positionMillis={
+                  Number(route?.params?.data?.progress?.duration) || 0
+                }
+                volume={80}
+                onPlaybackStatusUpdate={(status: any) => {
+                  setCompleteMillis(status?.durationMillis);
 
-                    setDurationMillis(status?.positionMillis);
-                  }}
-                />
-              </View>
-            )}
+                  setDurationMillis(status?.positionMillis);
+                }}
+              />
+              {mediaError !== "" && (
+                <Text size={12} textAlign="center" color={colors.red}>
+                  {mediaError}
+                </Text>
+              )}
+            </View>
+          )}
           {param?.data?.body_type === 2 && param?.data?.file && (
             <View>
               <Text textAlign="center" size={12}>
@@ -331,8 +351,21 @@ const ContentDetailScreen = ({ route }: Prop) => {
                 </TouchableOpacity>
               </View>
 
-              {/* WebView Document Viewer */}
-              {googleViewerUrl && (
+              {mediaError !== "" && (
+                <Text size={12} textAlign="center" color={colors.red}>
+                  {mediaError}
+                </Text>
+              )}
+
+              {isImageFile && (
+                <Image
+                  source={{ uri: fileUrl }}
+                  style={{ height: 360, width: "100%", resizeMode: "contain" }}
+                  onError={() => setMediaError("Dokumen belum bisa diakses.")}
+                />
+              )}
+
+              {!isImageFile && googleViewerUrl && (
                 <View
                   style={{
                     height: 500,
@@ -353,6 +386,10 @@ const ContentDetailScreen = ({ route }: Prop) => {
                     scalesPageToFit={true}
                     mixedContentMode="always"
                     cacheEnabled={false}
+                    onError={() => setMediaError("Dokumen belum bisa diakses.")}
+                    onHttpError={() =>
+                      setMediaError("Dokumen belum bisa diakses.")
+                    }
                     // eslint-disable-next-line max-len
                     userAgent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
                   />
@@ -377,9 +414,15 @@ const ContentDetailScreen = ({ route }: Prop) => {
             <View>
               {param?.data?.file && (
                 <Image
-                  source={{ uri: param?.data?.file?.url }}
+                  source={{ uri: fileUrl }}
                   style={{ height: 171, resizeMode: "contain" }}
+                  onError={() => setMediaError("Media belum bisa diakses.")}
                 />
+              )}
+              {mediaError !== "" && (
+                <Text size={12} textAlign="center" color={colors.red}>
+                  {mediaError}
+                </Text>
               )}
               <Space height={10} />
               <RenderHTML

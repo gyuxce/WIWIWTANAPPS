@@ -77,8 +77,12 @@ Audit layar aplikasi siswa Android lokal.
 - Detail `Teori Bahasa Jepang` terbuka tanpa crash. Tab modul menampilkan level `N4` dan `N5`.
 - Level `N4` menampilkan grup `Bahasa Jepang Menengah`, lalu grup tersebut menampilkan materi `Bahasa Jepang 1` dan `Bahasa Jepang 2`.
 - Layar detail materi terbuka untuk materi `Partikel dalam Kalimat` dan menampilkan judul, tipe konten, attachment file, serta area WebView/media.
-- Catatan lanjut: area WebView/media pada beberapa materi masih terlihat loading lama di emulator lokal. Perlu audit lanjutan apakah file storage/media seed lokal tersedia dan apakah URL media dapat diakses dari emulator.
-- Tab virtual class dan asesmen perlu diaudit ulang dari detail training setelah kembali dari layar materi; data API menunjukkan virtual class dan asesmen tersedia untuk kategori Teori.
+- Audit media: tabel `files` seed lokal berisi 3 file GCS (`jpg`, `mp3`, `mp4`) dan request host ke URL GCS mengembalikan `403 Forbidden`.
+- Perbaikan mobile: `ContentDetailScreen` sekarang mengenali ekstensi image dan merender dokumen image langsung dengan `<Image>`, bukan dipaksa lewat Google Docs Viewer. Jika video/dokumen/media gagal dimuat, layar menampilkan pesan error singkat, bukan spinner kosong terus.
+- Catatan lanjut: agar preview media benar-benar tampil, file GCS dev bucket perlu dibuat accessible atau seed lokal perlu diarahkan ke file `storage/app/public` yang tersedia.
+- API tab virtual class untuk kategori Teori mengembalikan data: `N4` punya 2 kelas dan `N5` punya 2 kelas.
+- API tab asesmen untuk kategori Teori mengembalikan data: `N4` punya 2 asesmen dan `N5` punya 2 asesmen.
+- Catatan UI: percobaan tap tab virtual/asesmen terakhir terpotong karena emulator kembali ke launcher saat navigasi back dari detail materi. Tidak ada `AndroidRuntime`/`ReactNativeJS` fatal error pada log singkat. Perlu ulang audit UI tab setelah install APK terbaru dari build ini.
 
 ## Temuan Lanjutan
 
