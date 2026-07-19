@@ -88,6 +88,12 @@ Login mobile local seed:
 - Email: `user1@62teknologi.com`
 - Password: `password`
 
+Cek encoding/mojibake source dan SQLite lokal:
+
+```powershell
+python scripts/check-mojibake.py
+```
+
 Audit mobile terakhir:
 
 - Layar siswa, dokumen, forum, dan progress fase sudah diaudit di emulator.

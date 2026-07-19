@@ -114,6 +114,12 @@ Audit layar aplikasi siswa Android lokal.
 - Verifikasi APK terbaru: `corepack yarn tsc --noEmit --pretty false` berhasil, build `app:assembleDevelopmentDebug` berhasil, APK berhasil di-install ke emulator, login siswa berhasil, dan Dokumen Saya menampilkan label `File Ijazah`, `File CV`, `File Paspor`, serta `File Hasil Tes Karakter`.
 - Perbaikan lanjutan: komponen progress training/profile sekarang menormalisasi angka kosong atau invalid menjadi `0`, sehingga data course kosong tidak lagi menampilkan `NaN%` atau `NaN / NaN`.
 
+### Encoding dan Mojibake
+
+- Scan source mobile/CMS/backend dan SQLite lokal tidak menemukan mojibake nyata pada teks aplikasi.
+- Catatan audit: output XML dari `adb shell uiautomator dump` bisa menampilkan teks Jepang sebagai mojibake di terminal Windows/PowerShell, walaupun UI emulator menampilkan teks Jepang dengan benar. Untuk validasi visual, pakai screenshot emulator sebagai acuan utama.
+- Perintah cek ulang: `python scripts/check-mojibake.py`. Command ini scan source penting dan `backend/database/database.sqlite`, lalu exit nonzero jika menemukan kandidat mojibake.
+
 ## Temuan Lanjutan
 
 - Untuk audit materi pelatihan penuh, siapkan seed user dengan `is_subscription_active = 1`, payment training completed, dan `training_program` yang sesuai dengan `course_items.program_type`.
