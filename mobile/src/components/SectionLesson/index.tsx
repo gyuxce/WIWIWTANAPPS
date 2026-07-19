@@ -32,6 +32,12 @@ const SectionLesson = ({
 }: Props) => {
   const { user } = useAuth();
   const { t } = useTranslation();
+  const toSafeNumber = (value?: number | string | null) => {
+    const numericValue = Number(value);
+
+    return Number.isFinite(numericValue) ? numericValue : 0;
+  };
+
   return (
     <View style={{ marginHorizontal: scaledHorizontal(25) }}>
       <Card style={{ alignItems: "center" }}>
@@ -57,12 +63,14 @@ const SectionLesson = ({
             color={getCourseImageAndColor(item?.type_label)?.color}
             title={item.title}
             total={
-              item.materi_count + item?.virtual_count + item?.assesment_count
+              toSafeNumber(item.materi_count) +
+              toSafeNumber(item?.virtual_count) +
+              toSafeNumber(item?.assesment_count)
             }
             progress={
-              item.materi_count_progress +
-              item?.virtual_count_progress +
-              item?.assesment_count_progress
+              toSafeNumber(item.materi_count_progress) +
+              toSafeNumber(item?.virtual_count_progress) +
+              toSafeNumber(item?.assesment_count_progress)
             }
             style={{
               marginBottom: data.length - 1 === i ? 0 : 12,

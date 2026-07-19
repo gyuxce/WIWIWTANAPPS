@@ -112,6 +112,7 @@ Audit layar aplikasi siswa Android lokal.
 - Notifikasi terbuka tanpa crash dan menampilkan empty state `Belum ada notifikasi` pada tab prioritas.
 - Perbaikan lanjutan: tombol `Detail` pada section training sekarang menerima handler eksplisit. Dari `TrainingScreen` dan `Progress` siswa, tombol ini diarahkan ke `DetailTrainingScreen` memakai kategori training pertama yang tersedia, sehingga tidak lagi fallback ke layar training yang sama.
 - Verifikasi APK terbaru: `corepack yarn tsc --noEmit --pretty false` berhasil, build `app:assembleDevelopmentDebug` berhasil, APK berhasil di-install ke emulator, login siswa berhasil, dan Dokumen Saya menampilkan label `File Ijazah`, `File CV`, `File Paspor`, serta `File Hasil Tes Karakter`.
+- Perbaikan lanjutan: komponen progress training/profile sekarang menormalisasi angka kosong atau invalid menjadi `0`, sehingga data course kosong tidak lagi menampilkan `NaN%` atau `NaN / NaN`.
 
 ## Temuan Lanjutan
 

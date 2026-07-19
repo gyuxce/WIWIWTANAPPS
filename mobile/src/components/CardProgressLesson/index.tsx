@@ -27,11 +27,14 @@ const CardProgressLesson = ({
   style,
   onPress,
 }: Props) => {
+  const safeProgress = Number.isFinite(Number(progress)) ? Number(progress) : 0;
+  const safeTotal = Number.isFinite(Number(total)) ? Number(total) : 0;
+
   const getPercentage = () => {
-    if (total === 0) {
+    if (safeTotal <= 0) {
       return 0;
     }
-    const result = (progress / total) * 100;
+    const result = (safeProgress / safeTotal) * 100;
     return Math.min(Math.max(Math.round(result), 0), 100);
   };
   return (
@@ -72,7 +75,7 @@ const CardProgressLesson = ({
             />
           </View>
           <Text size={12} type="bold" variant="CenturyGothicBold">
-            {`${progress} / ${total}`}
+            {`${safeProgress} / ${safeTotal}`}
           </Text>
         </View>
       </View>
