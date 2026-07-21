@@ -128,6 +128,7 @@ Audit layar aplikasi siswa Android lokal.
 - Progress siswa tampil normal dan detail `最終面接` terbuka tanpa crash. Data seed lokal masih minimal, sehingga layar detail final interview terlihat kosong selain card status.
 - Training tampil normal. Perbaikan `NaN%` sudah valid secara visual: kartu kosong sekarang menampilkan `0%` dan `0 / 12`, bukan `NaN`.
 - Detail Training terbuka tanpa crash dan tab `モジュール`, `バーチャルクラス`, serta `小テスト` tampil. Catatan visual/data: card progress header di detail training masih `0 / 0`, sementara tab Modul menampilkan `1/12`; ini perlu diselaraskan di fase fix berikutnya.
+- Perbaikan lanjutan: progress header Detail Training sekarang memakai data progress course dari route/Redux (`materi`, `virtual`, dan `assesment`) dengan normalisasi angka aman, bukan menjumlah data tab virtual/asesmen async yang bisa belum terisi dan menghasilkan `0 / 0`.
 - Dokumen Saya tampil normal setelah loading; label file fungsional seperti `File Ijazah`, `File CV`, `File Paspor`, dan `File Hasil Tes Karakter` sudah tampil dan filename storage mentah hanya menjadi teks kecil.
 - Audit Forum dan Notifikasi belum selesai pada run ini karena emulator `Pixel_8` kehilangan koneksi ADB, lalu setelah restart emulator muncul ANR `System UI isn't responding`.
 - Setelah relaunch app pasca restart emulator, layar sempat blank putih. Logcat menunjukkan action `RESET_ALL_STATE` dan `isNewInstall=true`; ini mengarah ke masalah session/state recovery setelah relaunch, bukan error mojibake.
@@ -138,5 +139,4 @@ Audit layar aplikasi siswa Android lokal.
 - Log debug Redux sangat verbose di Logcat. Ini membantu audit, tapi sebaiknya dimatikan untuk build release.
 - Warning Metro websocket `10.0.2.2:8081` muncul pada APK debug tanpa Metro berjalan. Ini tidak fatal selama APK punya bundled JS.
 - Perlu investigasi state recovery mobile: relaunch setelah emulator restart dapat memicu `RESET_ALL_STATE` dan layar blank putih.
-- Perlu selaraskan progress header detail training (`0 / 0`) dengan counter tab modul/course yang sudah berisi data.
 - `backend/.env` lokal saat audit menunjuk ke SQLite workspace lama. Pastikan path database disamakan sebelum handoff ke environment baru.

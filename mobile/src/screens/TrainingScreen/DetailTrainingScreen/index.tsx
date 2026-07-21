@@ -47,6 +47,28 @@ const DetailTraininScreen = ({ route }: Prop) => {
   const [selectedTab, setSelectedTab] = useState(0);
   const { user } = useAuth();
   const navigation = useNavigation();
+  const toSafeNumber = (value?: number | string | null) => {
+    const numericValue = Number(value);
+
+    return Number.isFinite(numericValue) ? numericValue : 0;
+  };
+
+  const selectedCourseProgress =
+    trainingModuleProgress?.find(
+      item => item.id === route?.params?.categoryCourse?.id,
+    ) || route?.params?.categoryCourse;
+  const moduleProgress = toSafeNumber(
+    selectedCourseProgress?.materi_count_progress,
+  );
+  const moduleTotal = toSafeNumber(selectedCourseProgress?.materi_count);
+  const courseProgress =
+    moduleProgress +
+    toSafeNumber(selectedCourseProgress?.virtual_count_progress) +
+    toSafeNumber(selectedCourseProgress?.assesment_count_progress);
+  const courseTotal =
+    moduleTotal +
+    toSafeNumber(selectedCourseProgress?.virtual_count) +
+    toSafeNumber(selectedCourseProgress?.assesment_count);
 
   useEffect(() => {
     if (user?.is_subscription_active !== 1) {
@@ -99,14 +121,8 @@ const DetailTraininScreen = ({ route }: Prop) => {
   const tabList = [
     {
       title: t("modul"),
-      progress:
-        trainingModuleProgress?.filter(
-          item => item.id === route?.params?.categoryCourse?.id,
-        )?.[0]?.materi_count_progress || 0,
-      total:
-        trainingModuleProgress?.filter(
-          item => item.id === route?.params?.categoryCourse?.id,
-        )?.[0]?.materi_count || 0,
+      progress: moduleProgress,
+      total: moduleTotal,
     },
     {
       title: t("kelas_virtual"),
@@ -169,35 +185,10 @@ const DetailTraininScreen = ({ route }: Prop) => {
                 : images.userDefault
             }
             total={
-              //@ts-ignore
-              trainingModuleProgress?.filter(
-                item => item.id === route?.params?.categoryCourse?.id,
-              )?.[0]?.materi_count +
-              virtualClassNoFilter?.reduce((total, item) => {
-                return total + item.classVirtual.length;
-              }, 0) +
-              assesmentListNoFilter?.reduce((total, item) => {
-                return total + item.assesment.length;
-              }, 0)
+              courseTotal
             }
             progress={
-              //@ts-ignore
-              trainingModuleProgress?.filter(
-                item => item.id === route?.params?.categoryCourse?.id,
-              )?.[0]?.materi_count_progress +
-              +virtualClassNoFilter?.reduce((total, item) => {
-                return total + item.classVirtual.length;
-              }, 0) +
-              assesmentListNoFilter?.reduce((total, item) => {
-                return (
-                  total +
-                  item.assesment.filter(
-                    item =>
-                      item?.assesmentStudent?.status === 1 ||
-                      item?.assesmentStudent?.status === 3,
-                  ).length
-                );
-              }, 0)
+              courseProgress
             }
             color={
               getCourseImageAndColor(route?.params?.categoryCourse?.type_label)
