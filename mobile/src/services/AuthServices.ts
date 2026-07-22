@@ -80,6 +80,20 @@ export const apiMe = (token: string) => {
   }>;
 };
 
+export const apiRefreshToken = (refreshToken: string) => {
+  return BaseService("/tokens/refresh")
+    .json({ refresh_token: refreshToken })
+    .post() as Promise<{
+    status?: string;
+    data?: {
+      access_token?: string;
+      refresh_token?: string;
+      user?: UserType;
+    };
+    message?: string;
+  }>;
+};
+
 export const apiLogout = (token: string) => {
   return BaseService("/auth/sign-out", token).post() as Promise<{
     status: string;

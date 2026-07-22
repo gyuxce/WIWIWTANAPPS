@@ -132,11 +132,13 @@ Audit layar aplikasi siswa Android lokal.
 - Dokumen Saya tampil normal setelah loading; label file fungsional seperti `File Ijazah`, `File CV`, `File Paspor`, dan `File Hasil Tes Karakter` sudah tampil dan filename storage mentah hanya menjadi teks kecil.
 - Audit Forum dan Notifikasi belum selesai pada run ini karena emulator `Pixel_8` kehilangan koneksi ADB, lalu setelah restart emulator muncul ANR `System UI isn't responding`.
 - Setelah relaunch app pasca restart emulator, layar sempat blank putih. Logcat menunjukkan action `RESET_ALL_STATE` dan `isNewInstall=true`; ini mengarah ke masalah session/state recovery setelah relaunch, bukan error mojibake.
+- Investigasi lanjutan: token access lokal backend hanya berlaku 2 jam, sedangkan refresh token berlaku 30 hari. Mobile sebelumnya tidak memakai endpoint `/tokens/refresh`, sehingga relaunch dengan access token expired langsung memicu `401`, `RESET_ALL_STATE`, dan session hilang.
+- Perbaikan lanjutan: `useAuth.getMe` sekarang mencoba refresh token saat `/auth/user/me` mengembalikan `401`, lalu mengulang `/me` dengan access token baru. Session hanya direset jika refresh token juga gagal.
 
 ## Temuan Lanjutan
 
 - Untuk audit materi pelatihan penuh, siapkan seed user dengan `is_subscription_active = 1`, payment training completed, dan `training_program` yang sesuai dengan `course_items.program_type`.
 - Log debug Redux sangat verbose di Logcat. Ini membantu audit, tapi sebaiknya dimatikan untuk build release.
 - Warning Metro websocket `10.0.2.2:8081` muncul pada APK debug tanpa Metro berjalan. Ini tidak fatal selama APK punya bundled JS.
-- Perlu investigasi state recovery mobile: relaunch setelah emulator restart dapat memicu `RESET_ALL_STATE` dan layar blank putih.
+- Verifikasi refresh-token mobile perlu diulang dengan backend lokal aktif dan login siswa baru, karena session emulator pada run sebelumnya sudah telanjur ter-reset.
 - `backend/.env` lokal saat audit menunjuk ke SQLite workspace lama. Pastikan path database disamakan sebelum handoff ke environment baru.

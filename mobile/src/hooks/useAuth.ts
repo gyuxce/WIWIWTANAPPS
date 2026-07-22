@@ -3,6 +3,7 @@ import {
   apiForgotPassword,
   apiLogout,
   apiMe,
+  apiRefreshToken,
   apiResetPassword,
   apiSignin,
   apiSignup,
@@ -147,20 +148,39 @@ export const useAuth = () => {
 
   const getMe = async (token: string, authToken: AuthType) => {
     try {
-      const resp: any = await apiMe(token);
+      let activeAuthToken = authToken;
+      let resp: any = await apiMe(token);
+
+      if (resp === 401 && authToken?.refreshToken) {
+        const refreshResp: any = await apiRefreshToken(authToken.refreshToken);
+        const refreshedAccessToken = refreshResp?.data?.access_token;
+        const refreshedRefreshToken =
+          refreshResp?.data?.refresh_token || authToken.refreshToken;
+
+        if (refreshResp?.status === "success" && refreshedAccessToken) {
+          activeAuthToken = {
+            accessToken: refreshedAccessToken,
+            refreshToken: refreshedRefreshToken,
+          };
+          resp = await apiMe(refreshedAccessToken);
+        }
+      }
+
       if (resp?.data) {
-        dispatch(onLogin({ auth: authToken, user: resp?.data }));
-        await apiGetPengaturanBahasa(authToken.accessToken).then(({ data }) => {
-          if (data && data?.[0]?.value) {
-            if (String(resp?.data?.last_phase) >= data?.[0]?.value) {
-              dispatch(onChangeLanguage("ja"));
-              i18n.changeLanguage("ja");
-            } else {
-              i18n.changeLanguage("id");
-              dispatch(onChangeLanguage("id"));
+        dispatch(onLogin({ auth: activeAuthToken, user: resp?.data }));
+        await apiGetPengaturanBahasa(activeAuthToken.accessToken).then(
+          ({ data }) => {
+            if (data && data?.[0]?.value) {
+              if (String(resp?.data?.last_phase) >= data?.[0]?.value) {
+                dispatch(onChangeLanguage("ja"));
+                i18n.changeLanguage("ja");
+              } else {
+                i18n.changeLanguage("id");
+                dispatch(onChangeLanguage("id"));
+              }
             }
           }
-        });
+        );
       } else {
         ErrorStatus(401, dispatch);
       }
