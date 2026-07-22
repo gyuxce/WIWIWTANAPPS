@@ -13,11 +13,13 @@ import type {
   ForumNotificationTypes,
 } from "types/NotificationTypes";
 import type { QueryType } from "types/QueryTypes";
+import { useTranslation } from "react-i18next";
 
 import Priority from "./Priority/Priority";
 import ForYou from "./ForYou/ForYou";
 import Forum from "./Forum/Forum";
 const NotificationScreen = () => {
+  const { t } = useTranslation();
   const [selectedNotification, setSelectedNotification] = useState(0);
   const {
     metaForumNotification,
@@ -64,15 +66,15 @@ const NotificationScreen = () => {
   const typeNotification = [
     {
       id: 0,
-      name: "Prioritas",
+      name: t("prioritas"),
     },
     {
       id: 1,
-      name: "Untukmu",
+      name: t("untukmu"),
     },
     {
       id: 2,
-      name: "Forum",
+      name: t("forum"),
     },
   ];
 

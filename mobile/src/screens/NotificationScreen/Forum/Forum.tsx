@@ -18,6 +18,7 @@ import type { QueryType } from "types/QueryTypes";
 import NavigationService from "utils/NavigationService";
 import { scaledVertical } from "utils/ScaledService";
 import { isCloseToBottom } from "utils/Utils";
+import { useTranslation } from "react-i18next";
 
 interface ForumProps {
   data: ForumNotificationTypes[];
@@ -26,6 +27,7 @@ interface ForumProps {
 }
 
 const Forum = ({ data, meta, query }: ForumProps) => {
+  const { t } = useTranslation();
   const { getForumNotification, totalNotification } = useNotification();
   const dispatch = useDispatch();
   const [loadingIndicator, setLoadingIndicator] = useState(false);
@@ -121,7 +123,7 @@ const Forum = ({ data, meta, query }: ForumProps) => {
         </View>
       ) : (
         <View style={{ marginTop: scaledVertical(100), alignItems: "center" }}>
-          <Text>Belum ada notifikasi</Text>
+          <Text>{t("belum_ada_notifikasi")}</Text>
         </View>
       )}
 

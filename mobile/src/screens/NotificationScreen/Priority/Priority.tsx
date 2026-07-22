@@ -18,6 +18,7 @@ import { QueryType } from "types/QueryTypes";
 import NavigationService from "utils/NavigationService";
 import { scaledVertical } from "utils/ScaledService";
 import { isCloseToBottom } from "utils/Utils";
+import { useTranslation } from "react-i18next";
 
 interface PriorityProps {
   data: ForYouNotificationTypes[];
@@ -26,6 +27,7 @@ interface PriorityProps {
 }
 
 const Priority = ({ data, meta, query }: PriorityProps) => {
+  const { t } = useTranslation();
   const { getForYouNotification, totalNotification } = useNotification();
   const dispatch = useDispatch();
   const { auth } = useAuth();
@@ -108,7 +110,7 @@ const Priority = ({ data, meta, query }: PriorityProps) => {
         </View>
       ) : (
         <View style={{ marginTop: scaledVertical(100), alignItems: "center" }}>
-          <Text>Belum ada notifikasi</Text>
+          <Text>{t("belum_ada_notifikasi")}</Text>
         </View>
       )}
       {/* <PriorityNotification

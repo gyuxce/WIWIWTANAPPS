@@ -564,7 +564,7 @@ const ForumScreen = () => {
                         })
                       ) : (
                         <Text textAlign="center">
-                          Topik forum belum tersedia
+                          {t("topik_forum_belum_tersedia")}
                         </Text>
                       )}
                     </View>

@@ -149,6 +149,16 @@ Audit layar aplikasi siswa Android lokal.
 - Notifikasi terbuka stabil. Tab Prioritas dan Untukmu kosong, tab Forum berisi daftar notifikasi komentar. Badge `173` di header kemungkinan berasal dari total unread forum notification, bukan dari tab Prioritas.
 - Temuan lintas layar: mode bahasa Jepang belum konsisten penuh. Banyak label statis sudah Jepang, tetapi sebagian data/teks UI masih Indonesia atau Inggris (`Prioritas`, `Untukmu`, `Forum`, `File Ijazah`, nama course, empty state forum). Ini menjadi kandidat fase polish i18n.
 
+### Polish i18n/Mixed Language 2026-07-22
+
+- Posisi stage: fase polish mobile siswa setelah bug logika progress utama selesai. Fokus saat ini adalah teks statis yang masih hardcoded di mobile, bukan konten dinamis dari CMS/backend.
+- Perbaikan mobile: empty state `Topik forum belum tersedia` di Forum sekarang memakai i18n key `topik_forum_belum_tersedia`.
+- Perbaikan mobile: tab Notifikasi `Prioritas`, `Untukmu`, dan `Forum` sekarang memakai i18n key. Empty state `Belum ada notifikasi` di tiga tab notifikasi juga sudah memakai i18n.
+- Perbaikan mobile: tombol filter dan empty state Dokumen Saya memakai i18n, dan label dokumen menggunakan template `file_dokumen_label` agar bahasa Jepang tidak lagi dipaksa memakai prefix `File ...`.
+- Perbaikan copy: typo Indonesia `Tidak ad trending post saat ini` dibetulkan menjadi `Tidak ada trending post saat ini`.
+- Catatan sisa: nama course, nama topic forum, dan isi notifikasi/forum tertentu berasal dari data backend/CMS. Agar full bilingual, fase berikutnya perlu audit skema data dan field terjemahan di CMS/backend, bukan hanya hardcoded text mobile.
+- Verifikasi: `corepack yarn tsc --noEmit --pretty false` berhasil dan `python scripts/check-mojibake.py` tidak menemukan kandidat mojibake.
+
 ## Temuan Lanjutan
 
 - Untuk audit materi pelatihan penuh, siapkan seed user dengan `is_subscription_active = 1`, payment training completed, dan `training_program` yang sesuai dengan `course_items.program_type`.

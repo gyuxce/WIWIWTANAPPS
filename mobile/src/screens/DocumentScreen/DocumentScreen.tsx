@@ -93,7 +93,7 @@ const DocInfo = ({
             type="bold"
             variant="CenturyGothicBold"
           >
-            {label ? `File ${label}` : t("dokumen")}
+            {label ? t("file_dokumen_label", { label }) : t("dokumen")}
           </Text>
           {shortFilename ? (
             <Text size={10} numberOfLines={1} color={colors.stone400}>
@@ -378,7 +378,7 @@ const DocumentScreen = () => {
             filterDocs(userDocs, selectedSort, val, selectedFilter);
           }}
           actionSheetRef={actionSheetRef}
-          btnText="Filter"
+          btnText={t("filter")}
           placeholder={t("cari_dokumen")}
         />
         {isFetchingDocs ? (
@@ -397,7 +397,7 @@ const DocumentScreen = () => {
           </View>
         ) : (
           <Text size={12} style={{ marginTop: 40 }} textAlign="center">
-            Dokumen tidak ditemukan
+            {t("dokumen_tidak_ditemukan")}
           </Text>
         )}
       </ScrollView>
