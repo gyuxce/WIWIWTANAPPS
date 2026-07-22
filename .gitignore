@@ -21,6 +21,7 @@ __pycache__/
 /.gradle/
 android/.gradle/
 mobile/android/.gradle/
+mobile/android/.kotlin/
 mobile/android/app/build/
 mobile/android/build/
 mobile/ios/build/
@@ -72,6 +73,7 @@ Thumbs.db
 /window-login*.xml
 /RKStorage.sqlite
 /RKStorage.b64
+/audit-RKStorage.*
 /RKStorage-audit-*.sqlite
 /RKStorage-session-test*.sqlite
 /metro.log
