@@ -159,6 +159,16 @@ Audit layar aplikasi siswa Android lokal.
 - Catatan sisa: nama course, nama topic forum, dan isi notifikasi/forum tertentu berasal dari data backend/CMS. Agar full bilingual, fase berikutnya perlu audit skema data dan field terjemahan di CMS/backend, bukan hanya hardcoded text mobile.
 - Verifikasi: `corepack yarn tsc --noEmit --pretty false` berhasil dan `python scripts/check-mojibake.py` tidak menemukan kandidat mojibake.
 
+### Audit i18n Data Backend/CMS 2026-07-22
+
+- Posisi stage: audit sumber data bilingual untuk teks yang datang dari backend/CMS.
+- Course category: tabel `courses` sudah punya kolom `title_japan`, API mobile `/mobile/training/module/progress` sudah mengirim `title_japan`, dan CMS kategori modul sudah punya field wajib `Nama Kategori Modul (Jepang)`. Perbaikan mobile: kartu training di Home/Progress/Training sekarang memilih `title_japan` saat bahasa app Jepang, dengan fallback i18n untuk tiga kategori seed lokal.
+- Catatan data lokal: database audit lokal masih berisi `courses.title_japan = NULL` untuk `Teori Bahasa Jepang`, `Praktik Bahasa Jepang`, dan `Soft Skill Bahasa Jepang`. Data ini perlu diisi lewat CMS/seed agar production tidak bergantung pada fallback mobile.
+- Course items/module/virtual/assessment: tabel `course_items` hanya punya `title` dan `description`; resource `CourseItemResource` juga hanya mengirim field single-language. Untuk full bilingual pada judul level/module/materi/kelas/asesmen, perlu migrasi kolom seperti `title_japan` dan `description_japan`, update CMS form, request validation, resource, dan mobile render.
+- Forum topic: tabel `forum_topics` hanya punya `name` dan `description`; resource `ForumTopicResource` juga single-language. Mobile saat ini masih memakai mapping lokal untuk topic umum. Untuk CMS-driven bilingual topic, perlu kolom `name_japan`/`description_japan` atau strategi translation table.
+- Notification/content notification: tabel `notifications` hanya punya `title`, `body`, `template`; tabel `content_notifications` hanya punya `name`, `description`. Body forum notification lokal seperti `[Test Postingan 24] Anda mendapatkan komentar dari [user 7]` dibuat sebagai kalimat Indonesia, sehingga full bilingual perlu template notification per locale saat create/send, bukan hanya translasi di mobile.
+- Rekomendasi fase berikutnya: mulai dari perbaikan data course category di seed/CMS karena schema sudah siap, lalu desain migrasi bilingual untuk `course_items`, `forum_topics`, dan notification templates secara bertahap.
+
 ## Temuan Lanjutan
 
 - Untuk audit materi pelatihan penuh, siapkan seed user dengan `is_subscription_active = 1`, payment training completed, dan `training_program` yang sesuai dengan `course_items.program_type`.

@@ -31,11 +31,31 @@ const SectionLesson = ({
   isCustom = false,
 }: Props) => {
   const { user } = useAuth();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const toSafeNumber = (value?: number | string | null) => {
     const numericValue = Number(value);
 
     return Number.isFinite(numericValue) ? numericValue : 0;
+  };
+  const fallbackCourseTitleKeys: Record<string, string> = {
+    "Teori Bahasa Jepang": "course_teori_bahasa_jepang",
+    "Praktik Bahasa Jepang": "course_praktik_bahasa_jepang",
+    "Soft Skill Bahasa Jepang": "course_soft_skill_bahasa_jepang",
+  };
+  const getCourseTitle = (item: TraningModuleProgressType) => {
+    if (i18n.language.startsWith("ja")) {
+      if (item.title_japan) {
+        return item.title_japan;
+      }
+
+      const fallbackKey = fallbackCourseTitleKeys[item.title];
+
+      if (fallbackKey) {
+        return t(fallbackKey);
+      }
+    }
+
+    return item.title;
   };
 
   return (
@@ -61,7 +81,7 @@ const SectionLesson = ({
           <CardProgressLesson
             key={i.toString()}
             color={getCourseImageAndColor(item?.type_label)?.color}
-            title={item.title}
+            title={getCourseTitle(item)}
             total={
               toSafeNumber(item.materi_count) +
               toSafeNumber(item?.virtual_count) +
