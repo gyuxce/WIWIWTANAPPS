@@ -61,6 +61,8 @@ Thumbs.db
 /audit-visual-*.xml
 /fix-*.png
 /fix-*.xml
+/session-recovery-*.png
+/session-recovery-*.xml
 /student-login-result*.png
 /window-after-student-login*.xml
 /window-current.xml
@@ -68,6 +70,7 @@ Thumbs.db
 /window-login*.xml
 /RKStorage.sqlite
 /RKStorage.b64
+/RKStorage-session-test*.sqlite
 /metro.log
 /tsc-mobile.log
 /backend-serve.log

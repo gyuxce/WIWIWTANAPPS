@@ -2,7 +2,6 @@ import { CommonActions, useNavigation } from "@react-navigation/core";
 import Space from "components/Space";
 import images from "configs/images";
 import { useAuth } from "hooks/useAuth";
-import { useConstant } from "hooks/useConstant";
 import { usePersist } from "hooks/usePersist";
 import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
@@ -20,13 +19,11 @@ const SplashScreen = () => {
   const { auth, getMe } = useAuth();
   const navigation = useNavigation();
   const dispatch = useDispatch();
-  const { getSettingAdmin } = useConstant();
   const { i18n } = useTranslation();
 
   useEffect(() => {
     if (auth?.accessToken) {
       getMe(auth?.accessToken, auth).then(({ status }) => {
-        getSettingAdmin();
         if (status === "success") {
           NavigationService.replace("HomeScreen");
         } else {

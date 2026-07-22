@@ -168,19 +168,29 @@ export const useAuth = () => {
 
       if (resp?.data) {
         dispatch(onLogin({ auth: activeAuthToken, user: resp?.data }));
-        await apiGetPengaturanBahasa(activeAuthToken.accessToken).then(
-          ({ data }) => {
-            if (data && data?.[0]?.value) {
-              if (String(resp?.data?.last_phase) >= data?.[0]?.value) {
-                dispatch(onChangeLanguage("ja"));
-                i18n.changeLanguage("ja");
-              } else {
-                i18n.changeLanguage("id");
-                dispatch(onChangeLanguage("id"));
-              }
+        try {
+          const settingResp = await apiGetPengaturanBahasa(
+            activeAuthToken.accessToken,
+          );
+          const settingValue = settingResp?.data?.[0]?.value;
+          if (settingValue) {
+            if (String(resp?.data?.last_phase) >= settingValue) {
+              dispatch(onChangeLanguage("ja"));
+              i18n.changeLanguage("ja");
+            } else {
+              i18n.changeLanguage("id");
+              dispatch(onChangeLanguage("id"));
             }
           }
-        );
+        } catch {
+          // Language settings should not invalidate an otherwise valid login.
+        }
+
+        return {
+          data: resp?.data,
+          status: "success",
+          message: "",
+        };
       } else {
         ErrorStatus(401, dispatch);
       }
