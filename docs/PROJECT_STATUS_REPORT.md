@@ -41,7 +41,7 @@ Mapping stage:
 | Media/document handling | 65% | Handling UI sudah lebih aman, tetapi file GCS/production media masih perlu validasi |
 | i18n/mixed language | 40% | Teks statis penting dan course category mulai rapi; data dinamis masih perlu schema/backend/CMS |
 | QA/UAT formal | 25% | Audit manual lokal sudah berjalan, test plan formal belum lengkap |
-| Google Play release readiness | 20% | Belum masuk signing, Play Console, privacy policy, production env, dan release build final |
+| Google Play release readiness | 25% | Release checklist dan signing config sudah mulai dirapikan; Play Console, privacy policy, production env, dan release build final belum selesai |
 
 ## Yang Sudah Diselesaikan
 
@@ -60,6 +60,8 @@ Mapping stage:
 - Mojibake/encoding sudah diaudit dan ada script checker.
 - i18n awal sudah dirapikan untuk teks statis mobile.
 - Course category sudah memakai `title_japan` dari backend, dan seed lokal sudah diisi title Jepang.
+- Release signing Android mulai dirapikan agar credential production tidak disimpan di repo.
+- Checklist rilis Google Play sudah dibuat sebagai acuan menuju AAB production.
 - Hasil audit dicatat di `docs/MOBILE_SCREEN_AUDIT.md`.
 
 ## Temuan/Risiko Utama
@@ -150,4 +152,3 @@ Versi singkat:
 Versi timeline:
 
 > Estimasi APK internal untuk review bisa disiapkan dalam 3-5 hari kerja setelah scope review disepakati. Release candidate staging realistis 1-2 minggu. Rilis Google Play production realistis 3-5 minggu, tergantung kesiapan akses production, Play Console, Firebase, storage, payment, privacy policy, dan hasil UAT.
-

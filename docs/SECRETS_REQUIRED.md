@@ -25,6 +25,7 @@ These files were present in the handoff package and must be stored outside Git.
 - `mobile/android/app/wiwitan.keystore` - Android release signing key.
 - `mobile/android/app/google-services.json` - Firebase Android config.
 - `mobile/ios/GoogleService-Info.plist` - Firebase iOS config, if iOS is maintained.
+- Android release signing values `MYAPP_UPLOAD_STORE_FILE`, `MYAPP_UPLOAD_STORE_PASSWORD`, `MYAPP_UPLOAD_KEY_ALIAS`, and `MYAPP_UPLOAD_KEY_PASSWORD` - store them in environment variables or local `~/.gradle/gradle.properties`, not in repo files.
 
 ## Security Follow-Up
 

@@ -65,7 +65,7 @@ npm run start
 - Install NDK `28.2.13676358`.
 - Copy `mobile/.env.example` ke `mobile/.env`.
 - Copy Firebase Android config ke `mobile/android/app/google-services.json`.
-- Untuk release build, copy keystore ke `mobile/android/app/`.
+- Untuk release build, copy keystore ke `mobile/android/app/` dan isi signing value lewat environment variable atau local `~/.gradle/gradle.properties`.
 - Jalankan:
 
 ```sh
@@ -81,6 +81,8 @@ Build AAB production:
 cd mobile
 yarn build:aab:prod
 ```
+
+Detail persiapan rilis Google Play ada di `docs/GOOGLE_PLAY_RELEASE_CHECKLIST.md`.
 
 ## 6. Akses Eksternal
 
