@@ -135,6 +135,20 @@ Audit layar aplikasi siswa Android lokal.
 - Investigasi lanjutan: token access lokal backend hanya berlaku 2 jam, sedangkan refresh token berlaku 30 hari. Mobile sebelumnya tidak memakai endpoint `/tokens/refresh`, sehingga relaunch dengan access token expired langsung memicu `401`, `RESET_ALL_STATE`, dan session hilang.
 - Perbaikan lanjutan: `useAuth.getMe` sekarang mencoba refresh token saat `/auth/user/me` mengembalikan `401`, lalu mengulang `/me` dengan access token baru. Session hanya direset jika refresh token juga gagal.
 
+### Audit Visual Siswa Setelah Session Recovery Stabil 2026-07-22
+
+- Posisi stage terbaru: fase audit dan polish mobile siswa. Setup repo, backend lokal, CMS lokal, Android SDK, build APK, login siswa, dan session recovery sudah melewati verifikasi dasar. Fase release/Google Play belum dimulai.
+- Verifikasi awal: backend lokal `http://127.0.0.1:8000/api/v1/constants/` mengembalikan `200`, emulator `emulator-5554` tersambung, dan repo bersih sebelum audit.
+- App direlaunch dari sesi siswa yang sudah ada. Hasil: app tetap masuk ke layar siswa, tidak blank dan tidak kembali login.
+- Progress siswa tampil stabil. Detail final interview terbuka tanpa crash. Catatan visual: layar detail final interview hanya berisi satu card status pendek, sehingga area bawah tampak sangat kosong pada viewport tinggi.
+- Drawer siswa tampil stabil dengan menu Home, Training Progress, Forum, Dokumen Saya, dan Profil. Untuk user seed ini, bahasa UI berubah ke Jepang karena `last_phase` sudah melewati setting bahasa lokal.
+- Training phase 3 terbuka stabil. Kartu kategori training menampilkan `Teori Bahasa Jepang` dengan `19%` dan `3 / 16`, serta kategori lain `0%` dan `0 / 12`; tidak ada `NaN`.
+- Detail Training terbuka stabil. Header progress sudah tidak `0 / 0`, tetapi ada mismatch data: header menampilkan `3 / 16`, sedangkan ringkasan tab menampilkan `Modul 1/12`, `Virtual Class 4/4`, dan `Kuis/Test 0/4`. Ini perlu investigasi API/perhitungan progress berikutnya.
+- Dokumen Saya terbuka setelah loading awal. Label dokumen sudah lebih rapi (`File Ijazah`, `File CV`, `File Paspor`, `File Hasil Tes Karakter`) dan filename storage dipendekkan sehingga tidak merusak layout.
+- Forum terbuka stabil. Setelah loading, tab trending menampilkan empty state. Catatan visual: beberapa teks masih campur Jepang dan Indonesia, misalnya `人気の話題` berdampingan dengan `Topik forum belum tersedia`.
+- Notifikasi terbuka stabil. Tab Prioritas dan Untukmu kosong, tab Forum berisi daftar notifikasi komentar. Badge `173` di header kemungkinan berasal dari total unread forum notification, bukan dari tab Prioritas.
+- Temuan lintas layar: mode bahasa Jepang belum konsisten penuh. Banyak label statis sudah Jepang, tetapi sebagian data/teks UI masih Indonesia atau Inggris (`Prioritas`, `Untukmu`, `Forum`, `File Ijazah`, nama course, empty state forum). Ini menjadi kandidat fase polish i18n.
+
 ## Temuan Lanjutan
 
 - Untuk audit materi pelatihan penuh, siapkan seed user dengan `is_subscription_active = 1`, payment training completed, dan `training_program` yang sesuai dengan `course_items.program_type`.
