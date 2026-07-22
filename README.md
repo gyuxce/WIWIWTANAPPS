@@ -18,7 +18,8 @@ Repo ini dibuat dari source handoff developer sebelumnya dan sudah disanitasi su
 5. Untuk hasil audit CMS terakhir, baca [docs/CMS_AUDIT.md](docs/CMS_AUDIT.md).
 6. Untuk menjalankan aplikasi siswa Android lokal, baca [docs/MOBILE_LOCAL_ANDROID.md](docs/MOBILE_LOCAL_ANDROID.md).
 7. Untuk hasil audit layar mobile, baca [docs/MOBILE_SCREEN_AUDIT.md](docs/MOBILE_SCREEN_AUDIT.md).
-8. Jalankan backend dulu, lalu CMS, lalu mobile app.
+8. Untuk laporan stage, persentase, risiko, dan estimasi rilis, baca [docs/PROJECT_STATUS_REPORT.md](docs/PROJECT_STATUS_REPORT.md).
+9. Jalankan backend dulu, lalu CMS, lalu mobile app.
 
 ## Stack Utama
 
