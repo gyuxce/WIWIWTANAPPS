@@ -22,6 +22,7 @@ class CourseItemResource extends JsonResource
             "parent_id" => $this->parent_id,
             "is_header" => $this->is_header,
             "title" => $this->title,
+            "title_japan" => $this->title_japan,
             "description" => $this->description,
             "index" => $this->index,
             "type" => $this->type,

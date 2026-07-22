@@ -7,6 +7,7 @@ export type VirtualClassModuleType = {
   parent_id: any;
   is_header: boolean;
   title: string;
+  title_japan?: string;
   description: string;
   index: number;
   type: string;
@@ -29,6 +30,7 @@ export type VirtualClassType = {
   parent_id: number;
   is_header: boolean;
   title: string;
+  title_japan?: string;
   description: string;
   index: any;
   type: any;
@@ -51,6 +53,7 @@ export type EventType = {
   updated_at: string;
   deleted_at: string;
   title: string;
+  title_japan?: string;
   description: string;
   from: any;
   to: any;
@@ -74,6 +77,7 @@ export type TypeAsesment = {
   updated_at: string;
   deleted_at: string;
   title: string;
+  title_japan?: string;
   description: string;
   duration: string;
   is_randomized_question: boolean;
@@ -117,6 +121,7 @@ export type AsesmentType = {
   parent_id: number;
   is_header: any;
   title: string;
+  title_japan?: string;
   description: string;
   index: number;
   type: number;

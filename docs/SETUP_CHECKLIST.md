@@ -26,6 +26,12 @@ php artisan migrate
 php artisan serve
 ```
 
+Untuk SQLite/local Windows, gunakan script repo agar semua subfolder migration ikut jalan:
+
+```powershell
+.\scripts\backend-migrate-sqlite.ps1
+```
+
 Jika memakai data production/staging dump, pastikan tidak menjalankan migration destruktif sebelum dicek.
 
 Untuk smoke test Windows tanpa MySQL/MariaDB, lihat `docs/LOCAL_DEV_WINDOWS.md`.

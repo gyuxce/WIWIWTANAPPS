@@ -18,6 +18,9 @@ class ApiCourseItemRequest extends FormRequest {
             "title" => [
                 "required",
             ],
+            "title_japan" => [
+                "nullable",
+            ],
             "course_id" => [
                 "required",
                 "exists:courses,uuid",

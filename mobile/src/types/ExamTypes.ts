@@ -58,6 +58,7 @@ export type SesiType = {
   index: number;
   is_header: boolean;
   title: string;
+  title_japan?: string;
   description: string;
   body_type: string;
   body_url: string;

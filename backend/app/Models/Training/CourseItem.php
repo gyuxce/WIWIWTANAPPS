@@ -24,6 +24,7 @@ class CourseItem extends Model
         "parent_id",
         "is_header",
         "title",
+        "title_japan",
         "description",
         "article_id",
         "exam_template_id",

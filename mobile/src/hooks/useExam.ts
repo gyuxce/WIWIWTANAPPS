@@ -22,6 +22,7 @@ import { useAuth } from "./useAuth";
 
 type ModuleContentProgress = {
   title: string;
+  title_japan?: string;
   id: string;
   isOpen: boolean;
   total: number;
@@ -30,6 +31,7 @@ type ModuleContentProgress = {
 
 type ModuleGroupProgress = {
   title: string;
+  title_japan?: string;
   total: number;
   total_finished: number;
   content: ModuleContentProgress[];
@@ -143,7 +145,7 @@ export const useExam = () => {
             ...item,
             date: item?.event?.started_at || "-",
             title: item?.event?.title,
-            headerTitle: item?.module?.title,
+            headerTitle: item?.module?.title_japan || item?.module?.title,
             type: item?.course?.type_label,
             image: item?.event?.cover?.url,
             numberEvent: item?.module?.level_module_label,
@@ -177,7 +179,7 @@ export const useExam = () => {
           ...item,
           date: item?.event?.started_at,
           title: item?.event?.title,
-          headerTitle: item?.module?.title,
+          headerTitle: item?.module?.title_japan || item?.module?.title,
           type: item?.course?.type_label,
           image: item?.event?.cover?.url,
           numberEvent: item?.module?.level_module_label,
@@ -215,6 +217,7 @@ export const useExam = () => {
           let content = element.content.map((content: any) => {
             let cont = {
               title: content.title,
+              title_japan: content.title_japan,
               id: content.id,
               isOpen: false,
               total: content.materialContent.length,
@@ -227,6 +230,7 @@ export const useExam = () => {
           });
           let child: ModuleGroupProgress = {
             title: element.title,
+            title_japan: element.title_japan,
             total: content.length,
             total_finished: content.filter(
               (x: ModuleContentProgress) =>

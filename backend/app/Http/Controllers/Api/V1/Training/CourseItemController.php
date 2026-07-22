@@ -43,7 +43,7 @@ class CourseItemController extends BaseCrud
 {
     public $model = CourseItem::class;
     public $resource = CourseItemResource::class;
-    public $searchAble = ["title", "materialContent.title", "materialContent.description"];
+    public $searchAble = ["title", "title_japan", "materialContent.title", "materialContent.description"];
 
     public $storeValidator = ApiCourseItemRequest::class;
     public $updateValidator = ApiCourseItemRequest::class;
@@ -75,6 +75,7 @@ class CourseItemController extends BaseCrud
                 "course_id" => $this->row->course_id,
                 "parent_id" => $this->row->id,
                 "title" => $this->row->title . ' asesmen soal',
+                "title_japan" => $this->row->title_japan ? $this->row->title_japan . ' 筆記評価' : null,
                 "exam_template_id" => 1,
                 "program_type" => $this->row->program_type,
                 "is_active" => true,
@@ -86,6 +87,7 @@ class CourseItemController extends BaseCrud
                 "course_id" => $this->row->course_id,
                 "parent_id" => $this->row->id,
                 "title" => $this->row->title . ' asesmen lisan',
+                "title_japan" => $this->row->title_japan ? $this->row->title_japan . ' 口頭評価' : null,
                 "exam_template_id" => 5,
                 "program_type" => $this->row->program_type,
                 "is_active" => true,
@@ -146,6 +148,7 @@ class CourseItemController extends BaseCrud
 
         $fields = [
             "title",
+            "title_japan",
             "course->title",
             "program_type",
             "level_module",
@@ -154,6 +157,7 @@ class CourseItemController extends BaseCrud
 
         $headings = [
             "Modul Pelatihan",
+            "Modul Pelatihan Jepang",
             "Kategori Modul",
             "Program Pelatihan",
             "Level Modul",

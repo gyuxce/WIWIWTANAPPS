@@ -131,6 +131,7 @@ const FormData = () => {
       <Formik
         initialValues={{
           title: detail?.title || '',
+          title_japan: detail?.title_japan || '',
           course_id: detail?.course?.id || '',
           program_type: detail?.program_type || '',
           level_module: detail?.level_module || '',
@@ -158,6 +159,21 @@ const FormData = () => {
                           value={values?.title}
                           size="md"
                           placeholder="Masukan nama Modul"
+                          onChange={(e) => setFieldValue(field.name, e.target.value)}
+                        />
+                      </div>
+                    )}
+                  </Field>
+                </FormItem>
+                <FormItem invalid={errors.title_japan && touched.title_japan} errorMessage={errors.title_japan}>
+                  <Field name="title_japan">
+                    {({ field }) => (
+                      <div>
+                        <p className="text-black leading-[21px] mb-2">Nama Modul (Jepang)</p>
+                        <Input
+                          value={values?.title_japan}
+                          size="md"
+                          placeholder="Masukan nama Modul dalam bahasa Jepang"
                           onChange={(e) => setFieldValue(field.name, e.target.value)}
                         />
                       </div>

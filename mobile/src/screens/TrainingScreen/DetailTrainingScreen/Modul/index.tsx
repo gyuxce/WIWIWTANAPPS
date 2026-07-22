@@ -20,6 +20,9 @@ import NavigationService from "utils/NavigationService";
 import { useIsFocused } from "@react-navigation/core";
 import { t } from "i18next";
 
+const getDisplayTitle = (item?: { title?: string; title_japan?: string }) =>
+  item?.title_japan || item?.title || "";
+
 interface Props {
   categoryId: string;
   title: string;
@@ -103,7 +106,9 @@ const Module = ({ categoryId, title, image }: Props) => {
                     onPress={() => toggleContentVisibility(index)}
                   >
                     <View style={styles.rowContainer}>
-                      <Text style={styles.mainTitle}>{item.title}</Text>
+                      <Text style={styles.mainTitle}>
+                        {getDisplayTitle(item)}
+                      </Text>
                       <View style={styles.rightContainer}>
                         <Text style={styles.totalTextRed}>
                           {item.total_finished} / {item.total}
@@ -126,7 +131,9 @@ const Module = ({ categoryId, title, image }: Props) => {
                       <View key={i} style={styles.childContentContainer}>
                         <TouchableOpacity onPress={() => openChild(index, i)}>
                           <View style={styles.rowContainer}>
-                            <Text style={styles.childTitle}>{child.title}</Text>
+                            <Text style={styles.childTitle}>
+                              {getDisplayTitle(child)}
+                            </Text>
                             <View style={styles.rightContainer}>
                               <Text style={styles.totalText}>
                                 {child.total_finished}/ {child.total}
@@ -151,7 +158,8 @@ const Module = ({ categoryId, title, image }: Props) => {
                                   "ModulDetailScreen",
                                   {
                                     level: item.level_module_label,
-                                    materiTitle: content.title,
+                                    materiTitle: getDisplayTitle(content),
+                                    materiTitleJapan: content.title_japan,
                                     materiProgress: content.total_finished,
                                     materiTotal: content.total,
                                     materiId: content.id,
@@ -160,8 +168,16 @@ const Module = ({ categoryId, title, image }: Props) => {
                                     type_label: item?.level_module_label,
                                     breadCrumb: [
                                       { title: title, isActive: false },
-                                      { title: child.title, isActive: false },
-                                      { title: content.title, isActive: true },
+                                      {
+                                        title: getDisplayTitle(child),
+                                        titleJapan: child.title_japan,
+                                        isActive: false,
+                                      },
+                                      {
+                                        title: getDisplayTitle(content),
+                                        titleJapan: content.title_japan,
+                                        isActive: true,
+                                      },
                                     ],
                                     image: image,
                                   },
@@ -190,7 +206,7 @@ const Module = ({ categoryId, title, image }: Props) => {
                                       numberOfLines={1}
                                       //ellipsizeMode="tail"
                                     >
-                                      {content.title}
+                                      {getDisplayTitle(content)}
                                     </Text>
                                     <Image
                                       source={icons.checklistGreen}
@@ -204,7 +220,7 @@ const Module = ({ categoryId, title, image }: Props) => {
                                       numberOfLines={1}
                                       //ellipsizeMode="tail"
                                     >
-                                      {content.title}
+                                      {getDisplayTitle(content)}
                                     </Text>
                                     <Text style={styles.totalText}>
                                       {content.total_finished} / {content.total}

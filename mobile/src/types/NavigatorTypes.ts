@@ -88,10 +88,11 @@ export type RootStackParamList = {
     level: string;
     categoryId: string;
     materiTitle: string;
+    materiTitleJapan?: string;
     materiProgress: string;
     materiTotal: string;
     materiId: string;
-    breadCrumb: { title: string; isActive: string }[];
+    breadCrumb: { title: string; titleJapan?: string; isActive: string }[];
     data?: MaterialContentType;
     title?: string;
     type_label?: string;
@@ -100,10 +101,11 @@ export type RootStackParamList = {
     level: string;
 
     materiTitle: string;
+    materiTitleJapan?: string;
     materiProgress: string;
     materiTotal: string;
     materiId: string;
-    breadCrumb: { title: string; isActive: string }[];
+    breadCrumb: { title: string; titleJapan?: string; isActive: string }[];
     data?: MaterialContentType;
     title?: string;
     type_label?: string;

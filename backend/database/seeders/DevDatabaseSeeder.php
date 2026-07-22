@@ -26,6 +26,7 @@ class DevDatabaseSeeder extends Seeder
             $file = base_path() . '/database/seeders/data/dev_data.xlsx';
             $excel->excelSeeder($file);
             $this->call(UpdateCourseJapaneseTitlesSeeder::class);
+            $this->call(UpdateCourseItemJapaneseTitlesSeeder::class);
 
             $this->dummySeederNotification();
         }

@@ -39,7 +39,7 @@ Mapping stage:
 | Mobile siswa core flow | 70% | Login, session recovery, progress, training, dokumen, forum, notifikasi dasar sudah diaudit |
 | Training module/progress logic | 80% | Bug NaN, mismatch progress, detail training sudah diperbaiki |
 | Media/document handling | 65% | Handling UI sudah lebih aman, tetapi file GCS/production media masih perlu validasi |
-| i18n/mixed language | 40% | Teks statis penting dan course category mulai rapi; data dinamis masih perlu schema/backend/CMS |
+| i18n/mixed language | 45% | Teks statis penting, course category, dan course item/module mulai rapi; forum topic dan notification data masih perlu schema/backend/CMS |
 | QA/UAT formal | 25% | Audit manual lokal sudah berjalan, test plan formal belum lengkap |
 | Google Play release readiness | 25% | Release checklist dan signing config sudah mulai dirapikan; Play Console, privacy policy, production env, dan release build final belum selesai |
 
@@ -60,6 +60,7 @@ Mapping stage:
 - Mojibake/encoding sudah diaudit dan ada script checker.
 - i18n awal sudah dirapikan untuk teks statis mobile.
 - Course category sudah memakai `title_japan` dari backend, dan seed lokal sudah diisi title Jepang.
+- Course item/module mulai mendukung `title_japan` dari backend, CMS, seed lokal, dan mobile display.
 - Release signing Android mulai dirapikan agar credential production tidak disimpan di repo.
 - Checklist rilis Google Play sudah dibuat sebagai acuan menuju AAB production.
 - Hasil audit dicatat di `docs/MOBILE_SCREEN_AUDIT.md`.

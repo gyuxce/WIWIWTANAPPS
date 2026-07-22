@@ -32,6 +32,13 @@ export const PageConfig = {
       is_show: true,
     },
     {
+      key: 'title_japan',
+      label: 'Modul Pelatihan Jepang',
+      sortable: false,
+      width: 234,
+      is_show: true,
+    },
+    {
       key: 'course.title',
       label: 'Kategori Modul',
       sortable: false,
