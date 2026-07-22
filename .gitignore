@@ -59,6 +59,8 @@ Thumbs.db
 /audit-student-*.xml
 /audit-visual-*.png
 /audit-visual-*.xml
+/audit-course-item-*.png
+/audit-course-item-*.xml
 /fix-*.png
 /fix-*.xml
 /session-recovery-*.png
