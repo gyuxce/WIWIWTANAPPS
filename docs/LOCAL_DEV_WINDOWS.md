@@ -64,6 +64,22 @@ cd backend
 php artisan db:seed --class=DevDatabaseSeeder --force
 ```
 
+`DevDatabaseSeeder` also calls `UpdateCourseJapaneseTitlesSeeder` so local course categories get Japanese titles after the Excel seed import. If the database already exists and only those course translations need repair, run:
+
+```powershell
+.\scripts\dev-env.ps1
+cd backend
+php artisan db:seed --class=UpdateCourseJapaneseTitlesSeeder --force
+```
+
+Expected local course category translations:
+
+```text
+Teori Bahasa Jepang => 日本語理論
+Praktik Bahasa Jepang => 日本語実践
+Soft Skill Bahasa Jepang => 日本語ソフトスキル
+```
+
 Serve the backend:
 
 ```powershell
@@ -151,7 +167,7 @@ Production should still run on Linux with the proper PHP extensions and queue pr
 - Laravel boots with PHP 8.2.32.
 - Composer dependencies install.
 - SQLite migrations run when each migration subfolder is called explicitly.
-- `DevDatabaseSeeder` imports the development Excel seed data.
+- `DevDatabaseSeeder` imports the development Excel seed data and fills local course category `title_japan` values.
 - `php artisan serve` responds on `http://127.0.0.1:8000`.
 - CMS starts on `http://127.0.0.1:3000`.
 - CMS login succeeds with the seed admin account and redirects to `/dashboard`.
