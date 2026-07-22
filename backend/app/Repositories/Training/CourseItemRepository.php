@@ -8,6 +8,7 @@ use App\Models\Training\CourseItem;
 use App\Repositories\BaseRepository;
 use Carbon\Carbon;
 use App\Constants\Training\UserCourseItemStatusConstant;
+use Illuminate\Support\Facades\Auth;
 
 class CourseItemRepository extends BaseRepository
 {
@@ -23,16 +24,20 @@ class CourseItemRepository extends BaseRepository
             $course->assesment_count = 0;
             $course->assesment_count_progress = 0;
 
-            $parentCourseItem = CourseItem::where('course_id', $course->id)->whereNull('parent_id')->first();
-            if ($parentCourseItem) {
+            $parentCourseItemIds = CourseItem::where('course_id', $course->id)
+                ->where('is_header', true)
+                ->where('program_type', Auth::user()?->training_program)
+                ->pluck('id');
+
+            if ($parentCourseItemIds->isNotEmpty()) {
                 $courseItems = CourseItem::where('course_id', $course->id)
-                    ->where('parent_id', $parentCourseItem->id)
+                    ->whereIn('parent_id', $parentCourseItemIds)
                     ->with('event', 'assesmentStudent')
                     ->get();
 
                 if (!empty($courseItems)) {
                     foreach ($courseItems as $item) {
-                        if ($item->event_id !== null) {
+                        if ($item->group === CourseItemGroupConstant::COURSE_GROUP_CLASS && $item->event_id !== null) {
                             $course->virtual_count++;
                             if ($item->event && Carbon::parse($item->event->started_at)->lt(now())) {
                                 $course->virtual_count_progress++;

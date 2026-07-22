@@ -70,6 +70,7 @@ Thumbs.db
 /window-login*.xml
 /RKStorage.sqlite
 /RKStorage.b64
+/RKStorage-audit-*.sqlite
 /RKStorage-session-test*.sqlite
 /metro.log
 /tsc-mobile.log
