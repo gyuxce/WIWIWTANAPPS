@@ -80,3 +80,6 @@ Thumbs.db
 /tsc-mobile.log
 /backend-serve.log
 /backend-serve.err
+/backend-serve.err.log
+/gradle-qa.log
+/audit-app-current.png

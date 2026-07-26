@@ -161,11 +161,34 @@ APK lokal akan dibuat di:
 mobile/android/app/build/outputs/apk/development/debug/app-development-debug.apk
 ```
 
+Untuk audit lokal tanpa Metro, gunakan build `developmentQa`. Build ini membundel JavaScript seperti release, tetapi tetap memakai flavor development dan debug keystore lokal:
+
+```powershell
+.\scripts\android-env.ps1
+cd mobile\android
+.\gradlew.bat app:assembleDevelopmentQa --no-daemon --stacktrace --max-workers=2 -PincludeX86ForLocal=true
+```
+
+APK QA lokal akan dibuat di:
+
+```text
+mobile/android/app/build/outputs/apk/development/qa/app-development-qa.apk
+```
+
+Catatan: flag `-PincludeX86ForLocal=true` hanya untuk emulator x86_64. Build Play Store tetap harus memakai artifact release/bundle resmi, bukan APK QA ini.
+
 Install APK ke emulator:
 
 ```powershell
 .\scripts\android-env.ps1
 adb install -r .\mobile\android\app\build\outputs\apk\development\debug\app-development-debug.apk
+```
+
+Install APK QA ke emulator:
+
+```powershell
+.\scripts\android-env.ps1
+adb install -r .\mobile\android\app\build\outputs\apk\development\qa\app-development-qa.apk
 ```
 
 ## Status Audit Lokal
@@ -175,6 +198,7 @@ adb install -r .\mobile\android\app\build\outputs\apk\development\debug\app-deve
 - Login screen mobile sudah mengirim `is_mobile: "1"`.
 - Build Android development debug sudah terverifikasi dengan Gradle.
 - APK development debug sudah berhasil di-install ke emulator `Pixel_8`.
+- APK `developmentQa` bundled berhasil dibuat dan di-install ke emulator ringan `Wiwitan_API35_Lite` untuk audit tanpa Metro.
 - Login siswa lokal sudah terverifikasi dengan seed `user1@62teknologi.com` / `password`.
 - Backend lokal memakai fallback token `local.*`. Middleware `MobileAccess` sudah mendukung token lokal agar endpoint mobile bisa dites tanpa service Dolphin eksternal.
 - Endpoint HomeScreen penting yang sudah dites lokal:

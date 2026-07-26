@@ -178,3 +178,13 @@ Audit layar aplikasi siswa Android lokal.
 - Warning Metro websocket `10.0.2.2:8081` muncul pada APK debug tanpa Metro berjalan. Ini tidak fatal selama APK punya bundled JS.
 - Verifikasi refresh-token mobile perlu diulang dengan backend lokal aktif dan login siswa baru, karena session emulator pada run sebelumnya sudah telanjur ter-reset.
 - `backend/.env` lokal saat audit menunjuk ke SQLite workspace lama. Pastikan path database disamakan sebelum handoff ke environment baru.
+
+### Audit QA APK Lokal 2026-07-26
+
+- Posisi stage: stabilisasi build Android lokal dan persiapan audit visual siswa lanjutan. Ini masih fase pre-release; belum build final Google Play.
+- Perubahan build: ditambahkan build type `developmentQa` di Android. Build ini memakai konfigurasi release agar JavaScript dibundel ke APK, tetapi ditandatangani debug keystore untuk instalasi lokal.
+- Verifikasi build: `app:assembleDevelopmentQa -PincludeX86ForLocal=true` berhasil membuat `mobile/android/app/build/outputs/apk/development/qa/app-development-qa.apk`.
+- Emulator: `Pixel_8_API35` dan `Pixel_8` sempat memicu ANR `System UI`/`Pixel Launcher`. Untuk audit dibuat AVD baru `Wiwitan_API35_Lite` berbasis `pixel_2` + API 35 Google Play image. AVD ini berhasil menjalankan onboarding dan login screen.
+- Backend lokal: credential `user1@62teknologi.com` / `password` tervalidasi langsung ke endpoint host `POST /api/v1/auth/sign-in` dan mengembalikan `200`. Database user lokal juga valid: `role_id = null`, `is_active = 1`, dan password cocok.
+- Temuan blocker sementara: submit login lewat input otomatis ADB masih menghasilkan modal `Login gagal`. Counter `count_login_attempt` user tidak naik, sehingga indikasinya request dari app tidak masuk sebagai request credential yang sama, atau state form mobile tidak menerima input ADB seperti input manual. Ini perlu diverifikasi ulang dengan input manual di emulator/Android Studio atau dengan instrumentation yang lebih stabil.
+- Catatan environment: `mobile/.env` sudah memakai `API_URL=http://10.0.2.2:8000/api/v1` dan `URL_CMS=http://10.0.2.2:3000`; `adb reverse tcp:8000 tcp:8000` juga sudah dicoba, tetapi bukan akar masalah utama karena host API sukses.

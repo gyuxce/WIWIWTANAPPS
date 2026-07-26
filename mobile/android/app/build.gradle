@@ -108,8 +108,13 @@ android {
         // }
 
         ndk {
-            // optional but recommended to reduce size
-            abiFilters "armeabi-v7a", "arm64-v8a"
+            // Keep production builds small, but allow local emulator QA builds
+            // to include x86_64 by passing -PincludeX86ForLocal=true.
+            if (project.hasProperty("includeX86ForLocal") && project.property("includeX86ForLocal") == "true") {
+                abiFilters "armeabi-v7a", "arm64-v8a", "x86_64"
+            } else {
+                abiFilters "armeabi-v7a", "arm64-v8a"
+            }
         }
     }
     signingConfigs {
@@ -167,6 +172,15 @@ android {
             minifyEnabled true
             shrinkResources false
             signingConfig signingConfigs.release
+            ndkVersion rootProject.ext.ndkVersion
+        }
+        qa {
+            initWith release
+            matchingFallbacks = ["release"]
+            debuggable false
+            minifyEnabled false
+            shrinkResources false
+            signingConfig signingConfigs.debug
             ndkVersion rootProject.ext.ndkVersion
         }
     }
