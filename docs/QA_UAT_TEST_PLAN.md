@@ -79,12 +79,12 @@ Catatan: hasil `PASS-SMOKE` pada dokumen ini adalah baseline teknis dari emulato
 | --- | --- | --- | --- | --- |
 | QA-AUTH-001 | Admin login valid | Admin masuk CMS dan dashboard terbuka | P1 | PASS-SMOKE |
 | QA-AUTH-002 | Student login valid | Student masuk mobile dan profile termuat | P0 | PASS-SMOKE |
-| QA-AUTH-003 | Credential salah | Pesan error jelas, tidak masuk Home, loading berhenti | P1 | PENDING |
-| QA-AUTH-004 | Logout student | Token dibersihkan dan kembali ke login | P1 | PENDING |
-| QA-AUTH-005 | Relaunch dengan session valid | App kembali ke layar siswa tanpa blank | P0 | PASS-SMOKE |
-| QA-AUTH-006 | Access token expired | Refresh token dicoba dan session tetap aktif | P0 | PENDING |
-| QA-AUTH-007 | Refresh token invalid | Session dihapus dan user kembali login secara jelas | P1 | PENDING |
-| QA-AUTH-008 | Role/access boundary | Student tidak dapat membuka route CMS/admin | P1 | PENDING |
+| QA-AUTH-003 | Credential salah | Pesan error jelas, tidak masuk Home, loading berhenti | P1 | PASS-QA |
+| QA-AUTH-004 | Logout student | Token dibersihkan dan kembali ke login | P1 | PASS-QA |
+| QA-AUTH-005 | Relaunch dengan session valid | App kembali ke layar siswa tanpa blank | P0 | PASS-QA |
+| QA-AUTH-006 | Access token expired | Refresh token dicoba dan session tetap aktif | P0 | PASS-QA |
+| QA-AUTH-007 | Refresh token invalid | Session dihapus dan user kembali login secara jelas | P1 | PASS-QA |
+| QA-AUTH-008 | Role/access boundary | Student tidak dapat membuka route CMS/admin | P1 | PASS-QA |
 
 ## CMS Admin Flow
 
@@ -128,14 +128,14 @@ Catatan: hasil `PASS-SMOKE` pada dokumen ini adalah baseline teknis dari emulato
 
 | ID | Skenario | Expected result | Severity | Status |
 | --- | --- | --- | --- | --- |
-| QA-NEG-001 | API tidak tersedia | Error state jelas, tidak infinite loading atau crash | P0 | PENDING |
+| QA-NEG-001 | API tidak tersedia | Error state jelas, tidak infinite loading atau crash | P0 | PASS-QA |
 | QA-NEG-002 | Empty course/module | Tampil `0`, empty state, atau pesan yang benar; tidak `NaN` | P0 | PASS-SMOKE |
 | QA-NEG-003 | Filename sangat panjang | Layout tidak overflow dan label tetap terbaca | P2 | PASS-SMOKE |
 | QA-NEG-004 | Data backend null/incomplete | Guard UI aktif dan tidak crash | P1 | PENDING |
 | QA-NEG-005 | Network lambat | Loading state terlihat dan request tidak menduplikasi data secara salah | P2 | PENDING |
 | QA-NEG-006 | Double tap submit | Hanya satu request/data record yang dibuat | P1 | PENDING |
-| QA-NEG-007 | Device rotation/background | State tidak hilang atau crash saat app kembali aktif | P2 | PENDING |
-| QA-NEG-008 | Android permission denied | App memberi fallback/error yang dapat dipahami | P1 | PENDING |
+| QA-NEG-007 | Device rotation/background | State tidak hilang atau crash saat app kembali aktif | P2 | PASS-QA |
+| QA-NEG-008 | Android permission denied | App memberi fallback/error yang dapat dipahami | P1 | PASS-QA |
 
 ## UAT Client Checklist
 
@@ -161,12 +161,19 @@ Gunakan satu baris per defect. Jangan menutup defect hanya karena workaround dit
 | ID | Test case | Severity | Actual result | Evidence | Owner | Status |
 | --- | --- | --- | --- | --- | --- | --- |
 | DEF-001 | QA-ENV-005 | P2 | Existing `App-test.tsx` belum dapat berjalan karena membutuhkan konfigurasi mock native SDK yang luas | Jest output | Engineering | Blocked - test infra |
+| DEF-002 | QA-AUTH-006 | P2 | Toast `Error internal server` muncul transient saat startup/recovery walaupun session akhirnya pulih dan Progress termuat; endpoint pemicu belum diketahui | Logcat `ReactNativeJS` dan UI Progress | Engineering | Open - isolate endpoint |
 
 ## Execution Notes
 
 - Smoke baseline 1 Agustus 2026 lulus untuk Home, Progress, Training, Detail Training, Dokumen, Forum, Notifikasi, dan relaunch/session recovery.
 - QA environment batch 1: API health, backend PHPUnit, CMS build, mobile TypeScript, mojibake scan, dan secret hygiene lulus.
-- Auth API contract batch: credential valid merespons HTTP 200, credential invalid merespons HTTP 422, dan access token invalid merespons HTTP 401. Verifikasi pesan error pada layar login mobile tetap perlu dilakukan manual.
+- Auth API contract batch: credential valid merespons HTTP 200, credential invalid merespons HTTP 422, dan access token invalid merespons HTTP 401. UI login juga sudah diverifikasi menampilkan error dan tidak masuk Home.
+- Negative mobile QA batch pada AVD `Wiwitan_API35_Lite`: credential salah menampilkan `Login gagal` dan tetap di layar login; logout mengembalikan user ke landing; API mati menampilkan `Network request failed` tanpa crash; backend kembali normal setelah test.
+- Expired-session test: access token lokal dibuat benar-benar kedaluwarsa dengan signature valid dan refresh token tetap valid; aplikasi berhasil menyimpan access token baru dan kembali ke layar Progress. Invalid access token + invalid refresh token menghapus auth/user dari storage dan mengembalikan aplikasi ke landing dengan tombol `Masuk`.
+- Access boundary test: token student mendapatkan HTTP 401 pada `GET /api/v1/base/users`, sedangkan `GET /api/v1/auth/user/me` tetap HTTP 200. Ini membuktikan route CMS/admin tidak terbuka untuk student pada local API.
+- Device lifecycle test: background/resume dan rotasi layar kembali menampilkan UI Progress tanpa `FATAL EXCEPTION`, crash, atau kehilangan session. Permission Kalender ditolak dan aplikasi tetap dapat digunakan.
+- `QA-NEG-004`, `QA-NEG-005`, dan `QA-NEG-006` masih `PENDING` karena membutuhkan fixture null/incomplete, network shaping terkontrol, dan skenario submit yang tidak mengubah data bisnis secara tidak sengaja.
+- Selama startup/recovery muncul toast generik `Error internal server` beberapa kali, tetapi layar Progress akhirnya termuat dan session tetap aktif. Endpoint pemicu belum terisolasi; dicatat sebagai `DEF-002` P2 untuk investigasi sebelum production.
 - CMS build membutuhkan `npm ci` ketika dependency lokal belum lengkap; `cms/yarn.lock` dikembalikan dan tidak menjadi bagian dari perubahan.
 - Mobile Jest belum menjadi gate QA karena test lama mengimpor native SDK secara penuh dan berhenti sebelum assertion; ini dicatat sebagai blocker test infrastructure terpisah dari runtime APK.
 - `PASS-SMOKE` harus diulang sebagai `PASS-QA` setelah test data, build, dan bukti eksekusi formal ditetapkan.
@@ -176,7 +183,7 @@ Gunakan satu baris per defect. Jangan menutup defect hanya karena workaround dit
 ## Next Gate
 
 1. Tutup `QA-ENV-002` dan putuskan perbaikan untuk blocker `QA-ENV-005`.
-2. Jalankan negative test dan auth/session test yang belum tercakup smoke pada UI mobile.
-3. Siapkan build QA yang diberi version label dan kumpulkan bukti per layar.
+2. Selesaikan negative case yang masih pending: null/incomplete data, network lambat, dan double tap submit.
+3. Siapkan build QA yang diberi version label dan kumpulkan screenshot/log evidence per layar.
 4. Kirim UAT checklist ke client/product owner untuk eksekusi dengan data bisnis.
 5. Setelah UAT diterima, lanjut ke release hardening dan Google Play internal testing.

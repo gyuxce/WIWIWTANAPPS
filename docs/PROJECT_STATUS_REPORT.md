@@ -14,13 +14,14 @@ Estimasi kesiapan menuju **rilis Google Play production**: **45-50%**, karena ma
 
 ## Checkpoint Terbaru - 1 Agustus 2026
 
-- Posisi aktual: penutupan stabilisasi mobile Android, sebelum QA/UAT formal.
+- Posisi aktual: QA/UAT formal tahap awal, setelah stabilisasi mobile Android dan negative test batch 1.
 - Login API siswa tervalidasi dengan HTTP 200 dari backend lokal.
 - Handling login mobile diperbaiki agar respons/error API terbaca jelas dan aplikasi tidak pindah ke Home sebelum profil berhasil dimuat.
 - TypeScript mobile lulus dan APK `developmentQa` terbaru berhasil dibuild. APK ini masih ditandatangani debug untuk audit lokal, bukan untuk Google Play.
 - APK QA terbaru berhasil di-install ke emulator. Log menunjukkan `[QA auto-login] signed in` dan UI siswa terbuka pada layar progress dengan data fase/interview.
 - Smoke test end-to-end lokal siswa lulus untuk Home, Progress, Training, Detail Training, Dokumen, Forum, Notifikasi, dan relaunch/session recovery.
 - Formal QA batch 1 selesai: API health HTTP 200, backend PHPUnit 2 tests passed, CMS production build, mobile TypeScript, mojibake scan, dan secret hygiene lulus.
+- Negative mobile QA batch 1 selesai: credential salah, logout, API tidak tersedia, expired/invalid session, access boundary student/admin, permission denial, background/resume, dan rotasi device sudah diuji pada emulator.
 - Mobile Jest belum menjadi gate QA karena `App-test.tsx` legacy mengimpor banyak native SDK tanpa mock lengkap; blocker test infrastructure sudah dicatat terpisah dari runtime APK.
 - Login otomatis dari `.env` hanya untuk QA lokal; credential contoh tidak lagi ditanam sebagai fallback di source.
 - Build type `qa` sekarang mengizinkan HTTP cleartext hanya melalui manifest `mobile/android/app/src/qa/AndroidManifest.xml`, karena backend emulator lokal memakai `10.0.2.2`; production tetap tidak diberi izin HTTP cleartext.
@@ -28,7 +29,7 @@ Estimasi kesiapan menuju **rilis Google Play production**: **45-50%**, karena ma
 
 ## Stage Saat Ini
 
-Stage sekarang: **Stage 4 - Mobile Student Stabilization & Polish, gate login QA sudah ditutup**
+Stage sekarang: **Stage 6 - Formal QA & UAT, negative mobile QA batch 1 selesai**
 
 Mapping stage:
 
@@ -37,9 +38,9 @@ Mapping stage:
 | 1 | Repo recovery & cleanup dari source handoff | Selesai |
 | 2 | Local backend/CMS/mobile setup | Selesai untuk local dev |
 | 3 | Audit CMS dan flow admin dasar | Sebagian besar selesai |
-| 4 | Audit dan stabilisasi mobile siswa | Smoke test local QA selesai; polish dan edge case masih berjalan |
+| 4 | Audit dan stabilisasi mobile siswa | Core flow dan recovery utama selesai; edge case sudah masuk QA |
 | 5 | Data/i18n/backend schema hardening | Sebagian selesai; course bilingual sudah ada, forum/notifikasi dinamis masih pending |
-| 6 | QA end-to-end dan UAT client | QA batch 1 selesai; UAT client dan negative test masih pending |
+| 6 | QA end-to-end dan UAT client | QA batch 1 dan negative mobile batch 1 selesai; UAT client masih pending |
 | 7 | Release preparation Google Play | Belum mulai |
 
 ## Progress Per Area
@@ -54,7 +55,7 @@ Mapping stage:
 | Training module/progress logic | 80% | Bug NaN, mismatch progress, detail training sudah diperbaiki |
 | Media/document handling | 65% | Handling UI sudah lebih aman, tetapi file GCS/production media masih perlu validasi |
 | i18n/mixed language | 45% | Teks statis penting, course category, dan course item/module mulai rapi; forum topic dan notification data masih perlu schema/backend/CMS |
-| QA/UAT formal | 25% | Audit manual lokal sudah berjalan, test plan formal belum lengkap |
+| QA/UAT formal | 40% | Test plan formal dan negative mobile batch 1 selesai; data migration, edge case khusus, serta UAT masih pending |
 | Google Play release readiness | 25% | Release checklist dan signing config sudah mulai dirapikan; Play Console, privacy policy, production env, dan release build final belum selesai |
 
 ## Yang Sudah Diselesaikan
@@ -78,6 +79,7 @@ Mapping stage:
 - Release signing Android mulai dirapikan agar credential production tidak disimpan di repo.
 - Checklist rilis Google Play sudah dibuat sebagai acuan menuju AAB production.
 - Hasil audit dicatat di `docs/MOBILE_SCREEN_AUDIT.md`.
+- Negative test mobile batch 1 sudah dicatat di `docs/QA_UAT_TEST_PLAN.md`, termasuk evidence API status, UI state, storage session, logcat, dan lifecycle emulator.
 
 ## Temuan/Risiko Utama
 
@@ -87,6 +89,7 @@ Mapping stage:
 | i18n data dinamis belum full bilingual | Teks course item, forum topic, notification masih bisa campur bahasa | Perlu desain schema/backend/CMS |
 | Media GCS/file production belum tervalidasi | Preview gambar/video/audio bisa gagal jika permission/storage salah | Perlu audit storage production |
 | QA formal belum lengkap | Bug edge case mungkin belum terlihat | Perlu test plan dan UAT |
+| Toast `Error internal server` transient saat startup/recovery | User melihat error generik walaupun session akhirnya pulih | P2 open; endpoint pemicu perlu diisolasi |
 | Release Google Play belum disiapkan | Belum bisa publish production | Perlu keystore, signing, Play Console, privacy, AAB |
 | Push notification/Firebase belum diaudit production | Notifikasi real device bisa belum siap | Perlu credential dan test device |
 | Payment/transaction production belum diaudit penuh | Flow pembayaran bisa bergantung vendor/config | Perlu env/vendor production atau staging |
@@ -134,10 +137,11 @@ Syarat:
 
 Prioritas terdekat:
 
-1. **Pilih scope i18n berikutnya**
-   - Opsi A: Forum topic bilingual.
-   - Opsi B: Course item/module bilingual.
-   - Rekomendasi: course item/module dulu, karena lebih sering dilihat siswa di training.
+1. **Tutup gate QA yang tersisa**
+   - Migration/seed reproducibility.
+   - Null/incomplete data, network lambat, dan double tap submit.
+   - Putuskan apakah blocker Jest legacy akan diperbaiki atau diberi waiver.
+   - Isolasi toast `Error internal server` transient pada startup/recovery.
 
 2. **Audit production/staging readiness**
    - Env backend.
@@ -145,7 +149,7 @@ Prioritas terdekat:
    - Storage/media.
    - Payment/vendor.
 
-3. **Buat QA checklist**
+3. **Jalankan UAT client**
    - Login/logout/session.
    - Home/progress/training.
    - Dokumen.
