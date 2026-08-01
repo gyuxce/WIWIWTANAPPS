@@ -22,19 +22,20 @@ Estimasi kesiapan menuju **rilis Google Play production**: **45-50%**, karena ma
 - Smoke test end-to-end lokal siswa lulus untuk Home, Progress, Training, Detail Training, Dokumen, Forum, Notifikasi, dan relaunch/session recovery.
 - Formal QA batch 1 selesai: API health HTTP 200, backend PHPUnit 2 tests passed, CMS production build, mobile TypeScript, mojibake scan, dan secret hygiene lulus.
 - Negative mobile QA batch 1 selesai: credential salah, logout, API tidak tersedia, expired/invalid session, access boundary student/admin, permission denial, background/resume, dan rotasi device sudah diuji pada emulator.
-- Mobile Jest belum menjadi gate QA karena `App-test.tsx` legacy mengimpor banyak native SDK tanpa mock lengkap; blocker test infrastructure sudah dicatat terpisah dari runtime APK.
+- Mobile Jest harness sudah diperbaiki untuk dependency native yang dibutuhkan test; `2` test suites / `4` tests passed dan TypeScript tetap lulus.
 - Login otomatis dari `.env` hanya untuk QA lokal; credential contoh tidak lagi ditanam sebagai fallback di source.
 - Build type `qa` sekarang mengizinkan HTTP cleartext hanya melalui manifest `mobile/android/app/src/qa/AndroidManifest.xml`, karena backend emulator lokal memakai `10.0.2.2`; production tetap tidak diberi izin HTTP cleartext.
 - Build lokal saat ini memakai Node 24 karena dependency Metro yang terpasang (`metro-config` 0.83.x) mensyaratkan Node 20.19.4 atau lebih baru. Penyelarasan dependency dengan baseline Node 18 dicatat sebagai hardening build terpisah.
 - Preflight `bundleProductionRelease` sudah dijalankan; R8/minification berhasil setelah heap Gradle dinaikkan menjadi 3 GB.
 - Production signing belum tersedia: keystore upload dan credential `MYAPP_UPLOAD_*` belum diset, sehingga AAB belum terbentuk.
 - Guard signing sudah ditambahkan agar build production gagal dengan pesan yang jelas, bukan `NullPointerException`.
-- Paket eksekusi UAT client sudah siap dan approval client sudah dilaporkan; nama reviewer, acceptance criteria, dan evidence formal masih perlu dilampirkan.
+- Paket eksekusi UAT client sudah siap, approval client sudah dilaporkan, dan template formal sign-off sudah ditambahkan di `docs/UAT_SIGN_OFF_2026-08-01.md`; nama reviewer, acceptance criteria, dan evidence formal masih perlu dilampirkan.
 - Internal UAT baseline sudah dijalankan dengan hasil `CONDITIONAL PASS`; detail evidence dipisahkan dari approval client.
 - Negative test batch 2 sudah dijalankan: duplicate submit forum berhasil direproduksi sebelum fix, guard mobile sudah diterapkan dan lulus retest UI, null-safety training diperkuat, serta null payload dan slow-network sudah lulus replay. Detail ada di `docs/NEGATIVE_TEST_BATCH_2_2026-08-01.md`.
 - `QA-NEG-004` null/incomplete sudah direplay melalui proxy fixture ke emulator. Course dan Detail Training menampilkan zero state valid tanpa `NaN`, blank, atau crash.
 - `QA-NEG-005` latency sudah diuji dengan delayed proxy 2.5 detik. Detail Training menampilkan loading overlay/spinner, lalu pulih ke data normal tanpa `NaN` atau crash.
-- Client UAT dilaporkan sudah approved oleh project owner pada 1 Agustus 2026. Formal sign-off, acceptance criteria, dan evidence per flow masih perlu dilampirkan.
+- Client UAT dilaporkan sudah approved oleh project owner pada 1 Agustus 2026. DEF-001 dan DEF-002 sudah ditutup berdasarkan evidence QA; formal sign-off, acceptance criteria, dan evidence per flow masih perlu dilampirkan.
+- DEF-002 sudah diretest pada APK baru dengan expired access token dan refresh token aktif. Access token baru tersimpan, tanpa `Error internal server` dan tanpa `FATAL EXCEPTION`.
 - Fresh SQLite migration dan seed seluruh domain sudah lulus; path DB lokal lama ditemukan dan dikoreksi tanpa memasukkan `.env` ke repo.
 
 ## Stage Saat Ini
@@ -50,7 +51,7 @@ Mapping stage:
 | 3 | Audit CMS dan flow admin dasar | Sebagian besar selesai |
 | 4 | Audit dan stabilisasi mobile siswa | Core flow dan recovery utama selesai; edge case sudah masuk QA |
 | 5 | Data/i18n/backend schema hardening | Sebagian selesai; course bilingual sudah ada, forum/notifikasi dinamis masih pending |
-| 6 | QA end-to-end dan UAT client | QA batch 1-2 sudah ditutup untuk scope yang diuji; client UAT dilaporkan approved, evidence formal masih perlu dilampirkan |
+| 6 | QA end-to-end dan UAT client | QA batch 1-2 serta DEF-001/DEF-002 sudah ditutup untuk scope yang diuji; client UAT dilaporkan approved, evidence formal masih perlu dilampirkan |
 | 7 | Release preparation Google Play | Aktif; signing/AAB, production config, compliance, dan Play Console masih pending |
 
 ## Progress Per Area
@@ -65,7 +66,7 @@ Mapping stage:
 | Training module/progress logic | 80% | Bug NaN, mismatch progress, detail training sudah diperbaiki |
 | Media/document handling | 65% | Handling UI sudah lebih aman, tetapi file GCS/production media masih perlu validasi |
 | i18n/mixed language | 45% | Teks statis penting, course category, dan course item/module mulai rapi; forum topic dan notification data masih perlu schema/backend/CMS |
-| QA/UAT formal | 60-65% | Negative batch 2 sudah PASS-QA dan UAT client dilaporkan approved; evidence formal dan known issue closure masih perlu dilengkapi |
+| QA/UAT formal | 70% | Negative batch 2 serta DEF-001/DEF-002 sudah PASS-QA; formal sign-off, evidence client, dan retest CMS release candidate masih perlu dilengkapi |
 | Google Play release readiness | 30% | Environment dan preflight sudah dicek; signing/AAB, Play Console, privacy policy, production env, dan store assets belum selesai |
 
 ## Yang Sudah Diselesaikan
@@ -99,6 +100,8 @@ Mapping stage:
 - QA-NEG-004 null/incomplete sudah direplay dengan proxy fixture dan ditutup `PASS-QA`.
 - QA-NEG-005 slow network sudah diuji dengan delayed proxy 2.5 detik; loading overlay ditambahkan pada Detail Training dan ditutup `PASS-QA`.
 - Client UAT dilaporkan approved oleh project owner; artefact sign-off dan evidence formal masih menjadi release-handoff item.
+- Mobile Jest baseline sudah lulus setelah test-only native mocks ditambahkan: `2` suites / `4` tests passed; ini menutup DEF-001 pada level code/test, bukan menggantikan device QA.
+- DEF-002 sudah ditutup setelah HTTP `401` recovery diretest pada APK baru dan access token baru tersimpan tanpa internal-server error/fatal.
 
 ## Temuan/Risiko Utama
 
@@ -107,8 +110,8 @@ Mapping stage:
 | Data production belum divalidasi penuh | Bisa beda dengan seed lokal | Perlu akses/staging production-like |
 | i18n data dinamis belum full bilingual | Teks course item, forum topic, notification masih bisa campur bahasa | Perlu desain schema/backend/CMS |
 | Media GCS/file production belum tervalidasi | Preview gambar/video/audio bisa gagal jika permission/storage salah | Perlu audit storage production |
-| QA formal belum lengkap | Bug timeout, retry, dan edge case yang belum masuk scope bisa masih tersembunyi | Perlu final evidence, timeout/retry test pada staging, dan known issue closure |
-| Toast `Error internal server` transient saat startup/recovery | User melihat error generik walaupun session akhirnya pulih | P2 open; endpoint pemicu perlu diisolasi |
+| QA formal belum lengkap | Bug timeout, retry, dan edge case yang belum masuk scope bisa masih tersembunyi | Perlu final evidence, timeout/retry test pada staging, dan client sign-off |
+| Client evidence belum lengkap | Approval yang dilaporkan belum dapat diaudit sebagai dokumen formal | Perlu nama reviewer, acceptance criteria, evidence, dan konfirmasi tertulis |
 | Release Google Play belum siap | Belum bisa publish production | Perlu keystore upload, `MYAPP_UPLOAD_*`, Play Console, privacy, dan AAB |
 | Push notification/Firebase belum diaudit production | Notifikasi real device bisa belum siap | Perlu credential dan test device |
 | Payment/transaction production belum diaudit penuh | Flow pembayaran bisa bergantung vendor/config | Perlu env/vendor production atau staging |
@@ -157,10 +160,9 @@ Syarat:
 Prioritas terdekat:
 
 1. **Lengkapi handoff QA/UAT**
-   - Lampirkan formal sign-off, acceptance criteria, dan evidence UAT client yang sudah dilaporkan approved.
-   - Tutup known issue yang disetujui atau buat waiver tertulis.
-   - Putuskan apakah blocker Jest legacy akan diperbaiki atau diberi waiver.
-   - Isolasi toast `Error internal server` transient pada startup/recovery.
+   - Isi dan minta approval pada `docs/UAT_SIGN_OFF_2026-08-01.md`.
+   - Lampirkan acceptance criteria, evidence per flow, nama reviewer, dan keputusan known issue.
+   - Retest CMS CRUD content, user, role, permission, dan validation pada build release candidate.
 
 2. **Audit production/staging readiness**
    - Env backend.

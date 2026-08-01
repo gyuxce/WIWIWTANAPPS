@@ -110,6 +110,6 @@ Keputusan: `PASS-QA` untuk double-tap pada jalur draft dan publish UI mobile. Re
 ## Next Action
 
 1. Lampirkan screenshot/log proxy sebagai evidence batch 2 pada artefact QA bila dibutuhkan client.
-2. Isolasi toast `Error internal server` transient pada startup/recovery (`DEF-002`).
-3. Putuskan waiver atau perbaikan test infrastructure Jest legacy (`DEF-001`).
-4. Lanjutkan release hardening, signing keystore, dan build AAB production setelah UAT client approved.
+2. DEF-001 sudah ditutup melalui Jest test-only harness: `2` suites / `4` tests passed.
+3. DEF-002 sudah ditutup melalui guard HTTP `401` pada `useExam` dan expired-access replay pada APK baru tanpa internal-server error/fatal.
+4. Lanjutkan formal UAT sign-off, release hardening, signing keystore, dan build AAB production.

@@ -15,6 +15,7 @@ import {
   onGetTrainingModuleProgress,
 } from "stores/exam/examSlice";
 import { ErrorStatus } from "utils/ErrorStatus";
+import { getApiErrorStatus } from "utils/ApiResponse";
 import type { StatusTestType } from "types/UserTypes";
 import type { ExamProgressType } from "types/ExamTypes";
 
@@ -63,7 +64,10 @@ export const useExam = () => {
       if (resp?.data) {
         dispatch(onGetExamProgress(resp?.data));
       } else {
-        ErrorStatus(500, dispatch);
+        const errorStatus = getApiErrorStatus(resp);
+        if (errorStatus) {
+          ErrorStatus(errorStatus, dispatch);
+        }
       }
 
       return {
@@ -84,7 +88,10 @@ export const useExam = () => {
       if (resp?.data) {
         dispatch(onGetExamSchedule(resp?.data));
       } else {
-        ErrorStatus(500, dispatch);
+        const errorStatus = getApiErrorStatus(resp);
+        if (errorStatus) {
+          ErrorStatus(errorStatus, dispatch);
+        }
       }
 
       return {
@@ -119,7 +126,10 @@ export const useExam = () => {
       if (resp?.data) {
         dispatch(onGetTrainingModuleProgress(resp?.data));
       } else {
-        ErrorStatus(500, dispatch);
+        const errorStatus = getApiErrorStatus(resp);
+        if (errorStatus) {
+          ErrorStatus(errorStatus, dispatch);
+        }
       }
 
       return {

@@ -69,7 +69,7 @@ Catatan: hasil `PASS-SMOKE` pada dokumen ini adalah baseline teknis dari emulato
 | QA-ENV-002 | Backend migration/seed | Database QA dapat di-reset dan seed tanpa error | PASS-QA | Fresh SQLite sementara: migrate:fresh, seluruh domain migration, DevDatabaseSeeder, UpdateCourseJapaneseTitlesSeeder, dan UpdateCourseItemJapaneseTitlesSeeder lulus |
 | QA-ENV-003 | CMS production build | `npm run build` selesai tanpa error fatal | PASS-QA | Build CMS selesai setelah `npm ci` |
 | QA-ENV-004 | Mobile TypeScript | `corepack yarn tsc --noEmit --pretty false` lulus | PASS-QA | TypeScript lulus tanpa error |
-| QA-ENV-005 | Mobile Jest baseline | Test runner selesai dan failure dicatat | BLOCKED | `App-test.tsx` membutuhkan mock banyak native SDK; test harness legacy |
+| QA-ENV-005 | Mobile Jest baseline | Test runner selesai dan failure dicatat | PASS-QA | Jest harness test-only sudah mem-mock native dependency dan asset; `2` test suites / `4` tests passed, termasuk `App-test.tsx` |
 | QA-ENV-006 | Android QA build/install | APK QA berhasil dibuild dan di-install | PASS-SMOKE | APK development QA sudah dipakai |
 | QA-ENV-007 | Mojibake scan | Script tidak menemukan kandidat baru | PASS-QA | `No mojibake candidates found` |
 | QA-ENV-008 | Secret/release hygiene | `.env`, keystore, dan credential tidak masuk Git | PASS-QA | Tidak ada file secret production yang tracked |
@@ -168,8 +168,8 @@ Gunakan satu baris per defect. Jangan menutup defect hanya karena workaround dit
 
 | ID | Test case | Severity | Actual result | Evidence | Owner | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| DEF-001 | QA-ENV-005 | P2 | Existing `App-test.tsx` belum dapat berjalan karena membutuhkan konfigurasi mock native SDK yang luas | Jest output | Engineering | Blocked - test infra |
-| DEF-002 | QA-AUTH-006 | P2 | Toast `Error internal server` muncul transient saat startup/recovery walaupun session akhirnya pulih dan Progress termuat; endpoint pemicu belum diketahui | Logcat `ReactNativeJS` dan UI Progress | Engineering | Open - isolate endpoint |
+| DEF-001 | QA-ENV-005 | P2 | Existing `App-test.tsx` membutuhkan konfigurasi mock native SDK yang luas dan sebelumnya berhenti sebelum assertion | Jest output, `mobile/jest.setup.js`, `mobile/__mocks__/assetMock.js` | Engineering | Closed - PASS-QA (Jest harness) |
+| DEF-002 | QA-AUTH-006 | P2 | Toast `Error internal server` muncul transient saat HTTP `401` terjadi ketika access-token recovery berjalan | `ApiResponse-test`, APK replay expired access token, logcat tanpa internal-server error/fatal | Engineering | Closed - PASS-QA (401 recovery) |
 | DEF-003 | QA-NEG-006 | P1 | Dua request forum paralel sebelum fix sama-sama `201 Created`; setelah guard UI, dua tap cepat menghasilkan satu record | API reproduction, emulator UI retest, database count `1`, fixture cleanup | Engineering | Closed - PASS-QA (mobile guard) |
 
 ## Execution Notes
@@ -190,17 +190,17 @@ Gunakan satu baris per defect. Jangan menutup defect hanya karena workaround dit
 - `QA-NEG-004` sekarang `PASS-QA`: fixture response null/incomplete berhasil direplay ke emulator dengan proxy lokal dan tidak menghasilkan `NaN`, blank, atau crash.
 - `QA-NEG-005` sekarang `PASS-QA`: delayed proxy 2.5 detik memperlihatkan loading overlay dan data pulih setelah request selesai.
 - `QA-NEG-006` sekarang `PASS-QA`: dua tap cepat pada Forum Editor menghasilkan satu record pada emulator; marker QA dihapus setelah verifikasi. Direct API parallel replay sebelum fix tetap dicatat sebagai rekomendasi backend idempotency.
-- Selama startup/recovery muncul toast generik `Error internal server` beberapa kali, tetapi layar Progress akhirnya termuat dan session tetap aktif. Endpoint pemicu belum terisolasi; dicatat sebagai `DEF-002` P2 untuk investigasi sebelum production.
+- DEF-002 sudah diisolasi pada mapping response di `mobile/src/hooks/useExam.ts`: HTTP `401` dari request training ketika access-token recovery berlangsung sebelumnya dipetakan menjadi error `500`. Setelah guard diterapkan, regression test lulus dan expired-access replay pada APK baru menghasilkan access token baru tanpa `Error internal server` atau `FATAL EXCEPTION`.
 - CMS build membutuhkan `npm ci` ketika dependency lokal belum lengkap; `cms/yarn.lock` dikembalikan dan tidak menjadi bagian dari perubahan.
-- Mobile Jest belum menjadi gate QA karena test lama mengimpor native SDK secara penuh dan berhenti sebelum assertion; ini dicatat sebagai blocker test infrastructure terpisah dari runtime APK.
+- Mobile Jest sudah menjadi gate code-level terbatas untuk regression test yang tersedia. `App-test.tsx` dan helper DEF-002 lulus dengan `2` suites / `4` tests; mock native dependency berada di `mobile/jest.setup.js` dan hanya aktif pada Jest.
 - `PASS-SMOKE` harus diulang sebagai `PASS-QA` setelah test data, build, dan bukti eksekusi formal ditetapkan.
-- UAT client dilaporkan sudah `Approved` oleh project owner pada 1 Agustus 2026. Acceptance criteria, nama reviewer, dan artefact sign-off belum tersimpan di repo sehingga kelengkapan administrasi UAT masih perlu ditutup.
+- UAT client dilaporkan sudah `Approved` oleh project owner pada 1 Agustus 2026. Template formal sign-off tersedia di [UAT_SIGN_OFF_2026-08-01.md](UAT_SIGN_OFF_2026-08-01.md), tetapi acceptance criteria, nama reviewer, evidence, dan konfirmasi tertulis tetap harus diisi agar approval menjadi auditable.
 - Defect P0/P1 harus ditutup atau mendapat waiver tertulis sebelum gate release.
 
 ## Next Gate
 
-1. Putuskan perbaikan atau waiver untuk blocker `QA-ENV-005`/`DEF-001`.
-2. Lampirkan sign-off/evidence UAT client dan tutup known issue yang disetujui.
+1. Lengkapi dan minta konfirmasi pada [UAT_SIGN_OFF_2026-08-01.md](UAT_SIGN_OFF_2026-08-01.md), termasuk scope, evidence, known issue, nama reviewer, dan tanda tangan/approval tertulis.
+2. Retest CMS CRUD content, user, role, permission, dan validation pada build berlabel release candidate.
 3. Siapkan release candidate berlabel version dan kumpulkan screenshot/log evidence final.
-4. Tutup atau beri waiver pada `DEF-001` dan isolasi `DEF-002`.
-5. Lanjutkan release hardening, signing keystore, AAB production, dan Google Play internal testing.
+4. Selesaikan `REL-001`: keystore/signing production, AAB production, dan checksum.
+5. Lanjutkan production config, privacy/Data Safety, Firebase/storage/payment, Play Console internal testing, dan release smoke test.

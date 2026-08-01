@@ -3,8 +3,9 @@
 Periode target: Agustus 2026
 Status: **CLIENT UAT APPROVED - reported by project owner on 1 August 2026**
 Related QA plan: [QA_UAT_TEST_PLAN.md](QA_UAT_TEST_PLAN.md)
+Formal sign-off template: [UAT_SIGN_OFF_2026-08-01.md](UAT_SIGN_OFF_2026-08-01.md)
 
-Catatan administrasi: approval client sudah dilaporkan, tetapi nama reviewer, acceptance criteria, evidence per test case, dan tanda tangan/catatan resmi belum dilampirkan pada repository. Lengkapi bagian tersebut sebelum release handoff agar keputusan dapat diaudit.
+Catatan administrasi: approval client sudah dilaporkan, tetapi nama reviewer, acceptance criteria, evidence per test case, dan tanda tangan/catatan resmi belum dilampirkan pada repository. Lengkapi bagian tersebut pada formal sign-off sebelum release handoff agar keputusan dapat diaudit.
 
 ## Tujuan
 
@@ -177,14 +178,17 @@ Credential production atau credential pribadi tidak boleh ditulis ke repository.
 | Langkah | Review defect log, risiko, workaround, dan release scope |
 | Expected | Client memberi keputusan akhir tertulis untuk internal testing atau meminta perbaikan tambahan |
 | Evidence | Approval tertulis, meeting notes, atau sign-off dokumen |
-| Actual result | `Client UAT dilaporkan approved oleh project owner pada 1 Agustus 2026; detail evidence dan sign-off formal belum dilampirkan` |
-| Decision | `Accept - approval reported; formal sign-off pending` |
+| Actual result | `Client UAT dilaporkan approved oleh project owner pada 1 Agustus 2026; formal sign-off template sudah tersedia, tetapi detail evidence, reviewer, dan konfirmasi tertulis masih perlu diisi` |
+| Decision | `Accept - approval reported; formal sign-off pending completion` |
 
 ## UAT Defect Log
 
 | ID | Test case | Severity | Actual result | Evidence/link | Owner | Decision/status |
 | --- | --- | --- | --- | --- | --- | --- |
-| UAT-DEF-001 | `isi` | P0/P1/P2/P3 | `isi` | `isi` | `Engineering/Client` | Open/Fixed/Retest/Accepted |
+| DEF-001 | QA-ENV-005 | P2 | Jest harness legacy sebelumnya gagal sebelum assertion karena mock native SDK belum lengkap; sudah ditambah mock test-only | `2` suites / `4` tests passed; [QA plan](QA_UAT_TEST_PLAN.md) | Engineering | Closed - PASS-QA |
+| DEF-002 | QA-AUTH-006 | P2 | HTTP `401` dari access-token recovery sebelumnya dipetakan menjadi `Error internal server`; helper guard sudah diterapkan | Expired-access replay pada APK baru: fresh token tersimpan, internal-server error `0`, fatal `0` | Engineering | Closed - PASS-QA; client confirmation pending |
+| DEF-003 | QA-NEG-006 | P1 | Double tap forum sempat menghasilkan dua record sebelum guard; mobile guard sudah diuji ulang | Dua tap cepat draft/publish menghasilkan satu record | Engineering | Closed - PASS-QA |
+| REL-001 | Release handoff | P0 | AAB production belum dapat ditandatangani karena keystore dan `MYAPP_UPLOAD_*` belum tersedia | R8/preflight lulus; task berhenti pada signing | Owner/Engineering | Open - release blocker |
 
 Severity guide:
 
@@ -194,6 +198,8 @@ Severity guide:
 - P3: visual, copy, atau edge case minor.
 
 ## UAT Sign-off
+
+Gunakan [UAT_SIGN_OFF_2026-08-01.md](UAT_SIGN_OFF_2026-08-01.md) sebagai lembar formal utama. Tabel di bawah tetap menjadi ringkasan approval; jangan mengisi nama atau tanda tangan tanpa konfirmasi dari reviewer yang berwenang.
 
 | Role | Nama | Keputusan | Tanggal | Tanda tangan/catatan |
 | --- | --- | --- | --- | --- |

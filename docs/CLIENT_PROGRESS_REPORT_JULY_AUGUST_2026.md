@@ -153,10 +153,10 @@ Catatan QA:
 - `QA-NEG-004` null/incomplete: fixture null/incomplete berhasil direplay ke emulator dengan zero state valid tanpa `NaN`, blank, atau crash (`PASS-QA`).
 - `QA-NEG-005` network lambat: delayed proxy 2.5 detik memperlihatkan loading overlay dan data pulih tanpa `NaN` atau crash (`PASS-QA`).
 - `QA-NEG-006` double tap: dua request paralel terbukti membuat dua record sebelum fix; setelah guard mobile, dua tap cepat pada Forum Editor menghasilkan satu record dan fixture dibersihkan (`PASS-QA`).
-- Client UAT dilaporkan sudah approved oleh project owner pada 1 Agustus 2026. Formal sign-off, acceptance criteria, dan evidence per flow masih perlu dilampirkan.
+- Client UAT dilaporkan sudah approved oleh project owner pada 1 Agustus 2026. Template formal sign-off tersedia di `docs/UAT_SIGN_OFF_2026-08-01.md`; nama reviewer, acceptance criteria, dan evidence per flow masih perlu dilampirkan.
 - Detail evidence batch 2 tersedia di `docs/NEGATIVE_TEST_BATCH_2_2026-08-01.md`.
-- Toast generik `Error internal server` masih muncul transient pada sebagian startup/recovery dan dicatat sebagai defect P2 untuk diisolasi.
-- Mobile Jest legacy masih menjadi blocker test infrastructure karena membutuhkan mock native SDK yang luas; hal ini berbeda dari runtime APK yang sudah dapat berjalan.
+- DEF-001 Jest harness sudah ditutup `PASS-QA` setelah `2` test suites / `4` tests passed dengan mock native test-only.
+- DEF-002 sudah ditutup `PASS-QA` setelah expired-access replay pada APK baru menghasilkan access token baru tanpa `Error internal server` atau `FATAL EXCEPTION`.
 
 ## Perbandingan Progres Juli Dan Agustus
 
@@ -166,7 +166,7 @@ Angka berikut diambil dari checkpoint project yang sudah dicatat pada 22 Juli da
 | --- | ---: | ---: | --- |
 | Internal release candidate | 60-65% | 65-70% | Null payload dan latency behavior sudah ditutup pada QA lokal; release hardening masih berjalan |
 | Google Play production readiness | 45-50% | 45-50% | Masih menunggu akses dan validasi production |
-| QA/UAT formal | 25% | 60-65% | Naik karena formal test plan, negative batch 1-2, null/latency replay, dan approval UAT client yang dilaporkan |
+| QA/UAT formal | 25% | 70% | Naik karena formal test plan, negative batch 1-2, null/latency replay, DEF-001/DEF-002 closure, dan approval UAT client yang dilaporkan |
 | Google Play release preparation | 20% | 30% | Naik karena checklist, preflight, debug APK, dan signing blocker sudah terisolasi |
 | Mobile core flow | Audit sedang berjalan | Core flow dan recovery utama sudah lulus smoke/QA lokal | Progress kualitatif meningkat |
 | Data/i18n | Course category mulai diverifikasi | Course item/module title Jepang sudah terhubung; forum/notification masih pending | Scope bilingual bertambah |
@@ -182,7 +182,7 @@ Interpretasi untuk client: project tidak berhenti selama Juli. Sebagian besar pe
 | 3 | Audit CMS dan admin dasar | Sebagian besar selesai; validasi bisnis client masih diperlukan |
 | 4 | Mobile student stabilization | Core flow, bug utama, dan session recovery sudah stabil di QA lokal |
 | 5 | Data/i18n/backend hardening | Sebagian selesai; forum dan notification dynamic data masih pending |
-| 6 | Formal QA dan UAT | QA batch 1-2 sudah ditutup untuk scope yang diuji; client UAT dilaporkan approved, formal evidence masih perlu dilampirkan |
+| 6 | Formal QA dan UAT | QA batch 1-2 serta DEF-001/DEF-002 sudah ditutup untuk scope yang diuji; client UAT dilaporkan approved, formal evidence masih perlu dilampirkan |
 | 7 | Release preparation Google Play | Aktif; belum siap publish production karena signing, environment, compliance, dan Play Console masih pending |
 
 ## Next Action Agustus
@@ -199,8 +199,7 @@ Client UAT sudah dilaporkan approved oleh project owner. Action yang tersisa ada
 ### Prioritas 2: Tutup QA Dan Defect Terakhir
 
 - Null/incomplete dan latency sudah `PASS-QA`.
-- Isolasi endpoint pemicu toast `Error internal server` (`DEF-002`).
-- Putuskan apakah test Jest legacy akan diperbaiki atau diberi waiver dengan bukti runtime QA (`DEF-001`).
+- DEF-001 dan DEF-002 sudah `Closed - PASS-QA` berdasarkan regression test dan expired-access replay emulator.
 - Ulangi CMS CRUD pada build release candidate berlabel.
 
 ### Prioritas 3: Release Preparation

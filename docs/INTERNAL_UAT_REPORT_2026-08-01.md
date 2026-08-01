@@ -39,6 +39,7 @@ Laporan ini adalah hasil pengujian internal menggunakan source, seed lokal, back
 | INT-ENV-005 | Encoding | `scripts/check-mojibake.py` -> `No mojibake candidates found` | PASS |
 | INT-ENV-006 | Secret hygiene | `.env`, `google-services.json`, dan keystore lokal tidak tracked | PASS |
 | INT-ENV-007 | Migration/seed reproducibility | Fresh SQLite sementara menjalankan migrate:fresh, seluruh domain migration, DevDatabaseSeeder, UpdateCourseJapaneseTitlesSeeder, dan UpdateCourseItemJapaneseTitlesSeeder tanpa error | PASS |
+| INT-ENV-008 | Mobile Jest harness | `jest --runInBand --watch=false --passWithNoTests --silent --detectOpenHandles` -> `2` suites, `4` tests passed; `App-test.tsx` dan `ApiResponse-test.ts` lulus | PASS |
 | INT-MOB-001 | APK QA | `app:assembleDevelopmentQa` berhasil; APK ter-install ke emulator | PASS |
 | INT-MOB-002 | Mobile launch/session | `MainActivity` resumed, proses hidup, log memuat student profile dan route `HomeScreen`, tanpa fatal exception | PASS-SMOKE |
 | INT-MOB-003 | Student core routes | Home, Progress, Training, Detail Training, Dokumen, Forum, Notifikasi, dan relaunch pernah lulus smoke test emulator | PASS-SMOKE |
@@ -46,24 +47,25 @@ Laporan ini adalah hasil pengujian internal menggunakan source, seed lokal, back
 | INT-NEG-001 | Null/incomplete guard | Fixture null/incomplete direplay melalui proxy lokal; course menampilkan `0%`/`0 / 0`, Detail Training tetap usable, dan tidak ada fatal log | PASS-QA |
 | INT-NEG-002 | Double-submit forum | Dua POST paralel sebelum fix menghasilkan dua record; setelah fix, dua tap cepat pada jalur draft dan publish masing-masing menghasilkan satu record dan fixture dibersihkan | PASS-QA |
 | INT-NEG-003 | Slow network | Delayed proxy 2.5 detik menunjukkan loading overlay/spinner; data pulih ke `20%` dan `4 / 20`, tanpa `NaN` atau fatal log | PASS-QA |
+| INT-AUTH-001 | Expired access recovery regression | APK debug baru diuji dengan access token kedaluwarsa dan refresh token aktif; access token baru tersimpan, `Error internal server` tidak muncul, dan tidak ada `FATAL EXCEPTION` | PASS-QA |
 | INT-CMS-001 | CMS/admin | Login admin dan flow CMS dasar sudah pernah diaudit; runtime CRUD lengkap tetap perlu retest dengan fixture internal | PASS-SMOKE |
 | INT-REL-001 | Production AAB | Compile/native/R8 lulus; task berhenti pada release signing karena keystore dan `MYAPP_UPLOAD_*` belum tersedia | BLOCKED |
 
 ## 4. Internal Decision
 
-Internal QA baseline: **CONDITIONAL PASS** dengan negative batch 2 sudah tertutup.
+Internal QA baseline: **CONDITIONAL PASS** dengan negative batch 2 serta DEF-001/DEF-002 sudah tertutup pada evidence teknis.
 
 Artinya core flow dan environment lokal cukup untuk melanjutkan test cycle, tetapi belum boleh disebut siap publish. Dua gate besar masih terpisah:
 
-1. Client UAT sudah dilaporkan approved, tetapi bukti sign-off dan detail acceptance criteria belum tersimpan di repo.
+1. Client UAT sudah dilaporkan approved, tetapi bukti sign-off, nama reviewer, dan detail acceptance criteria belum tersimpan di repo. Template formal tersedia di [UAT_SIGN_OFF_2026-08-01.md](UAT_SIGN_OFF_2026-08-01.md).
 2. Google Play release masih blocked karena keystore upload, credential signing, production environment, dan Play Console belum lengkap.
 
 ## 5. Open Issues
 
 | ID | Severity | Issue | Status |
 | --- | --- | --- | --- |
-| DEF-001 | P2 | Jest legacy membutuhkan mock native SDK yang belum lengkap | Blocked - test infrastructure |
-| DEF-002 | P2 | Toast `Error internal server` transient saat startup/recovery; endpoint pemicu belum terisolasi | Open |
+| DEF-001 | P2 | Jest legacy membutuhkan mock native SDK yang belum lengkap | Closed - PASS-QA; `2` suites / `4` tests passed setelah test-only harness ditambahkan |
+| DEF-002 | P2 | HTTP `401` dari request training ketika access-token recovery sebelumnya dipetakan menjadi error `500` | Closed - PASS-QA; expired-access replay pada APK baru pulih dengan token baru tanpa internal-server error/fatal |
 | QA-ENV-002 | P1 | Reproducibility migration/seed sudah dibuktikan pada fresh SQLite sementara | Closed - PASS |
 | QA-NEG-004 | P1 | Fixture null/incomplete berhasil direplay ke emulator; UI menampilkan zero state yang valid tanpa `NaN` atau crash | Closed - PASS-QA |
 | QA-NEG-005 | P2 | Delayed proxy 2.5 detik memperlihatkan loading overlay dan data pulih tanpa `NaN` atau crash | Closed - PASS-QA |
@@ -75,15 +77,15 @@ Artinya core flow dan environment lokal cukup untuk melanjutkan test cycle, teta
 - Data yang dipakai adalah seed/local data, bukan data bisnis resmi client.
 - Login mobile pada sebagian smoke run memakai konfigurasi auto-login QA lokal.
 - Belum ada validasi device fisik, push notification production, storage production, payment production, atau Play Console.
-- Hasil internal tidak menggantikan sign-off dari client/product owner.
+- Hasil internal tidak menggantikan sign-off dari client/product owner. Lembar formal yang harus dilengkapi tersedia di [UAT_SIGN_OFF_2026-08-01.md](UAT_SIGN_OFF_2026-08-01.md).
 - Backend local `.env` sempat menunjuk ke absolute path database dari workspace lama; path lokal sudah diarahkan ke workspace aktif dan file `.env` tetap tidak di-commit.
 - Detail negative test batch 2 tersedia di [NEGATIVE_TEST_BATCH_2_2026-08-01.md](NEGATIVE_TEST_BATCH_2_2026-08-01.md). Dua request forum paralel menghasilkan HTTP `201` dan dua record sebelum fix; cleanup fixture berhasil menyisakan nol record.
-- Source mobile batch 2 menambah synchronous submit lock pada ForumEditor, `isLoading` pada tombol publish/draft, invalid JSON recovery, safe empty-array reducers pada DetailTrainingScreen, serta fallback cover course. TypeScript lulus, APK QA terbaru ter-install, MainActivity resumed, dan tidak ada fatal Android runtime log.
+- Source mobile batch 2 menambah synchronous submit lock pada ForumEditor, `isLoading` pada tombol publish/draft, invalid JSON recovery, safe empty-array reducers pada DetailTrainingScreen, fallback cover course, serta guard HTTP `401` pada `useExam`. TypeScript lulus, Jest `2` suites/`4` tests lulus, APK debug terbaru ter-install, MainActivity resumed, dan tidak ada fatal Android runtime log.
 - Null/incomplete dan slow-network sudah direplay dengan proxy lokal. Null fixture menghasilkan zero state valid; delayed proxy 2.5 detik menghasilkan loading overlay lalu data normal. Double-tap UI juga lulus retest pada jalur draft dan publish di APK terbaru: masing-masing modal sukses tampil sekali dan database marker terhitung satu sebelum cleanup.
 
 ## 7. Next Internal Test Cycle
 
-1. Lampirkan formal UAT sign-off dan acceptance criteria yang dilaporkan sudah approved.
-2. Isolasi `DEF-002` toast `Error internal server` dan putuskan waiver/perbaikan `DEF-001` Jest.
-3. Retest CMS CRUD content, user, role, permission, dan validation pada build berlabel release candidate.
-4. Siapkan keystore/signing production, build AAB, dan jalankan release smoke test.
+1. Lengkapi [UAT_SIGN_OFF_2026-08-01.md](UAT_SIGN_OFF_2026-08-01.md) dengan acceptance criteria, evidence, nama reviewer, dan approval tertulis.
+2. Retest CMS CRUD content, user, role, permission, dan validation pada build berlabel release candidate.
+3. Selesaikan keystore/signing production, build AAB, dan jalankan release smoke test.
+4. Validasi production/staging Firebase, storage/media, payment, notification, privacy, Data Safety, dan Play Console.
