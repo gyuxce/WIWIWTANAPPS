@@ -141,6 +141,8 @@ Catatan: hasil `PASS-SMOKE` pada dokumen ini adalah baseline teknis dari emulato
 
 UAT dilakukan dengan akun dan data yang disetujui client. Setiap item harus memiliki screenshot atau rekaman singkat, actual result, nama tester, tanggal, dan keputusan `Accept` atau `Reject`.
 
+Template eksekusi yang siap dikirim ke client tersedia di [UAT_CLIENT_EXECUTION_PACK.md](UAT_CLIENT_EXECUTION_PACK.md).
+
 | ID | Business flow | Acceptance criteria | Status |
 | --- | --- | --- | --- |
 | UAT-001 | Login siswa | Siswa dapat login dan melihat data miliknya | PENDING |

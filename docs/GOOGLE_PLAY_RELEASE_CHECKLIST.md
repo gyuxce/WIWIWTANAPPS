@@ -8,11 +8,26 @@ Checklist ini dipakai saat project mulai masuk fase rilis Android production. Ja
 
 Project belum siap publish production. Posisi sekarang masih **release preparation awal**, berjalan paralel dengan QA/UAT:
 
-- APK development sudah bisa dibuild dan diinstall ke emulator.
+- Environment Android lokal sudah tervalidasi: JDK Android Studio, SDK, NDK, dan Gradle dapat dipakai.
+- APK development/QA sudah bisa dibuild dan diinstall ke emulator.
 - Flow siswa utama sudah mulai stabil.
-- Production signing belum divalidasi.
-- AAB production belum dibuild dan dites.
+- Preflight `bundleProductionRelease` sudah dijalankan; R8 berhasil setelah heap Gradle dinaikkan.
+- Production signing masih **BLOCKED** karena keystore upload dan credential `MYAPP_UPLOAD_*` belum tersedia.
+- AAB production belum terbentuk karena proses berhenti di tahap signing.
 - Play Console, privacy policy, data safety, Firebase production, storage, payment, dan backend production belum diaudit penuh.
+
+## 1A. Latest Local Release Preflight - 1 Agustus 2026
+
+| Check | Result | Catatan |
+| --- | --- | --- |
+| Android environment | PASS | `ANDROID_HOME`, JDK Android Studio, SDK Platform 35, NDK `28.2.13676358`, dan Gradle 8.9 terdeteksi |
+| Production flavor/config | PASS | Variant `productionRelease` dan task bundle tersedia |
+| JavaScript/native compilation | PASS | Build maju sampai tahap bundle signing |
+| R8/minification | PASS | Lolos dengan Gradle heap 3 GB dan workers 1 |
+| Release signing | BLOCKED | `mobile/android/app/wiwitan.keystore` belum tersedia; empat `MYAPP_UPLOAD_*` belum diset |
+| Production AAB | BLOCKED | Belum ada file `.aab` yang dapat diupload |
+
+Catatan non-blocking: Gradle masih menampilkan warning penggunaan `ndk.dir` yang deprecated dan build lokal perlu `NODE_ENV=production` agar pemilihan env Expo eksplisit.
 
 ## 2. Akses yang Harus Dikumpulkan
 
@@ -35,6 +50,8 @@ File yang dibutuhkan lokal:
 - `mobile/android/app/wiwitan.keystore`
 
 Credential signing tidak boleh ditulis di repo. Simpan di local machine atau secret manager.
+
+Konfigurasi `PROD_KEYSTORE_*` di `mobile/.env` tidak otomatis dipakai oleh Gradle signing. Untuk build release, map nilainya secara aman ke `MYAPP_UPLOAD_*` melalui environment variable atau `~/.gradle/gradle.properties`; jangan menyalin password ke README atau commit.
 
 Opsi lokal via environment variable PowerShell:
 
@@ -87,8 +104,11 @@ Build AAB:
 
 ```powershell
 cd mobile\android
-.\gradlew.bat app:bundleProductionRelease --no-daemon --stacktrace --max-workers=2
+$env:NODE_ENV="production"
+.\gradlew.bat app:bundleProductionRelease --no-daemon --stacktrace --max-workers=1
 ```
+
+Build akan berhenti dengan pesan yang jelas bila signing belum lengkap. Jangan memakai debug keystore untuk upload ke Google Play.
 
 Output:
 

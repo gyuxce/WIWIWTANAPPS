@@ -26,6 +26,10 @@ Estimasi kesiapan menuju **rilis Google Play production**: **45-50%**, karena ma
 - Login otomatis dari `.env` hanya untuk QA lokal; credential contoh tidak lagi ditanam sebagai fallback di source.
 - Build type `qa` sekarang mengizinkan HTTP cleartext hanya melalui manifest `mobile/android/app/src/qa/AndroidManifest.xml`, karena backend emulator lokal memakai `10.0.2.2`; production tetap tidak diberi izin HTTP cleartext.
 - Build lokal saat ini memakai Node 24 karena dependency Metro yang terpasang (`metro-config` 0.83.x) mensyaratkan Node 20.19.4 atau lebih baru. Penyelarasan dependency dengan baseline Node 18 dicatat sebagai hardening build terpisah.
+- Preflight `bundleProductionRelease` sudah dijalankan; R8/minification berhasil setelah heap Gradle dinaikkan menjadi 3 GB.
+- Production signing belum tersedia: keystore upload dan credential `MYAPP_UPLOAD_*` belum diset, sehingga AAB belum terbentuk.
+- Guard signing sudah ditambahkan agar build production gagal dengan pesan yang jelas, bukan `NullPointerException`.
+- Paket eksekusi UAT client sudah siap dikirim dan diisi oleh reviewer.
 
 ## Stage Saat Ini
 
@@ -40,8 +44,8 @@ Mapping stage:
 | 3 | Audit CMS dan flow admin dasar | Sebagian besar selesai |
 | 4 | Audit dan stabilisasi mobile siswa | Core flow dan recovery utama selesai; edge case sudah masuk QA |
 | 5 | Data/i18n/backend schema hardening | Sebagian selesai; course bilingual sudah ada, forum/notifikasi dinamis masih pending |
-| 6 | QA end-to-end dan UAT client | QA batch 1 dan negative mobile batch 1 selesai; UAT client masih pending |
-| 7 | Release preparation Google Play | Persiapan awal dimulai; belum siap publish production |
+| 6 | QA end-to-end dan UAT client | QA batch 1 dan negative mobile batch 1 selesai; execution pack siap, eksekusi client masih pending |
+| 7 | Release preparation Google Play | Preflight sudah dilakukan; signing/AAB, production config, compliance, dan Play Console masih pending |
 
 ## Progress Per Area
 
@@ -56,7 +60,7 @@ Mapping stage:
 | Media/document handling | 65% | Handling UI sudah lebih aman, tetapi file GCS/production media masih perlu validasi |
 | i18n/mixed language | 45% | Teks statis penting, course category, dan course item/module mulai rapi; forum topic dan notification data masih perlu schema/backend/CMS |
 | QA/UAT formal | 40% | Test plan formal dan negative mobile batch 1 selesai; data migration, edge case khusus, serta UAT masih pending |
-| Google Play release readiness | 25% | Release checklist dan signing config sudah mulai dirapikan; Play Console, privacy policy, production env, dan release build final belum selesai |
+| Google Play release readiness | 25% | Environment dan preflight sudah dicek; signing/AAB, Play Console, privacy policy, production env, dan store assets belum selesai |
 
 ## Yang Sudah Diselesaikan
 
@@ -78,6 +82,9 @@ Mapping stage:
 - Course item/module mulai mendukung `title_japan` dari backend, CMS, seed lokal, dan mobile display.
 - Release signing Android mulai dirapikan agar credential production tidak disimpan di repo.
 - Checklist rilis Google Play sudah dibuat sebagai acuan menuju AAB production.
+- UAT client execution pack sudah dibuat dengan matrix login, progress, training, dokumen, forum, notifikasi, CMS, role, bilingual, dan sign-off.
+- Preflight production sudah melewati R8; blocker rilis sekarang terisolasi pada keystore upload dan credential signing yang belum tersedia.
+- Guard signing production sudah ditambahkan agar error konfigurasi terbaca jelas dan tidak membingungkan saat build.
 - Hasil audit dicatat di `docs/MOBILE_SCREEN_AUDIT.md`.
 - Negative test mobile batch 1 sudah dicatat di `docs/QA_UAT_TEST_PLAN.md`, termasuk evidence API status, UI state, storage session, logcat, dan lifecycle emulator.
 
@@ -90,7 +97,7 @@ Mapping stage:
 | Media GCS/file production belum tervalidasi | Preview gambar/video/audio bisa gagal jika permission/storage salah | Perlu audit storage production |
 | QA formal belum lengkap | Bug edge case mungkin belum terlihat | Perlu test plan dan UAT |
 | Toast `Error internal server` transient saat startup/recovery | User melihat error generik walaupun session akhirnya pulih | P2 open; endpoint pemicu perlu diisolasi |
-| Release Google Play belum disiapkan | Belum bisa publish production | Perlu keystore, signing, Play Console, privacy, AAB |
+| Release Google Play belum siap | Belum bisa publish production | Perlu keystore upload, `MYAPP_UPLOAD_*`, Play Console, privacy, dan AAB |
 | Push notification/Firebase belum diaudit production | Notifikasi real device bisa belum siap | Perlu credential dan test device |
 | Payment/transaction production belum diaudit penuh | Flow pembayaran bisa bergantung vendor/config | Perlu env/vendor production atau staging |
 
@@ -157,7 +164,13 @@ Prioritas terdekat:
    - Payment.
    - Sertifikasi/final interview.
 
-4. **Siapkan release track**
+4. **Lengkapi release signing dan build AAB**
+   - Minta keystore upload resmi dari owner atau buat sekali dengan persetujuan owner.
+   - Simpan keystore dan password di luar repo.
+   - Set `MYAPP_UPLOAD_*` pada mesin build.
+   - Jalankan ulang `bundleProductionRelease` dan simpan checksum AAB.
+
+5. **Siapkan release track**
    - Debug APK untuk internal review.
    - Staging/release APK atau AAB.
    - Google Play checklist.

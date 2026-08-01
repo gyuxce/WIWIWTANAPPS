@@ -86,6 +86,31 @@ def releaseSigningValue = { name ->
     return System.getenv(name)
 }
 
+def releaseSigningValues = [
+    storeFile: releaseSigningValue('MYAPP_UPLOAD_STORE_FILE'),
+    storePassword: releaseSigningValue('MYAPP_UPLOAD_STORE_PASSWORD'),
+    keyAlias: releaseSigningValue('MYAPP_UPLOAD_KEY_ALIAS'),
+    keyPassword: releaseSigningValue('MYAPP_UPLOAD_KEY_PASSWORD'),
+]
+def hasReleaseSigning = releaseSigningValues.values().every { it }
+def releaseKeystoreFile = hasReleaseSigning ? file(releaseSigningValues.storeFile) : null
+
+def requireReleaseSigning = {
+    if (!hasReleaseSigning) {
+        throw new GradleException(
+            'Production release signing is not configured. Set MYAPP_UPLOAD_STORE_FILE, ' +
+                'MYAPP_UPLOAD_STORE_PASSWORD, MYAPP_UPLOAD_KEY_ALIAS, and MYAPP_UPLOAD_KEY_PASSWORD ' +
+                'as environment variables or Gradle properties. Do not commit these values.'
+        )
+    }
+    if (!releaseKeystoreFile.exists()) {
+        throw new GradleException(
+            "Production release keystore was not found at ${releaseKeystoreFile}. " +
+                'Set MYAPP_UPLOAD_STORE_FILE to the local keystore path.'
+        )
+    }
+}
+
 android {
     ndkVersion rootProject.ext.ndkVersion
     compileSdkVersion rootProject.ext.compileSdkVersion
@@ -126,16 +151,11 @@ android {
         }
 
         release {
-            def uploadStoreFile = releaseSigningValue('MYAPP_UPLOAD_STORE_FILE')
-            def uploadStorePassword = releaseSigningValue('MYAPP_UPLOAD_STORE_PASSWORD')
-            def uploadKeyAlias = releaseSigningValue('MYAPP_UPLOAD_KEY_ALIAS')
-            def uploadKeyPassword = releaseSigningValue('MYAPP_UPLOAD_KEY_PASSWORD')
-
-            if (uploadStoreFile && uploadStorePassword && uploadKeyAlias && uploadKeyPassword) {
-                storeFile file(uploadStoreFile)
-                storePassword uploadStorePassword
-                keyAlias uploadKeyAlias
-                keyPassword uploadKeyPassword
+            if (hasReleaseSigning) {
+                storeFile releaseKeystoreFile
+                storePassword releaseSigningValues.storePassword
+                keyAlias releaseSigningValues.keyAlias
+                keyPassword releaseSigningValues.keyPassword
             }
         }
     }
@@ -208,6 +228,16 @@ android {
     //     }
     // }
 
+}
+
+afterEvaluate {
+    tasks.matching {
+        it.name == 'validateSigningProductionRelease' || it.name == 'signProductionReleaseBundle'
+    }.configureEach {
+        doFirst {
+            requireReleaseSigning()
+        }
+    }
 }
 
 dependencies {
