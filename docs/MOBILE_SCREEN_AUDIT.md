@@ -200,4 +200,18 @@ Audit layar aplikasi siswa Android lokal.
 - Verifikasi: `app:assembleDevelopmentQa -PincludeX86ForLocal=true` berhasil pada 1 Agustus 2026 dan menghasilkan APK baru di `mobile/android/app/build/outputs/apk/development/qa/app-development-qa.apk`.
 - Catatan build: dependency Metro yang terpasang menggunakan `metro-config` 0.83.x sehingga build lokal saat ini memakai Node 24.16.0. Node 18 portable dari helper repo gagal pada `Array.prototype.toReversed`; penyelarasan dependency menjadi pekerjaan hardening build berikutnya.
 - Verifikasi emulator: APK QA terbaru ter-install, `[QA auto-login] signed in` tercatat di Logcat, dan UI tree menunjukkan layar progress siswa dengan data fase/interview. Blocker login cleartext dinyatakan selesai untuk QA lokal.
-- Status berikutnya: smoke test end-to-end siswa dan hardening dependency Node/Metro sebelum release build.
+- Status berikutnya: formal QA/UAT, hardening dependency Node/Metro, dan release build sebelum production.
+
+### Smoke Test End-to-End Siswa 2026-08-01
+
+- APK yang dipakai: `app-development-qa.apk` terbaru, ter-install pada AVD `Wiwitan_API35_Lite`.
+- Backend lokal aktif pada port `8000` dan emulator dapat mengakses API melalui `10.0.2.2`.
+- Home: PASS. Drawer dan konten Home terbuka tanpa crash.
+- Progress: PASS. Ringkasan fase/interview dan tombol detail tampil tanpa error.
+- Training: PASS. Tiga kategori training tampil dari backend dengan judul Jepang dan progress valid (`5 / 20`, `0 / 12`, `0 / 12`).
+- Detail Training: PASS. Header `5 / 20`, tab Modul/Virtual Class/Asesmen, serta item modul tampil tanpa `NaN` atau crash.
+- Dokumen: PASS. Screen, search, dan filter terbuka. Akun QA belum memiliki data dokumen sehingga empty list dianggap normal.
+- Forum: PASS. Screen, tab/topik, search, dan sort tampil tanpa crash.
+- Notifikasi: PASS. Tab prioritas, untukmu, dan forum tampil; empty state notifikasi terbuka normal.
+- Relaunch/session recovery: PASS. Setelah `force-stop` dan relaunch, aplikasi kembali ke layar progress siswa; proses aktif dan tidak ada `FATAL EXCEPTION`, `TypeError`, atau error jaringan pada Logcat.
+- Kesimpulan: smoke test fungsional lokal siswa lulus untuk jalur utama. Sisa pekerjaan berpindah ke test case formal, validasi data edge case, hardening build, dan persiapan release production.

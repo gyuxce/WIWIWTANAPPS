@@ -19,6 +19,7 @@ Estimasi kesiapan menuju **rilis Google Play production**: **45-50%**, karena ma
 - Handling login mobile diperbaiki agar respons/error API terbaca jelas dan aplikasi tidak pindah ke Home sebelum profil berhasil dimuat.
 - TypeScript mobile lulus dan APK `developmentQa` terbaru berhasil dibuild. APK ini masih ditandatangani debug untuk audit lokal, bukan untuk Google Play.
 - APK QA terbaru berhasil di-install ke emulator. Log menunjukkan `[QA auto-login] signed in` dan UI siswa terbuka pada layar progress dengan data fase/interview.
+- Smoke test end-to-end lokal siswa lulus untuk Home, Progress, Training, Detail Training, Dokumen, Forum, Notifikasi, dan relaunch/session recovery.
 - Login otomatis dari `.env` hanya untuk QA lokal; credential contoh tidak lagi ditanam sebagai fallback di source.
 - Build type `qa` sekarang mengizinkan HTTP cleartext hanya melalui manifest `mobile/android/app/src/qa/AndroidManifest.xml`, karena backend emulator lokal memakai `10.0.2.2`; production tetap tidak diberi izin HTTP cleartext.
 - Build lokal saat ini memakai Node 24 karena dependency Metro yang terpasang (`metro-config` 0.83.x) mensyaratkan Node 20.19.4 atau lebih baru. Penyelarasan dependency dengan baseline Node 18 dicatat sebagai hardening build terpisah.
@@ -34,9 +35,9 @@ Mapping stage:
 | 1 | Repo recovery & cleanup dari source handoff | Selesai |
 | 2 | Local backend/CMS/mobile setup | Selesai untuk local dev |
 | 3 | Audit CMS dan flow admin dasar | Sebagian besar selesai |
-| 4 | Audit dan stabilisasi mobile siswa | Hampir selesai untuk local QA; smoke test end-to-end masih pending |
+| 4 | Audit dan stabilisasi mobile siswa | Smoke test local QA selesai; polish dan edge case masih berjalan |
 | 5 | Data/i18n/backend schema hardening | Sebagian selesai; course bilingual sudah ada, forum/notifikasi dinamis masih pending |
-| 6 | QA end-to-end dan UAT client | Gate berikutnya setelah login QA stabil |
+| 6 | QA end-to-end dan UAT client | Gate berikutnya; smoke test lokal sudah menjadi baseline |
 | 7 | Release preparation Google Play | Belum mulai |
 
 ## Progress Per Area
