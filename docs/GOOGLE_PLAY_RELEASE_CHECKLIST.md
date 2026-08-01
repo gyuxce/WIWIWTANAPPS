@@ -4,6 +4,8 @@ Tanggal update: 1 Agustus 2026
 
 Checklist ini dipakai saat project mulai masuk fase rilis Android production. Jangan publish sebelum semua item wajib di bawah selesai.
 
+Evidence local release-candidate hardening: [LOCAL_RELEASE_CANDIDATE_2026-08-01.md](LOCAL_RELEASE_CANDIDATE_2026-08-01.md)
+
 ## 1. Status Saat Ini
 
 Project belum siap publish production. Posisi sekarang masih **release preparation awal**, berjalan paralel dengan QA/UAT:
@@ -15,6 +17,7 @@ Project belum siap publish production. Posisi sekarang masih **release preparati
 - Client UAT sudah dilaporkan approved; formal sign-off/evidence tetap menjadi item release handoff.
 - Production signing masih **BLOCKED** karena keystore upload dan credential `MYAPP_UPLOAD_*` belum tersedia.
 - AAB production belum terbentuk karena proses berhenti di tahap signing.
+- Production bundle sekarang wajib memilih `ENVFILE` secara eksplisit; konfigurasi lokal emulator tidak boleh ikut masuk ke production artifact.
 - Play Console, privacy policy, data safety, Firebase production, storage, payment, dan backend production belum diaudit penuh.
 
 ## 1A. Latest Local Release Preflight - 1 Agustus 2026
@@ -25,10 +28,11 @@ Project belum siap publish production. Posisi sekarang masih **release preparati
 | Production flavor/config | PASS | Variant `productionRelease` dan task bundle tersedia |
 | JavaScript/native compilation | PASS | Build maju sampai tahap bundle signing |
 | R8/minification | PASS | Lolos dengan Gradle heap 3 GB dan workers 1 |
+| Local QA env isolation | PASS | `ENVFILE` wajib eksplisit; production-shaped env menolak URL emulator dan auto-login |
 | Release signing | BLOCKED | `mobile/android/app/wiwitan.keystore` belum tersedia; empat `MYAPP_UPLOAD_*` belum diset |
 | Production AAB | BLOCKED | Belum ada file `.aab` yang dapat diupload |
 
-Catatan non-blocking: Gradle masih menampilkan warning penggunaan `ndk.dir` yang deprecated dan build lokal perlu `NODE_ENV=production` agar pemilihan env Expo eksplisit.
+Catatan non-blocking: Gradle masih menampilkan warning penggunaan `ndk.dir` yang deprecated. Pemilihan env mobile sekarang dikunci melalui `ENVFILE`; `mobile/.env.production` harus dibuat dari `mobile/.env.production.example` dan tetap tidak boleh masuk Git.
 
 ## 2. Akses yang Harus Dikumpulkan
 
@@ -106,10 +110,18 @@ Build AAB:
 ```powershell
 cd mobile\android
 $env:NODE_ENV="production"
+$env:ENVFILE=".env.production"
 .\gradlew.bat app:bundleProductionRelease --no-daemon --stacktrace --max-workers=1
 ```
 
-Build akan berhenti dengan pesan yang jelas bila signing belum lengkap. Jangan memakai debug keystore untuk upload ke Google Play.
+Validasi env sebelum build:
+
+```powershell
+cd mobile
+node ..\scripts\validate-mobile-env.js .env.production production
+```
+
+Build akan berhenti dengan pesan yang jelas bila env atau signing belum lengkap. Jangan memakai debug keystore untuk upload ke Google Play.
 
 Output:
 

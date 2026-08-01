@@ -12,7 +12,7 @@ Per 1 Agustus 2026:
 
 | Indikator | Estimasi | Keterangan |
 | --- | ---: | --- |
-| Kesiapan menuju internal release candidate | **65-70%** | Core mobile flow, null payload replay, dan latency behavior sudah diuji di emulator |
+| Kesiapan menuju internal release candidate | **70-75%** | Core mobile flow, null/latency replay, local storage readback, dan QA APK hardening sudah diuji |
 | Kesiapan menuju Google Play production | **45-50%** | Production environment, signing final, Firebase, storage, payment, dan Play Console masih perlu diselesaikan |
 | QA/UAT formal | **60-65%** | Negative batch 2 sudah PASS-QA; client UAT dilaporkan approved, evidence formal dan known issue closure masih perlu dilengkapi |
 | Google Play release preparation | **30%** | Checklist, preflight, dan dasar signing sudah ada; keystore/AAB production dan akses production belum selesai |
@@ -120,6 +120,7 @@ Pekerjaan yang dilakukan:
 - Dasar release signing dan kebutuhan keystore didokumentasikan.
 - Credential signing diarahkan untuk disimpan di local machine atau secret manager, bukan repository.
 - Perbedaan build QA dan build production dicatat.
+- Local release-candidate hardening lulus: env QA dipilih eksplisit, APK `developmentQa` dibuild/install, checksum dicatat, dan launch smoke emulator lulus tanpa fatal log.
 
 Yang belum selesai:
 
@@ -164,7 +165,7 @@ Angka berikut diambil dari checkpoint project yang sudah dicatat pada 22 Juli da
 
 | Area | Checkpoint 22 Juli | Checkpoint 1 Agustus | Perubahan |
 | --- | ---: | ---: | --- |
-| Internal release candidate | 60-65% | 65-70% | Null payload dan latency behavior sudah ditutup pada QA lokal; release hardening masih berjalan |
+| Internal release candidate | 60-65% | 70-75% | Null/latency behavior, local storage readback, dan env-isolated QA APK sudah ditutup; production hardening masih berjalan |
 | Google Play production readiness | 45-50% | 45-50% | Masih menunggu akses dan validasi production |
 | QA/UAT formal | 25% | 70% | Naik karena formal test plan, negative batch 1-2, null/latency replay, DEF-001/DEF-002 closure, dan approval UAT client yang dilaporkan |
 | Google Play release preparation | 20% | 30% | Naik karena checklist, preflight, debug APK, dan signing blocker sudah terisolasi |
@@ -259,3 +260,4 @@ Dokumen pendukung:
 - [Formal QA/UAT test plan](QA_UAT_TEST_PLAN.md)
 - [Negative test batch 2](NEGATIVE_TEST_BATCH_2_2026-08-01.md)
 - [Google Play release checklist](GOOGLE_PLAY_RELEASE_CHECKLIST.md)
+- [Local release candidate hardening](LOCAL_RELEASE_CANDIDATE_2026-08-01.md)

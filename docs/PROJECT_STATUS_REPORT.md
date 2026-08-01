@@ -8,7 +8,7 @@ Project saat ini berada di fase **release preparation setelah internal QA dan ap
 
 Source handoff dari developer sebelumnya sudah dirapikan ke repo, environment lokal sudah bisa dijalankan, CMS dan backend lokal sudah aktif, APK Android development sudah berhasil dibuild dan diinstall ke emulator, dan flow utama siswa sudah mulai stabil.
 
-Estimasi kesiapan keseluruhan saat ini: **65-70% menuju release candidate internal**.
+Estimasi kesiapan keseluruhan saat ini: **70-75% menuju release candidate internal**.
 
 Estimasi kesiapan menuju **rilis Google Play production**: **45-50%**, karena masih ada pekerjaan release engineering, konfigurasi production, signing, privacy/compliance, dan validasi backend production.
 
@@ -27,8 +27,11 @@ Estimasi kesiapan menuju **rilis Google Play production**: **45-50%**, karena ma
 - Build type `qa` sekarang mengizinkan HTTP cleartext hanya melalui manifest `mobile/android/app/src/qa/AndroidManifest.xml`, karena backend emulator lokal memakai `10.0.2.2`; production tetap tidak diberi izin HTTP cleartext.
 - Build lokal saat ini memakai Node 24 karena dependency Metro yang terpasang (`metro-config` 0.83.x) mensyaratkan Node 20.19.4 atau lebih baru. Penyelarasan dependency dengan baseline Node 18 dicatat sebagai hardening build terpisah.
 - Preflight `bundleProductionRelease` sudah dijalankan; R8/minification berhasil setelah heap Gradle dinaikkan menjadi 3 GB.
+- Local release-candidate hardening sudah lulus: `developmentQa` dibuild dengan env QA eksplisit, checksum dicatat, APK di-install ke emulator, dan MainActivity resumed tanpa fatal log. Detail ada di `docs/LOCAL_RELEASE_CANDIDATE_2026-08-01.md`.
+- Production package script sekarang menolak build sebelum Gradle jika `.env.production` belum tersedia; ini mencegah URL emulator dan auto-login QA masuk ke production bundle.
 - Production signing belum tersedia: keystore upload dan credential `MYAPP_UPLOAD_*` belum diset, sehingga AAB belum terbentuk.
 - Guard signing sudah ditambahkan agar build production gagal dengan pesan yang jelas, bukan `NullPointerException`.
+- Local release-candidate hardening menambahkan pemilihan `ENVFILE` eksplisit dan validasi agar URL emulator/auto-login QA tidak dapat ikut ke production bundle.
 - Paket eksekusi UAT client sudah siap, approval client sudah dilaporkan, dan template formal sign-off sudah ditambahkan di `docs/UAT_SIGN_OFF_2026-08-01.md`; nama reviewer, acceptance criteria, dan evidence formal masih perlu dilampirkan.
 - Internal UAT baseline sudah dijalankan dengan hasil `CONDITIONAL PASS`; detail evidence dipisahkan dari approval client.
 - Negative test batch 2 sudah dijalankan: duplicate submit forum berhasil direproduksi sebelum fix, guard mobile sudah diterapkan dan lulus retest UI, null-safety training diperkuat, serta null payload dan slow-network sudah lulus replay. Detail ada di `docs/NEGATIVE_TEST_BATCH_2_2026-08-01.md`.
@@ -61,13 +64,13 @@ Mapping stage:
 | Repo, struktur, dokumentasi awal | 90% | Repo sudah rapi, README/docs aktif diperbarui |
 | Backend local development | 75% | Laravel local jalan, SQLite dan local auth fallback sudah bisa dipakai |
 | CMS local/admin | 70% | CMS bisa login admin dan beberapa fitur sudah diaudit |
-| Mobile Android build | 75% | APK development debug berhasil build/install di emulator |
+| Mobile Android build | 80% | APK `developmentQa` berhasil build/install dengan env eksplisit; production signing/AAB masih blocked |
 | Mobile siswa core flow | 70% | Login, session recovery, progress, training, dokumen, forum, notifikasi dasar sudah diaudit |
 | Training module/progress logic | 80% | Bug NaN, mismatch progress, detail training sudah diperbaiki |
-| Media/document handling | 65% | Handling UI sudah lebih aman, tetapi file GCS/production media masih perlu validasi |
+| Media/document handling | 70% | Local Sardine upload/readback untuk cover, video, dan dokumen sudah lulus; production media masih perlu validasi |
 | i18n/mixed language | 45% | Teks statis penting, course category, dan course item/module mulai rapi; forum topic dan notification data masih perlu schema/backend/CMS |
 | QA/UAT formal | 70% | Negative batch 2 serta DEF-001/DEF-002 sudah PASS-QA; formal sign-off, evidence client, dan retest CMS release candidate masih perlu dilengkapi |
-| Google Play release readiness | 30% | Environment dan preflight sudah dicek; signing/AAB, Play Console, privacy policy, production env, dan store assets belum selesai |
+| Google Play release readiness | 30% | Local preflight dan env guard sudah lebih rapi; signing/AAB, Play Console, privacy policy, production env, dan store assets belum selesai |
 
 ## Yang Sudah Diselesaikan
 

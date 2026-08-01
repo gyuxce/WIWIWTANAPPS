@@ -165,6 +165,7 @@ Untuk audit lokal tanpa Metro, gunakan build `developmentQa`. Build ini membunde
 
 ```powershell
 .\scripts\android-env.ps1
+$env:ENVFILE = '.env'
 cd mobile\android
 .\gradlew.bat app:assembleDevelopmentQa --no-daemon --stacktrace --max-workers=2 -PincludeX86ForLocal=true
 ```
@@ -176,6 +177,8 @@ mobile/android/app/build/outputs/apk/development/qa/app-development-qa.apk
 ```
 
 Catatan: flag `-PincludeX86ForLocal=true` hanya untuk emulator x86_64. Build Play Store tetap harus memakai artifact release/bundle resmi, bukan APK QA ini.
+
+Build yang membundel JavaScript dalam mode production wajib memilih env secara eksplisit. Gunakan `mobile/.env.production` yang dibuat dari [`.env.production.example`](../mobile/.env.production.example); file tersebut tetap lokal dan tidak boleh di-commit. Build production akan gagal lebih awal bila env tidak memakai `STATUS=PRODUCTION`, URL HTTPS, atau masih berisi auto-login QA.
 
 Install APK ke emulator:
 
