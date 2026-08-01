@@ -5,7 +5,6 @@ import { apiShow, apiStore, apiUpdate } from './api';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import { Button, toast, Notification, FormContainer, FormItem, Input } from 'components/ui';
-import { PageConfig } from './config';
 import { PageConfig as ModulePageConfig } from '../../config';
 import { Field, Form, Formik } from 'formik';
 import * as Yup from 'yup';
@@ -125,7 +124,7 @@ const Create = () => {
           placement: 'top-center',
         },
       );
-      navigate(PageConfig.url);
+      navigate(ModulePageConfig.detailModulelUrl + parentId + '?page=virtual');
     } catch (error) {
       toast.push(
         <Notification title={'Error'} type="danger">

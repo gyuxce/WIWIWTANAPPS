@@ -98,8 +98,8 @@ Catatan: hasil `PASS-SMOKE` pada dokumen ini adalah baseline teknis dari emulato
 | QA-CMS-004 | Daftar dan buat role | Permission dapat dipilih, dibaca kembali, dan dihapus | P1 | PASS-QA |
 | QA-CMS-005 | Kategori training | Create/edit/delete dan title Jepang tersimpan | P1 | PASS-QA |
 | QA-CMS-006 | Modul training | Module, item, dan title Jepang tersimpan; urutan belum diuji | P1 | PARTIAL |
-| QA-CMS-007 | Virtual class | Create/edit/detail dan status tampil | P1 | PENDING |
-| QA-CMS-008 | Assessment | Template, question, dan publish flow berjalan | P1 | PENDING |
+| QA-CMS-007 | Virtual class | Create/edit/detail/delete, date picker, dan link tampil; upload/status edge case belum diuji | P1 | PASS-QA |
+| QA-CMS-008 | Assessment | Package/question create-readback-edit-delete dan activation toggle lulus; verbal schedule/video publish belum lengkap | P1 | PARTIAL |
 | QA-CMS-009 | Seminar | Daftar, create/edit/delete, date picker, link, dan detail terbuka | P2 | PASS-QA |
 | QA-CMS-010 | Forum | Topic/list/detail, publish, delete, dan empty state stabil | P1 | PASS-QA |
 | QA-CMS-011 | Notification content | Create/edit/delete, schedule, link, repeat, dan target user benar | P1 | PASS-QA |
@@ -177,6 +177,8 @@ Gunakan satu baris per defect. Jangan menutup defect hanya karena workaround dit
 | CMS-DEF-004 | QA-CMS-006 | P3 | Toast edit materi masih berbunyi `Berhasil membuat data` | CMS training material edit retest | Engineering | Open - copy only |
 | CMS-DEF-005 | QA-CMS-009 | P3 | Date kosong pada Seminar menampilkan error Yup teknis | `cms/src/views/seminar/form.js`, empty-submit retest | Engineering | Closed - PASS-QA |
 | CMS-DEF-006 | QA-CMS-011 | P1 | Field link notifikasi hilang saat readback karena tidak ada di request validation backend | `ApiContentNotificationRequest.php`, edit readback retest | Engineering | Closed - PASS-QA |
+| CMS-DEF-007 | QA-CMS-007 | P2 | Virtual class create berhasil tetapi halaman tetap di form karena `PageConfig.url` kosong | `cms/src/views/training/module/detail/virtual/create.js`, browser retest | Engineering | Closed - PASS-QA |
+| CMS-DEF-008 | QA-CMS-006 | P1 | Delete modul melakukan soft-delete pada parent tetapi child asesmen otomatis masih aktif; fixture QA perlu dibersihkan di level database | CMS module delete retest, local SQLite relation count | Engineering/Product | Open - retention policy and backend cascade/archive required |
 
 ## Execution Notes
 
@@ -201,6 +203,9 @@ Gunakan satu baris per defect. Jangan menutup defect hanya karena workaround dit
 - CMS functional QA 1 Agustus 2026: user/role, training category/module/material, forum, seminar, dan notification core flows lulus pada local development. Temporary QA records were removed after each flow.
 - Notification link persistence was reproduced as a backend validation defect, fixed by adding the optional URL rule, then verified through CMS edit readback and database-backed API response.
 - Seminar empty date validation was reproduced before the fix and now returns the user-facing required-field message.
+- Virtual Class CRUD was executed from the module detail tab. The create redirect defect was fixed and the temporary class was read back, edited, and deleted.
+- Assessment package/question flow was executed with a temporary package and question. Activation was toggled off and restored on the seeded assessment; verbal schedule and video upload remain separate gaps.
+- CMS module deletion retest found that the parent is soft-deleted while generated assessment child rows remain active. The local QA fixture sweep removed all temporary descendants and returned zero active or soft-deleted `QA CMS` rows, but production cascade/archive behavior remains an open defect.
 - Mobile Jest sudah menjadi gate code-level terbatas untuk regression test yang tersedia. `App-test.tsx` dan helper DEF-002 lulus dengan `2` suites / `4` tests; mock native dependency berada di `mobile/jest.setup.js` dan hanya aktif pada Jest.
 - `PASS-SMOKE` harus diulang sebagai `PASS-QA` setelah test data, build, dan bukti eksekusi formal ditetapkan.
 - UAT client dilaporkan sudah `Approved` oleh project owner pada 1 Agustus 2026. Template formal sign-off tersedia di [UAT_SIGN_OFF_2026-08-01.md](UAT_SIGN_OFF_2026-08-01.md), tetapi acceptance criteria, nama reviewer, evidence, dan konfirmasi tertulis tetap harus diisi agar approval menjadi auditable.
@@ -209,8 +214,9 @@ Gunakan satu baris per defect. Jangan menutup defect hanya karena workaround dit
 ## Next Gate
 
 1. Lengkapi dan minta konfirmasi pada [UAT_SIGN_OFF_2026-08-01.md](UAT_SIGN_OFF_2026-08-01.md), termasuk scope, evidence, known issue, nama reviewer, dan tanda tangan/approval tertulis.
-2. Finish CMS virtual class, assessment, upload/storage, and restricted-role permission tests.
-3. Retest CMS CRUD content, user, role, permission, and validation on a labeled release candidate.
-4. Siapkan release candidate berlabel version dan kumpulkan screenshot/log evidence final.
-5. Selesaikan `REL-001`: keystore/signing production, AAB production, dan checksum.
-6. Lanjutkan production config, privacy/Data Safety, Firebase/storage/payment, Play Console internal testing, dan release smoke test.
+2. Close `CMS-DEF-008` after the module deletion retention/cascade policy is implemented and verified with database evidence.
+3. Finish CMS virtual class, assessment, upload/storage, and restricted-role permission tests.
+4. Retest CMS CRUD content, user, role, permission, and validation on a labeled release candidate.
+5. Siapkan release candidate berlabel version dan kumpulkan screenshot/log evidence final.
+6. Selesaikan `REL-001`: keystore/signing production, AAB production, dan checksum.
+7. Lanjutkan production config, privacy/Data Safety, Firebase/storage/payment, Play Console internal testing, dan release smoke test.
