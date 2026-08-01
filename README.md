@@ -23,7 +23,8 @@ Repo ini dibuat dari source handoff developer sebelumnya dan sudah disanitasi su
 10. Untuk test matrix formal QA/UAT, baca [docs/QA_UAT_TEST_PLAN.md](docs/QA_UAT_TEST_PLAN.md).
 11. Untuk report progres Juli-Agustus dan action plan client, baca [docs/CLIENT_PROGRESS_REPORT_JULY_AUGUST_2026.md](docs/CLIENT_PROGRESS_REPORT_JULY_AUGUST_2026.md).
 12. Untuk paket eksekusi dan sign-off UAT client, baca [docs/UAT_CLIENT_EXECUTION_PACK.md](docs/UAT_CLIENT_EXECUTION_PACK.md).
-13. Jalankan backend dulu, lalu CMS, lalu mobile app.
+13. Untuk hasil pengujian internal terbaru, baca [docs/INTERNAL_UAT_REPORT_2026-08-01.md](docs/INTERNAL_UAT_REPORT_2026-08-01.md).
+14. Jalankan backend dulu, lalu CMS, lalu mobile app.
 
 ## Stack Utama
 

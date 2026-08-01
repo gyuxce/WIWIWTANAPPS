@@ -143,6 +143,8 @@ UAT dilakukan dengan akun dan data yang disetujui client. Setiap item harus memi
 
 Template eksekusi yang siap dikirim ke client tersedia di [UAT_CLIENT_EXECUTION_PACK.md](UAT_CLIENT_EXECUTION_PACK.md).
 
+Hasil pengujian lokal/internal terbaru tersedia di [INTERNAL_UAT_REPORT_2026-08-01.md](INTERNAL_UAT_REPORT_2026-08-01.md). Hasil internal tidak mengubah status UAT client menjadi `Accept`.
+
 | ID | Business flow | Acceptance criteria | Status |
 | --- | --- | --- | --- |
 | UAT-001 | Login siswa | Siswa dapat login dan melihat data miliknya | PENDING |

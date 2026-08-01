@@ -30,6 +30,7 @@ Estimasi kesiapan menuju **rilis Google Play production**: **45-50%**, karena ma
 - Production signing belum tersedia: keystore upload dan credential `MYAPP_UPLOAD_*` belum diset, sehingga AAB belum terbentuk.
 - Guard signing sudah ditambahkan agar build production gagal dengan pesan yang jelas, bukan `NullPointerException`.
 - Paket eksekusi UAT client sudah siap dikirim dan diisi oleh reviewer.
+- Internal UAT baseline sudah dijalankan dengan hasil `CONDITIONAL PASS`; detail evidence dipisahkan dari approval client.
 
 ## Stage Saat Ini
 
@@ -44,7 +45,7 @@ Mapping stage:
 | 3 | Audit CMS dan flow admin dasar | Sebagian besar selesai |
 | 4 | Audit dan stabilisasi mobile siswa | Core flow dan recovery utama selesai; edge case sudah masuk QA |
 | 5 | Data/i18n/backend schema hardening | Sebagian selesai; course bilingual sudah ada, forum/notifikasi dinamis masih pending |
-| 6 | QA end-to-end dan UAT client | QA batch 1 dan negative mobile batch 1 selesai; execution pack siap, eksekusi client masih pending |
+| 6 | QA end-to-end dan UAT client | QA batch 1 dan negative mobile batch 1 selesai; internal baseline conditional pass, eksekusi client masih pending |
 | 7 | Release preparation Google Play | Preflight sudah dilakukan; signing/AAB, production config, compliance, dan Play Console masih pending |
 
 ## Progress Per Area
@@ -59,7 +60,7 @@ Mapping stage:
 | Training module/progress logic | 80% | Bug NaN, mismatch progress, detail training sudah diperbaiki |
 | Media/document handling | 65% | Handling UI sudah lebih aman, tetapi file GCS/production media masih perlu validasi |
 | i18n/mixed language | 45% | Teks statis penting, course category, dan course item/module mulai rapi; forum topic dan notification data masih perlu schema/backend/CMS |
-| QA/UAT formal | 40% | Test plan formal dan negative mobile batch 1 selesai; data migration, edge case khusus, serta UAT masih pending |
+| QA/UAT formal | 40% | Internal baseline conditional pass; migration reproducibility, edge case khusus, dan UAT client masih pending |
 | Google Play release readiness | 25% | Environment dan preflight sudah dicek; signing/AAB, Play Console, privacy policy, production env, dan store assets belum selesai |
 
 ## Yang Sudah Diselesaikan
@@ -83,6 +84,7 @@ Mapping stage:
 - Release signing Android mulai dirapikan agar credential production tidak disimpan di repo.
 - Checklist rilis Google Play sudah dibuat sebagai acuan menuju AAB production.
 - UAT client execution pack sudah dibuat dengan matrix login, progress, training, dokumen, forum, notifikasi, CMS, role, bilingual, dan sign-off.
+- Internal UAT report 1 Agustus 2026 sudah mencatat gate backend, CMS build, mobile TypeScript, APK launch, security hygiene, dan open issue.
 - Preflight production sudah melewati R8; blocker rilis sekarang terisolasi pada keystore upload dan credential signing yang belum tersedia.
 - Guard signing production sudah ditambahkan agar error konfigurasi terbaca jelas dan tidak membingungkan saat build.
 - Hasil audit dicatat di `docs/MOBILE_SCREEN_AUDIT.md`.
