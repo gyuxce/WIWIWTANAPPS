@@ -87,7 +87,10 @@ const SplashScreen = () => {
         const refreshToken = signinResp?.data?.refresh_token;
 
         if (signinResp?.status !== "success" || !accessToken) {
-          console.log("[QA auto-login] sign-in failed", signinResp?.status);
+          console.log("[QA auto-login] sign-in failed", {
+            status: signinResp?.status,
+            message: signinResp?.message,
+          });
           return false;
         }
 

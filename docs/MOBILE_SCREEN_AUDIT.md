@@ -195,7 +195,9 @@ Audit layar aplikasi siswa Android lokal.
 - `apiSignin` mobile sekarang memakai request JSON langsung dan membaca body respons secara eksplisit. Error HTTP tidak lagi berubah menjadi status angka yang berakhir sebagai pesan `undefined`.
 - `LoginScreen` sekarang hanya berpindah ke `HomeScreen` setelah `getMe` berhasil memuat profil. Jika token diterima tetapi profil gagal dimuat, aplikasi menampilkan pesan yang jelas dan tidak meninggalkan loading modal.
 - QA auto-login hanya membaca `AUTO_LOGIN_EMAIL` dan `AUTO_LOGIN_PASSWORD` dari `mobile/.env`; fallback credential yang tertanam di source sudah dihapus dan mode production tetap menonaktifkan auto-login.
+- Build type `qa` sekarang memiliki manifest lokal yang mengizinkan HTTP cleartext untuk akses emulator ke `10.0.2.2`. Manifest ini tidak dipakai oleh build production.
 - Verifikasi: `corepack yarn tsc --noEmit --pretty false` berhasil.
 - Verifikasi: `app:assembleDevelopmentQa -PincludeX86ForLocal=true` berhasil pada 1 Agustus 2026 dan menghasilkan APK baru di `mobile/android/app/build/outputs/apk/development/qa/app-development-qa.apk`.
 - Catatan build: dependency Metro yang terpasang menggunakan `metro-config` 0.83.x sehingga build lokal saat ini memakai Node 24.16.0. Node 18 portable dari helper repo gagal pada `Array.prototype.toReversed`; penyelarasan dependency menjadi pekerjaan hardening build berikutnya.
-- Status pending: install APK terbaru ke emulator dan ulangi login/smoke test siswa. APK baru belum dianggap tervalidasi visual sebelum langkah ini selesai.
+- Verifikasi emulator: APK QA terbaru ter-install, `[QA auto-login] signed in` tercatat di Logcat, dan UI tree menunjukkan layar progress siswa dengan data fase/interview. Blocker login cleartext dinyatakan selesai untuk QA lokal.
+- Status berikutnya: smoke test end-to-end siswa dan hardening dependency Node/Metro sebelum release build.

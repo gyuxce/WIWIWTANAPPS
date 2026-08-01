@@ -14,11 +14,13 @@ Estimasi kesiapan menuju **rilis Google Play production**: **45-50%**, karena ma
 
 ## Checkpoint Terbaru - 1 Agustus 2026
 
-- Posisi aktual: akhir stabilisasi mobile Android, sebelum QA/UAT formal.
+- Posisi aktual: penutupan stabilisasi mobile Android, sebelum QA/UAT formal.
 - Login API siswa tervalidasi dengan HTTP 200 dari backend lokal.
 - Handling login mobile diperbaiki agar respons/error API terbaca jelas dan aplikasi tidak pindah ke Home sebelum profil berhasil dimuat.
 - TypeScript mobile lulus dan APK `developmentQa` terbaru berhasil dibuild. APK ini masih ditandatangani debug untuk audit lokal, bukan untuk Google Play.
-- Verifikasi emulator setelah APK terbaru masih menjadi langkah berikutnya. Login otomatis dari `.env` hanya untuk QA lokal; credential contoh tidak lagi ditanam sebagai fallback di source.
+- APK QA terbaru berhasil di-install ke emulator. Log menunjukkan `[QA auto-login] signed in` dan UI siswa terbuka pada layar progress dengan data fase/interview.
+- Login otomatis dari `.env` hanya untuk QA lokal; credential contoh tidak lagi ditanam sebagai fallback di source.
+- Build type `qa` sekarang mengizinkan HTTP cleartext hanya melalui manifest `mobile/android/app/src/qa/AndroidManifest.xml`, karena backend emulator lokal memakai `10.0.2.2`; production tetap tidak diberi izin HTTP cleartext.
 - Build lokal saat ini memakai Node 24 karena dependency Metro yang terpasang (`metro-config` 0.83.x) mensyaratkan Node 20.19.4 atau lebih baru. Penyelarasan dependency dengan baseline Node 18 dicatat sebagai hardening build terpisah.
 
 ## Stage Saat Ini

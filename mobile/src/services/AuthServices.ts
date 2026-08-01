@@ -3,7 +3,7 @@ import type {
   UserSignupProcessTypes,
   UserType,
 } from "types/UserTypes";
-import { API_URL } from "@env";
+import { API_URL, STATUS } from "@env";
 import { onErrorState } from "stores/error/errorSlice";
 import icons from "configs/icons";
 
@@ -48,7 +48,12 @@ export const apiSignin = async (body: {
   is_mobile: string;
 }) => {
   try {
-    const response = await fetch(`${API_URL}/auth/sign-in`, {
+    const signInUrl = `${API_URL}/auth/sign-in`;
+    if (STATUS !== "PRODUCTION") {
+      console.log("[QA sign-in] request", signInUrl);
+    }
+
+    const response = await fetch(signInUrl, {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -73,6 +78,9 @@ export const apiSignin = async (body: {
     }
 
     if (!response.ok) {
+      if (STATUS !== "PRODUCTION") {
+        console.log("[QA sign-in] response", response.status, result?.message);
+      }
       return {
         status: "failed",
         data: result?.data ?? null,
@@ -90,6 +98,12 @@ export const apiSignin = async (body: {
       errors: result?.errors,
     };
   } catch (error) {
+    if (STATUS !== "PRODUCTION") {
+      console.log(
+        "[QA sign-in] network error",
+        error instanceof Error ? error.message : String(error),
+      );
+    }
     return {
       status: "failed",
       message: error instanceof Error ? error.message : String(error),
