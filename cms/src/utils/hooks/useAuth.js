@@ -125,8 +125,12 @@ function useAuth() {
   };
 
   const signOut = async () => {
-    await apiSignOut({ refresh_token: refresh_token });
-    handleSignOut();
+    try {
+      await apiSignOut({ refresh_token: refresh_token });
+    } finally {
+      // Always clear the local session when the API cannot revoke an old token.
+      handleSignOut();
+    }
   };
 
   return {

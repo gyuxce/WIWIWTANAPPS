@@ -24,6 +24,10 @@ class ApiContentNotificationRequest extends FormRequest {
             "description" => [
                 "required",
             ],
+            "link" => [
+                "nullable",
+                "url",
+            ],
             "send_at" => [
                 "required",
                 "date_format:Y-m-d H:i",
@@ -56,7 +60,7 @@ class ApiContentNotificationRequest extends FormRequest {
         return [
             'name.required' => __('validation.required', ['attribute' => 'name']),
             'description.required' => __('validation.required', ['attribute' => 'description']),
-            'send_at.required' => __('validation.email', ['attribute' => 'send_at']),
+            'send_at.required' => __('validation.required', ['attribute' => 'send_at']),
             'send_at.after' => __('validation.after', ['attribute' => 'send_at']),
             'send_at.date_format' => __('validation.date_format', ['attribute' => 'send_at']),
             'repeat_each.required' => __('validation.required', ['attribute' => 'repeat_each']),

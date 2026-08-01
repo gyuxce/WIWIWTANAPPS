@@ -20,8 +20,8 @@ dayjs.extend(utc);
 const validationSchema = Yup.object().shape({
   name: Yup.string().required('Wajib diisi'),
   status: Yup.string().required('Wajib diisi'),
-  started_at: Yup.string().required('Wajib diisi'),
-  finished_at: Yup.string().required('Wajib diisi'),
+  started_at: Yup.mixed().required('Wajib diisi'),
+  finished_at: Yup.mixed().required('Wajib diisi'),
   description: Yup.string().max(1000, 'Deskripsi acara tidak boleh lebih dari 1000 karakter').required('Wajib diisi'),
   link: Yup.string().url('Invalid URL').required('Wajib diisi'),
 });

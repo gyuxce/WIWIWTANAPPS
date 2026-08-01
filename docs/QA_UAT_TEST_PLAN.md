@@ -93,18 +93,18 @@ Catatan: hasil `PASS-SMOKE` pada dokumen ini adalah baseline teknis dari emulato
 | ID | Skenario | Expected result | Severity | Status |
 | --- | --- | --- | --- | --- |
 | QA-CMS-001 | Dashboard admin | Dashboard, menu, dan data ringkasan terbuka | P1 | PASS-SMOKE |
-| QA-CMS-002 | Daftar dan detail user | Search, sort, detail, dan status tampil benar | P1 | PASS-SMOKE |
-| QA-CMS-003 | Buat/edit user | Validasi field dan penyimpanan berhasil | P1 | PENDING |
-| QA-CMS-004 | Daftar dan buat role | Permission dapat dipilih dan disimpan | P1 | PASS-SMOKE |
-| QA-CMS-005 | Kategori training | Create/edit/status dan title Jepang tersimpan | P1 | PASS-SMOKE |
-| QA-CMS-006 | Modul training | Module, item, urutan, dan title Jepang tersimpan | P1 | PASS-SMOKE |
+| QA-CMS-002 | Daftar dan detail user | Search, sort, detail, dan status tampil benar | P1 | PASS-QA |
+| QA-CMS-003 | Buat/edit user | Validasi field, format email, create/edit/delete, dan penyimpanan berhasil | P1 | PASS-QA |
+| QA-CMS-004 | Daftar dan buat role | Permission dapat dipilih, dibaca kembali, dan dihapus | P1 | PASS-QA |
+| QA-CMS-005 | Kategori training | Create/edit/delete dan title Jepang tersimpan | P1 | PASS-QA |
+| QA-CMS-006 | Modul training | Module, item, dan title Jepang tersimpan; urutan belum diuji | P1 | PARTIAL |
 | QA-CMS-007 | Virtual class | Create/edit/detail dan status tampil | P1 | PENDING |
 | QA-CMS-008 | Assessment | Template, question, dan publish flow berjalan | P1 | PENDING |
-| QA-CMS-009 | Seminar | Daftar, create/edit, dan detail terbuka | P2 | PASS-SMOKE |
-| QA-CMS-010 | Forum | Category/topic/list/detail dan empty state stabil | P1 | PASS-SMOKE |
-| QA-CMS-011 | Notification content | Create/edit/publish dan target user benar | P1 | PENDING |
+| QA-CMS-009 | Seminar | Daftar, create/edit/delete, date picker, link, dan detail terbuka | P2 | PASS-QA |
+| QA-CMS-010 | Forum | Topic/list/detail, publish, delete, dan empty state stabil | P1 | PASS-QA |
+| QA-CMS-011 | Notification content | Create/edit/delete, schedule, link, repeat, dan target user benar | P1 | PASS-QA |
 | QA-CMS-012 | Pengaturan/profile | Profile dan system setting tidak merusak session | P2 | PASS-SMOKE |
-| QA-CMS-013 | Form validation | Field wajib, format, duplicate, dan error API tampil jelas | P1 | PENDING |
+| QA-CMS-013 | Form validation | Field wajib, email/url/date format, dan error API tampil jelas; duplicate belum diuji | P1 | PARTIAL |
 | QA-CMS-014 | Permission matrix | Role non-admin tidak melihat atau mengakses menu terlarang | P0 | PENDING |
 
 ## Student Mobile Core Flow
@@ -171,6 +171,12 @@ Gunakan satu baris per defect. Jangan menutup defect hanya karena workaround dit
 | DEF-001 | QA-ENV-005 | P2 | Existing `App-test.tsx` membutuhkan konfigurasi mock native SDK yang luas dan sebelumnya berhenti sebelum assertion | Jest output, `mobile/jest.setup.js`, `mobile/__mocks__/assetMock.js` | Engineering | Closed - PASS-QA (Jest harness) |
 | DEF-002 | QA-AUTH-006 | P2 | Toast `Error internal server` muncul transient saat HTTP `401` terjadi ketika access-token recovery berjalan | `ApiResponse-test`, APK replay expired access token, logcat tanpa internal-server error/fatal | Engineering | Closed - PASS-QA (401 recovery) |
 | DEF-003 | QA-NEG-006 | P1 | Dua request forum paralel sebelum fix sama-sama `201 Created`; setelah guard UI, dua tap cepat menghasilkan satu record | API reproduction, emulator UI retest, database count `1`, fixture cleanup | Engineering | Closed - PASS-QA (mobile guard) |
+| CMS-DEF-001 | QA-CMS-003 | P2 | CMS logout dapat meninggalkan session lokal ketika revoke refresh token gagal | `cms/src/utils/hooks/useAuth.js`, browser retest | Engineering | Closed - PASS-QA |
+| CMS-DEF-002 | QA-CMS-006 | P1 | Local database tidak memiliki `course_items.title_japan` sampai migration domain dijalankan | Migration `Training/2026_07_22_000001...`, local migration run | Engineering | Open - staging/production migration verification |
+| CMS-DEF-003 | QA-CMS-005/006 | P2 | Seed title Jepang menampilkan mojibake | `UpdateCourseItemJapaneseTitlesSeeder.php`, module list readback | Engineering | Closed - PASS-QA |
+| CMS-DEF-004 | QA-CMS-006 | P3 | Toast edit materi masih berbunyi `Berhasil membuat data` | CMS training material edit retest | Engineering | Open - copy only |
+| CMS-DEF-005 | QA-CMS-009 | P3 | Date kosong pada Seminar menampilkan error Yup teknis | `cms/src/views/seminar/form.js`, empty-submit retest | Engineering | Closed - PASS-QA |
+| CMS-DEF-006 | QA-CMS-011 | P1 | Field link notifikasi hilang saat readback karena tidak ada di request validation backend | `ApiContentNotificationRequest.php`, edit readback retest | Engineering | Closed - PASS-QA |
 
 ## Execution Notes
 
@@ -192,6 +198,9 @@ Gunakan satu baris per defect. Jangan menutup defect hanya karena workaround dit
 - `QA-NEG-006` sekarang `PASS-QA`: dua tap cepat pada Forum Editor menghasilkan satu record pada emulator; marker QA dihapus setelah verifikasi. Direct API parallel replay sebelum fix tetap dicatat sebagai rekomendasi backend idempotency.
 - DEF-002 sudah diisolasi pada mapping response di `mobile/src/hooks/useExam.ts`: HTTP `401` dari request training ketika access-token recovery berlangsung sebelumnya dipetakan menjadi error `500`. Setelah guard diterapkan, regression test lulus dan expired-access replay pada APK baru menghasilkan access token baru tanpa `Error internal server` atau `FATAL EXCEPTION`.
 - CMS build membutuhkan `npm ci` ketika dependency lokal belum lengkap; `cms/yarn.lock` dikembalikan dan tidak menjadi bagian dari perubahan.
+- CMS functional QA 1 Agustus 2026: user/role, training category/module/material, forum, seminar, dan notification core flows lulus pada local development. Temporary QA records were removed after each flow.
+- Notification link persistence was reproduced as a backend validation defect, fixed by adding the optional URL rule, then verified through CMS edit readback and database-backed API response.
+- Seminar empty date validation was reproduced before the fix and now returns the user-facing required-field message.
 - Mobile Jest sudah menjadi gate code-level terbatas untuk regression test yang tersedia. `App-test.tsx` dan helper DEF-002 lulus dengan `2` suites / `4` tests; mock native dependency berada di `mobile/jest.setup.js` dan hanya aktif pada Jest.
 - `PASS-SMOKE` harus diulang sebagai `PASS-QA` setelah test data, build, dan bukti eksekusi formal ditetapkan.
 - UAT client dilaporkan sudah `Approved` oleh project owner pada 1 Agustus 2026. Template formal sign-off tersedia di [UAT_SIGN_OFF_2026-08-01.md](UAT_SIGN_OFF_2026-08-01.md), tetapi acceptance criteria, nama reviewer, evidence, dan konfirmasi tertulis tetap harus diisi agar approval menjadi auditable.
@@ -200,7 +209,8 @@ Gunakan satu baris per defect. Jangan menutup defect hanya karena workaround dit
 ## Next Gate
 
 1. Lengkapi dan minta konfirmasi pada [UAT_SIGN_OFF_2026-08-01.md](UAT_SIGN_OFF_2026-08-01.md), termasuk scope, evidence, known issue, nama reviewer, dan tanda tangan/approval tertulis.
-2. Retest CMS CRUD content, user, role, permission, dan validation pada build berlabel release candidate.
-3. Siapkan release candidate berlabel version dan kumpulkan screenshot/log evidence final.
-4. Selesaikan `REL-001`: keystore/signing production, AAB production, dan checksum.
-5. Lanjutkan production config, privacy/Data Safety, Firebase/storage/payment, Play Console internal testing, dan release smoke test.
+2. Finish CMS virtual class, assessment, upload/storage, and restricted-role permission tests.
+3. Retest CMS CRUD content, user, role, permission, and validation on a labeled release candidate.
+4. Siapkan release candidate berlabel version dan kumpulkan screenshot/log evidence final.
+5. Selesaikan `REL-001`: keystore/signing production, AAB production, dan checksum.
+6. Lanjutkan production config, privacy/Data Safety, Firebase/storage/payment, Play Console internal testing, dan release smoke test.

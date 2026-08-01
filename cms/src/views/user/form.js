@@ -15,8 +15,8 @@ import Breadcrumbs from 'components/ui/Breadcrumbs';
 dayjs.extend(utc);
 
 const validationSchema = Yup.object().shape({
-  name: Yup.string().required('Wajib diisi'),
-  email: Yup.string().required('Wajib diisi'),
+  name: Yup.string().trim().required('Wajib diisi'),
+  email: Yup.string().trim().email('Format email tidak valid').required('Wajib diisi'),
   role_id: Yup.string().required('Wajib diisi'),
 });
 
