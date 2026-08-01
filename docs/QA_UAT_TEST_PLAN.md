@@ -75,6 +75,7 @@ Catatan: hasil `PASS-SMOKE` pada dokumen ini adalah baseline teknis dari emulato
 | QA-ENV-008 | Secret/release hygiene | `.env`, keystore, dan credential tidak masuk Git | PASS-QA | Tidak ada file secret production yang tracked |
 | QA-ENV-009 | Backend PHPUnit baseline | Test backend selesai tanpa failure | PASS-QA | 2 tests, 2 assertions passed |
 | QA-ENV-010 | CMS lint baseline | Generated build output is excluded and changed source has targeted lint evidence | PARTIAL | `cms/.eslintignore` excludes `build/`; `virtual/create.js` passes targeted ESLint; full legacy source lint still reports 33 pre-existing errors |
+| QA-ENV-011 | Sardine staging health/upload/readback | Local storage endpoint accepts a file and returns identical bytes | PASS-QA | `tools/sardine-staging` on `127.0.0.1:9003`: health 200, upload metadata returned, 7,944-byte fixture read back with matching SHA-256 |
 
 ## Authentication And Session
 
@@ -108,7 +109,7 @@ Catatan: hasil `PASS-SMOKE` pada dokumen ini adalah baseline teknis dari emulato
 | QA-CMS-013 | Form validation | Field wajib, email/url/date format, dan error API tampil jelas; duplicate belum diuji | P1 | PARTIAL |
 | QA-CMS-014 | Permission matrix | Role non-admin tidak melihat atau mengakses menu terlarang | P0 | PASS-QA |
 | QA-CMS-015 | Module archive lifecycle | Parent delete archives structural descendants, preserves audit data, and leaves no active orphan | P1 | PASS-QA |
-| QA-CMS-016 | Upload/storage | Safe cover, video, and document files upload and read back through storage service | P1 | BLOCKED |
+| QA-CMS-016 | Upload/storage | Category cover uploads and reads back through the local staging storage contract | P1 | PASS-QA |
 
 ## Student Mobile Core Flow
 
@@ -182,7 +183,7 @@ Gunakan satu baris per defect. Jangan menutup defect hanya karena workaround dit
 | CMS-DEF-006 | QA-CMS-011 | P1 | Field link notifikasi hilang saat readback karena tidak ada di request validation backend | `ApiContentNotificationRequest.php`, edit readback retest | Engineering | Closed - PASS-QA |
 | CMS-DEF-007 | QA-CMS-007 | P2 | Virtual class create berhasil tetapi halaman tetap di form karena `PageConfig.url` kosong | `cms/src/views/training/module/detail/virtual/create.js`, browser retest | Engineering | Closed - PASS-QA |
 | CMS-DEF-008 | QA-CMS-015 | P1 | Delete modul melakukan soft-delete pada parent tetapi child asesmen otomatis masih aktif; fixture QA perlu dibersihkan di level database | CMS module delete retest, local SQLite relation count | Engineering/Product | Closed - recursive archive policy, UI retest, and zero active-orphan evidence |
-| CMS-DEF-009 | QA-CMS-016 | P1 | Upload/storage readback tidak dapat dieksekusi karena service Sardine `127.0.0.1:9003` tidak tersedia dan binary `62sardine` tidak ada di repository | Health check connection refused, upload form no preview | Infrastructure/Engineering | Open - staging storage dependency |
+| CMS-DEF-009 | QA-CMS-016 | P1 | Repository tidak membawa binary `62sardine` atau konfigurasi endpoint Sardine production | Local staging adapter health/upload/readback, production endpoint still absent | Infrastructure/Engineering | Open - production storage dependency; local staging PASS-QA |
 | CMS-DEF-010 | QA-ENV-002 | P1 | Clean migration runner membuat tabel `tokens` dua kali karena urutan Dolphin/Base | Staging migration failure, Dolphin/Base migration files | Engineering | Closed - Base-first order and Dolphin table guard; clean staging rerun passed |
 
 ## Execution Notes
@@ -212,7 +213,7 @@ Gunakan satu baris per defect. Jangan menutup defect hanya karena workaround dit
 - Assessment package/question flow was executed with a temporary package and question. Activation was toggled off and restored on the seeded assessment; verbal schedule and video upload remain separate gaps.
 - CMS module deletion retest now archives the parent and generated assessment descendants recursively. The transaction-level regression and browser delete flow both passed; database evidence showed zero active children/orphans, while student progress, question-bank rows, and file records remain preserved by policy.
 - Restricted-role matrix: the temporary role with only `Materi Pelatihan` permission saw only training navigation after async permissions loaded; `/forum` and `/management/user` both rendered `Access Denied`. Direct API/action-level CRUD checks remain a separate gap.
-- Upload/storage audit: category cover upload was attempted with a safe 1:1 fixture, but the required Sardine service at `127.0.0.1:9003` refused connection. No upload/readback pass is claimed until the approved service or staging endpoint is available.
+- Upload/storage audit: `tools/sardine-staging` was started on `127.0.0.1:9003`. CMS category cover upload created a file row and `cover_id`; edit readback returned the staging URL, and the 7,944-byte source/readback SHA-256 values matched. Video/document coverage and approved production Sardine verification remain open.
 - CMS release checks: production build compiled successfully; backend PHPUnit passed `2` tests / `2` assertions; targeted ESLint passed for `virtual/create.js`; full source lint remains a 33-error legacy baseline after generated build output was excluded.
 - Mobile Jest sudah menjadi gate code-level terbatas untuk regression test yang tersedia. `App-test.tsx` dan helper DEF-002 lulus dengan `2` suites / `4` tests; mock native dependency berada di `mobile/jest.setup.js` dan hanya aktif pada Jest.
 - `PASS-SMOKE` harus diulang sebagai `PASS-QA` setelah test data, build, dan bukti eksekusi formal ditetapkan.
@@ -222,7 +223,7 @@ Gunakan satu baris per defect. Jangan menutup defect hanya karena workaround dit
 ## Next Gate
 
 1. Lengkapi dan minta konfirmasi pada [UAT_SIGN_OFF_2026-08-01.md](UAT_SIGN_OFF_2026-08-01.md), termasuk scope, evidence, known issue, nama reviewer, dan tanda tangan/approval tertulis.
-2. Close `CMS-DEF-009` after Sardine/staging storage is available and upload/readback is evidenced.
+2. Close `CMS-DEF-009` after the approved Sardine staging/production endpoint is available and the same upload/readback evidence passes there.
 3. Finish CMS virtual class cover/status and assessment verbal/video tests.
 4. Add direct API/action-level permission checks and attach formal UAT evidence.
 5. Tag the CMS release candidate with version, migration/seed revision, environment, and build evidence.

@@ -20,7 +20,7 @@ The CMS core content-management flows were executed on the local backend and CMS
 | Seminar | Yes | Yes | Yes | Yes | PASS-QA |
 | Notification content | Yes | Yes | Yes | Yes | PASS-QA |
 | Restricted role permission matrix | Yes | Yes | Route denial | Not applicable | PASS-QA |
-| Upload/storage | Attempted safe cover fixture | Sardine unavailable | Not applicable | Readback blocked | BLOCKED - CMS-DEF-009 |
+| Upload/storage | Safe category cover fixture | Local Sardine staging adapter | CMS cover readback | Byte hash matched | PASS-QA; production dependency CMS-DEF-009 |
 
 ## Validation Evidence
 
@@ -45,10 +45,10 @@ The CMS core content-management flows were executed on the local backend and CMS
 
 - Virtual class cover upload and status edge cases.
 - Assessment verbal schedule, video upload, and full publish evidence.
-- Upload/storage readback, blocked by the unavailable Sardine service at `127.0.0.1:9003`.
+- Video/document upload and production storage readback; category cover passed against the local `tools/sardine-staging` adapter at `127.0.0.1:9003`.
 - Direct API/action-level permission checks beyond the route/menu matrix.
 - Production migration and service configuration.
 
 ## Decision
 
-CMS core content flows, module archive behavior, clean migration staging, and the CMS production build are ready for the next release-candidate gate on local development. The project is not yet release-ready because Sardine storage is unavailable, assessment/upload coverage is incomplete, production configuration is not verified, and formal UAT evidence still needs to be attached.
+CMS core content flows, module archive behavior, clean migration staging, CMS production build, and category cover storage readback are ready for the next release-candidate gate on local development. The project is not yet release-ready because the approved Sardine production endpoint is not configured, video/document coverage is incomplete, production configuration is not verified, and formal UAT evidence still needs to be attached.

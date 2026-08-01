@@ -44,7 +44,7 @@ All main CMS routes opened without an authentication redirect. This is a navigat
 | Seminar | Required fields, date picker, create/detail/edit/delete | PASS-QA | Temporary seminar read back date, description, link, edit result, then removed |
 | Notification | Required fields, schedule, repeat, target all users, create/edit/delete | PASS-QA | Temporary notification read back; link persistence verified after backend fix; then removed |
 | Restricted role | Training-only role can access training routes but is denied forum and user management | PASS-QA | Temporary role/user readback; permissions loaded asynchronously and both denied routes rendered `Access Denied`; no browser warnings |
-| Upload/storage | Category cover upload, storage response, and readback | BLOCKED | Sardine service is not available at `127.0.0.1:9003`; repository contains only the adapter and no `62sardine` binary |
+| Upload/storage | Category cover upload, storage response, and byte readback | PASS-QA (local staging) | Local `tools/sardine-staging` endpoint returned metadata, CMS saved `cover_id`, edit readback returned the staging URL, and source/readback SHA-256 matched |
 
 ## Fixes Applied
 
@@ -72,7 +72,7 @@ All main CMS routes opened without an authentication redirect. This is a navigat
 | CMS-DEF-006 | P1 | Notification link was dropped because backend request validation omitted the optional field | Closed; URL rule added and edit readback verified |
 | CMS-DEF-007 | P2 | Virtual class create succeeded but `PageConfig.url` was empty, so the UI stayed on the form after save | Closed; redirect now returns to the parent module virtual tab |
 | CMS-DEF-008 | P1 | Deleting a training module soft-deletes the parent but leaves generated assessment child `course_items` active; the UI warning says related records are deleted | Closed; recursive structural archive implemented, UI delete retested, and database evidence showed zero active descendants/orphans |
-| CMS-DEF-009 | P1 | Category cover upload and storage readback cannot be completed because Sardine at `127.0.0.1:9003` is unavailable and the `62sardine` binary is absent from this repository | Open release/environment blocker; start the approved Sardine service or provide a staging storage endpoint and credentials |
+| CMS-DEF-009 | P1 | The repository does not contain the approved `62sardine` binary or production Sardine endpoint configuration | Open production dependency; local staging adapter now passes category cover upload/readback, but replace it with the approved Sardine service before release |
 | CMS-DEF-010 | P1 | Clean migration runner defined the `tokens` table in both Dolphin and Base paths | Closed; Base runs first and Dolphin skips an existing token table; clean migration/seed staging passed |
 
 ## Gaps Still Open
@@ -81,18 +81,18 @@ These areas have route smoke evidence or mobile evidence but do not yet have com
 
 - Virtual class cover upload and status edge cases.
 - Assessment verbal schedule, video upload, and full publish/activation evidence.
-- Upload validation and storage readback for cover, video, and document files.
+- Video/document upload validation and production storage readback; category cover is covered by local staging evidence.
 - Direct API/action-level permission checks for create/update/delete remain separate from the route/menu matrix.
 - Export/import and pagination/filter boundary cases.
 - Staging/production storage, Firebase, payment, and scheduled notification verification.
 
 ## QA Interpretation
 
-The tested CMS core content flows and module archive lifecycle are `PASS-QA` for local development. The CMS production build and clean seeded migration staging also pass. The release candidate remains blocked by the unavailable Sardine storage dependency, incomplete assessment/upload coverage, production configuration, and auditable UAT evidence. Do not mark those items `PASS-UAT` without client/product-owner evidence.
+The tested CMS core content flows and module archive lifecycle are `PASS-QA` for local development. The CMS production build, clean seeded migration staging, and category cover readback through the local staging adapter also pass. The release candidate remains blocked by the unconfigured approved Sardine production dependency, incomplete assessment/upload coverage, production configuration, and auditable UAT evidence. Do not mark those items `PASS-UAT` without client/product-owner evidence.
 
 ## Next Gate
 
-1. Start the approved Sardine service or provide the staging storage endpoint, credentials, and retention policy; then close `CMS-DEF-009` with upload/readback evidence.
+1. Provide the approved Sardine staging/production endpoint, credentials, and retention policy; rerun upload/readback against it and close `CMS-DEF-009`.
 2. Finish virtual class cover/status and assessment verbal/video tests.
 3. Add direct API/action-level permission checks for the restricted-role matrix.
 4. Attach formal UAT evidence and known-issue approval.
