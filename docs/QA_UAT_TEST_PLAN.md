@@ -1,7 +1,7 @@
 # QA/UAT Test Plan - WIWITAN Apps
 
 Tanggal mulai: 1 Agustus 2026  
-Stage: Stage 7 - Release Preparation setelah QA/UAT
+Stage: Stage 7 - CMS Release Candidate Gate
 
 ## Tujuan
 
@@ -66,7 +66,7 @@ Catatan: hasil `PASS-SMOKE` pada dokumen ini adalah baseline teknis dari emulato
 | ID | Skenario | Expected result | Status | Bukti/catatan |
 | --- | --- | --- | --- | --- |
 | QA-ENV-001 | Backend health endpoint | API merespons HTTP 200 | PASS-QA | `GET /api/v1/constants/` merespons HTTP 200 |
-| QA-ENV-002 | Backend migration/seed | Database QA dapat di-reset dan seed tanpa error | PASS-QA | Fresh SQLite sementara: migrate:fresh, seluruh domain migration, DevDatabaseSeeder, UpdateCourseJapaneseTitlesSeeder, dan UpdateCourseItemJapaneseTitlesSeeder lulus |
+| QA-ENV-002 | Backend migration/seed | Database QA dapat di-reset dan seed tanpa error | PASS-QA | Clean SQLite staging: 65 migration records, modern `tokens` schema, `course_items.title_japan`, DevDatabaseSeeder, and both Japanese title seeders passed; 26 seeded course items have Japanese titles |
 | QA-ENV-003 | CMS production build | `npm run build` selesai tanpa error fatal | PASS-QA | Build CMS selesai setelah `npm ci` |
 | QA-ENV-004 | Mobile TypeScript | `corepack yarn tsc --noEmit --pretty false` lulus | PASS-QA | TypeScript lulus tanpa error |
 | QA-ENV-005 | Mobile Jest baseline | Test runner selesai dan failure dicatat | PASS-QA | Jest harness test-only sudah mem-mock native dependency dan asset; `2` test suites / `4` tests passed, termasuk `App-test.tsx` |
@@ -74,6 +74,7 @@ Catatan: hasil `PASS-SMOKE` pada dokumen ini adalah baseline teknis dari emulato
 | QA-ENV-007 | Mojibake scan | Script tidak menemukan kandidat baru | PASS-QA | `No mojibake candidates found` |
 | QA-ENV-008 | Secret/release hygiene | `.env`, keystore, dan credential tidak masuk Git | PASS-QA | Tidak ada file secret production yang tracked |
 | QA-ENV-009 | Backend PHPUnit baseline | Test backend selesai tanpa failure | PASS-QA | 2 tests, 2 assertions passed |
+| QA-ENV-010 | CMS lint baseline | Generated build output is excluded and changed source has targeted lint evidence | PARTIAL | `cms/.eslintignore` excludes `build/`; `virtual/create.js` passes targeted ESLint; full legacy source lint still reports 33 pre-existing errors |
 
 ## Authentication And Session
 
@@ -105,7 +106,9 @@ Catatan: hasil `PASS-SMOKE` pada dokumen ini adalah baseline teknis dari emulato
 | QA-CMS-011 | Notification content | Create/edit/delete, schedule, link, repeat, dan target user benar | P1 | PASS-QA |
 | QA-CMS-012 | Pengaturan/profile | Profile dan system setting tidak merusak session | P2 | PASS-SMOKE |
 | QA-CMS-013 | Form validation | Field wajib, email/url/date format, dan error API tampil jelas; duplicate belum diuji | P1 | PARTIAL |
-| QA-CMS-014 | Permission matrix | Role non-admin tidak melihat atau mengakses menu terlarang | P0 | PENDING |
+| QA-CMS-014 | Permission matrix | Role non-admin tidak melihat atau mengakses menu terlarang | P0 | PASS-QA |
+| QA-CMS-015 | Module archive lifecycle | Parent delete archives structural descendants, preserves audit data, and leaves no active orphan | P1 | PASS-QA |
+| QA-CMS-016 | Upload/storage | Safe cover, video, and document files upload and read back through storage service | P1 | BLOCKED |
 
 ## Student Mobile Core Flow
 
@@ -178,13 +181,15 @@ Gunakan satu baris per defect. Jangan menutup defect hanya karena workaround dit
 | CMS-DEF-005 | QA-CMS-009 | P3 | Date kosong pada Seminar menampilkan error Yup teknis | `cms/src/views/seminar/form.js`, empty-submit retest | Engineering | Closed - PASS-QA |
 | CMS-DEF-006 | QA-CMS-011 | P1 | Field link notifikasi hilang saat readback karena tidak ada di request validation backend | `ApiContentNotificationRequest.php`, edit readback retest | Engineering | Closed - PASS-QA |
 | CMS-DEF-007 | QA-CMS-007 | P2 | Virtual class create berhasil tetapi halaman tetap di form karena `PageConfig.url` kosong | `cms/src/views/training/module/detail/virtual/create.js`, browser retest | Engineering | Closed - PASS-QA |
-| CMS-DEF-008 | QA-CMS-006 | P1 | Delete modul melakukan soft-delete pada parent tetapi child asesmen otomatis masih aktif; fixture QA perlu dibersihkan di level database | CMS module delete retest, local SQLite relation count | Engineering/Product | Open - retention policy and backend cascade/archive required |
+| CMS-DEF-008 | QA-CMS-015 | P1 | Delete modul melakukan soft-delete pada parent tetapi child asesmen otomatis masih aktif; fixture QA perlu dibersihkan di level database | CMS module delete retest, local SQLite relation count | Engineering/Product | Closed - recursive archive policy, UI retest, and zero active-orphan evidence |
+| CMS-DEF-009 | QA-CMS-016 | P1 | Upload/storage readback tidak dapat dieksekusi karena service Sardine `127.0.0.1:9003` tidak tersedia dan binary `62sardine` tidak ada di repository | Health check connection refused, upload form no preview | Infrastructure/Engineering | Open - staging storage dependency |
+| CMS-DEF-010 | QA-ENV-002 | P1 | Clean migration runner membuat tabel `tokens` dua kali karena urutan Dolphin/Base | Staging migration failure, Dolphin/Base migration files | Engineering | Closed - Base-first order and Dolphin table guard; clean staging rerun passed |
 
 ## Execution Notes
 
 - Smoke baseline 1 Agustus 2026 lulus untuk Home, Progress, Training, Detail Training, Dokumen, Forum, Notifikasi, dan relaunch/session recovery.
 - QA environment batch 1: API health, backend PHPUnit, CMS build, mobile TypeScript, mojibake scan, dan secret hygiene lulus.
-- Migration/seed reproducibility: fresh SQLite sementara berhasil menjalankan migrate:fresh, migration Base/Master/Finance/Forum/Training/TableRefs, DevDatabaseSeeder, UpdateCourseJapaneseTitlesSeeder, dan UpdateCourseItemJapaneseTitlesSeeder tanpa error.
+- Migration/seed reproducibility: clean SQLite staging ran Base, Forum, Master, Training, Finance, TableRefs, Dolphin, and root migrations plus all three seeders without error. The staged database verified modern token columns, `course_items.title_japan`, 26 seeded course items with Japanese titles, and 9 users.
 - Negative test batch 2 dicatat di [NEGATIVE_TEST_BATCH_2_2026-08-01.md](NEGATIVE_TEST_BATCH_2_2026-08-01.md). Double-submit forum berhasil direproduksi sebelum fix: dua request paralel membuat dua record, lalu fixture dibersihkan sampai tersisa nol.
 - Null/incomplete hardening sudah ditambahkan pada progress card, SectionLesson, dan DetailTrainingScreen. Fixture null/incomplete direplay melalui `scripts/qa-http-proxy.mjs` ke emulator; course menampilkan `0%`/`0 / 0`, Detail Training tetap usable, dan tidak ada fatal Android runtime log. `QA-NEG-004` ditutup `PASS-QA`.
 - Guard double-submit ForumEditor sudah memakai synchronous ref lock, state loading tombol, serta recovery pada invalid JSON dan request rejection. Retest UI pada APK terbaru lulus untuk tombol draft dan publish: masing-masing dua tap cepat menampilkan loading state, satu modal sukses, dan satu matching database record; seluruh fixture kemudian dibersihkan.
@@ -205,7 +210,10 @@ Gunakan satu baris per defect. Jangan menutup defect hanya karena workaround dit
 - Seminar empty date validation was reproduced before the fix and now returns the user-facing required-field message.
 - Virtual Class CRUD was executed from the module detail tab. The create redirect defect was fixed and the temporary class was read back, edited, and deleted.
 - Assessment package/question flow was executed with a temporary package and question. Activation was toggled off and restored on the seeded assessment; verbal schedule and video upload remain separate gaps.
-- CMS module deletion retest found that the parent is soft-deleted while generated assessment child rows remain active. The local QA fixture sweep removed all temporary descendants and returned zero active or soft-deleted `QA CMS` rows, but production cascade/archive behavior remains an open defect.
+- CMS module deletion retest now archives the parent and generated assessment descendants recursively. The transaction-level regression and browser delete flow both passed; database evidence showed zero active children/orphans, while student progress, question-bank rows, and file records remain preserved by policy.
+- Restricted-role matrix: the temporary role with only `Materi Pelatihan` permission saw only training navigation after async permissions loaded; `/forum` and `/management/user` both rendered `Access Denied`. Direct API/action-level CRUD checks remain a separate gap.
+- Upload/storage audit: category cover upload was attempted with a safe 1:1 fixture, but the required Sardine service at `127.0.0.1:9003` refused connection. No upload/readback pass is claimed until the approved service or staging endpoint is available.
+- CMS release checks: production build compiled successfully; backend PHPUnit passed `2` tests / `2` assertions; targeted ESLint passed for `virtual/create.js`; full source lint remains a 33-error legacy baseline after generated build output was excluded.
 - Mobile Jest sudah menjadi gate code-level terbatas untuk regression test yang tersedia. `App-test.tsx` dan helper DEF-002 lulus dengan `2` suites / `4` tests; mock native dependency berada di `mobile/jest.setup.js` dan hanya aktif pada Jest.
 - `PASS-SMOKE` harus diulang sebagai `PASS-QA` setelah test data, build, dan bukti eksekusi formal ditetapkan.
 - UAT client dilaporkan sudah `Approved` oleh project owner pada 1 Agustus 2026. Template formal sign-off tersedia di [UAT_SIGN_OFF_2026-08-01.md](UAT_SIGN_OFF_2026-08-01.md), tetapi acceptance criteria, nama reviewer, evidence, dan konfirmasi tertulis tetap harus diisi agar approval menjadi auditable.
@@ -214,9 +222,9 @@ Gunakan satu baris per defect. Jangan menutup defect hanya karena workaround dit
 ## Next Gate
 
 1. Lengkapi dan minta konfirmasi pada [UAT_SIGN_OFF_2026-08-01.md](UAT_SIGN_OFF_2026-08-01.md), termasuk scope, evidence, known issue, nama reviewer, dan tanda tangan/approval tertulis.
-2. Close `CMS-DEF-008` after the module deletion retention/cascade policy is implemented and verified with database evidence.
-3. Finish CMS virtual class, assessment, upload/storage, and restricted-role permission tests.
-4. Retest CMS CRUD content, user, role, permission, and validation on a labeled release candidate.
-5. Siapkan release candidate berlabel version dan kumpulkan screenshot/log evidence final.
+2. Close `CMS-DEF-009` after Sardine/staging storage is available and upload/readback is evidenced.
+3. Finish CMS virtual class cover/status and assessment verbal/video tests.
+4. Add direct API/action-level permission checks and attach formal UAT evidence.
+5. Tag the CMS release candidate with version, migration/seed revision, environment, and build evidence.
 6. Selesaikan `REL-001`: keystore/signing production, AAB production, dan checksum.
 7. Lanjutkan production config, privacy/Data Safety, Firebase/storage/payment, Play Console internal testing, dan release smoke test.

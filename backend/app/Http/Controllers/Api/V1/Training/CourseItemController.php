@@ -101,6 +101,42 @@ class CourseItemController extends BaseCrud
         }
     }
 
+    /**
+     * Archive the structural records owned by a module before the parent is
+     * soft-deleted. Student progress and the reusable question bank remain
+     * available for audit; files are also preserved because they may be shared.
+     */
+    public function __beforeDestroy()
+    {
+        $this->archiveDescendants($this->row);
+    }
+
+    public function __beforeBulkDestroy()
+    {
+        foreach ($this->query->get() as $parent) {
+            $this->archiveDescendants($parent);
+        }
+    }
+
+    protected function archiveDescendants(CourseItem $parent): void
+    {
+        $children = CourseItem::withTrashed()
+            ->where('parent_id', $parent->id)
+            ->get();
+
+        foreach ($children as $child) {
+            $this->archiveDescendants($child);
+
+            if ($child->event_id) {
+                Event::whereKey($child->event_id)->delete();
+            }
+
+            Article::where('course_item_id', $child->id)->delete();
+            ExamTemplateItem::where('course_item_id', $child->id)->delete();
+            $child->delete();
+        }
+    }
+
     public function __prepareDataUpdate($data)
     {
         $data = $this->__prepareDataStore($data);

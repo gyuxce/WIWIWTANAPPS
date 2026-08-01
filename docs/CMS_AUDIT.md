@@ -35,7 +35,7 @@ All main CMS routes opened without an authentication redirect. This is a navigat
 | Role management | Required name, permission selection, create, readback, delete | PASS-QA | Temporary role with `Materi Pelatihan` permission read back checked, then deleted |
 | Training category | Required fields, bilingual create/edit/readback/delete | PASS-QA | Japanese title read back in edit form; temporary category removed |
 | Training module | Bilingual create/edit/readback/delete | PASS-QA | Japanese title read back and list display verified |
-| Training module deletion lifecycle | Parent delete and descendant cleanup | BLOCKED | Parent soft-delete passed, but generated assessment child rows remained active and required a local database fixture sweep |
+| Training module deletion lifecycle | Parent delete and descendant archive | PASS-QA | UI delete retest plus SQLite evidence: parent and generated assessment descendants archived; zero active child rows or QA orphans |
 | Training seed | Existing module rows have Japanese titles | PASS-QA | Seed repair applied; six seeded module rows no longer show `-` |
 | Training material | Required fields, create/edit/delete, text content persistence | PASS-QA | Text content reloaded with title, description, and body; temporary material removed |
 | Virtual class | Required fields, date picker, create/detail/edit/delete, link | PASS-QA | Temporary class returned to the module tab after the redirect fix and was removed |
@@ -43,6 +43,8 @@ All main CMS routes opened without an authentication redirect. This is a navigat
 | Forum | Required fields, topic selection, publish, detail, delete | PASS-QA | Temporary post reached detail page and was deleted with cleanup reason |
 | Seminar | Required fields, date picker, create/detail/edit/delete | PASS-QA | Temporary seminar read back date, description, link, edit result, then removed |
 | Notification | Required fields, schedule, repeat, target all users, create/edit/delete | PASS-QA | Temporary notification read back; link persistence verified after backend fix; then removed |
+| Restricted role | Training-only role can access training routes but is denied forum and user management | PASS-QA | Temporary role/user readback; permissions loaded asynchronously and both denied routes rendered `Access Denied`; no browser warnings |
+| Upload/storage | Category cover upload, storage response, and readback | BLOCKED | Sardine service is not available at `127.0.0.1:9003`; repository contains only the adapter and no `62sardine` binary |
 
 ## Fixes Applied
 
@@ -51,8 +53,11 @@ All main CMS routes opened without an authentication redirect. This is a navigat
 - Seminar empty date validation now returns `Wajib diisi` instead of a Yup type error.
 - Notification API validation now accepts and persists optional valid `link` values; the empty `send_at` message uses the required-field message.
 - Virtual class create/edit now returns to the parent module's `Kelas Virtual` tab instead of staying on a blank-route form.
+- Training module deletion now archives structural descendants recursively before soft-deleting the parent; student progress, question-bank data, and file records are preserved.
 - Japanese course item seed values were repaired so seeded titles are readable and no longer mojibake.
-- The existing `course_items.title_japan` migration was applied to the local QA database before module CRUD verification. The migration file already exists in source; deployment migration execution still needs a release check.
+- The existing `course_items.title_japan` migration was verified in clean SQLite staging together with the full domain migration set; production migration execution still needs the release environment check.
+- The migration runner now executes Base before Dolphin and guards the legacy Dolphin token table so clean staging creates the modern `tokens` schema once.
+- CMS lint now ignores generated `build/` output; the changed virtual-class source file passes targeted ESLint.
 - The final local QA fixture sweep removed temporary parent, child assessment, virtual-class, material, article, question, and notification records; all matching active and soft-deleted QA counts returned zero.
 
 ## Defects And Risks
@@ -60,13 +65,15 @@ All main CMS routes opened without an authentication redirect. This is a navigat
 | ID | Severity | Finding | Status |
 | --- | --- | --- | --- |
 | CMS-DEF-001 | P2 | Old CMS refresh token could prevent logout cleanup when the revoke API failed | Closed; local session cleanup fixed and browser retest clean |
-| CMS-DEF-002 | P1 | Local database was missing the existing `course_items.title_japan` column until its domain migration was applied | Open release risk; verify all domain migrations run on staging/production |
+| CMS-DEF-002 | P1 | Local database was missing the existing `course_items.title_japan` column until its domain migration was applied | Open production risk; clean staging now passes, production migration execution remains to be verified |
 | CMS-DEF-003 | P2 | Japanese seed literals contained mojibake and displayed as unreadable text | Closed in seed source; rerun seed on target environments |
 | CMS-DEF-004 | P3 | Training material edit toast says `Berhasil membuat data` although the edit succeeds | Open copy issue; no data loss observed |
-| CMS-DEF-005 | P3 | Existing source lint baseline still reports unrelated legacy errors; build command was previously slow/timeout-prone | Open technical debt; run release build on a dedicated machine |
+| CMS-DEF-005 | P3 | Existing source lint baseline still reports unrelated legacy errors; production build is valid but full lint remains noisy | Open technical debt; production build passed, while 33 legacy source lint errors remain |
 | CMS-DEF-006 | P1 | Notification link was dropped because backend request validation omitted the optional field | Closed; URL rule added and edit readback verified |
 | CMS-DEF-007 | P2 | Virtual class create succeeded but `PageConfig.url` was empty, so the UI stayed on the form after save | Closed; redirect now returns to the parent module virtual tab |
-| CMS-DEF-008 | P1 | Deleting a training module soft-deletes the parent but leaves generated assessment child `course_items` active; the UI warning says related records are deleted | Open; define retention policy and implement/test backend descendant cleanup before production content deletion |
+| CMS-DEF-008 | P1 | Deleting a training module soft-deletes the parent but leaves generated assessment child `course_items` active; the UI warning says related records are deleted | Closed; recursive structural archive implemented, UI delete retested, and database evidence showed zero active descendants/orphans |
+| CMS-DEF-009 | P1 | Category cover upload and storage readback cannot be completed because Sardine at `127.0.0.1:9003` is unavailable and the `62sardine` binary is absent from this repository | Open release/environment blocker; start the approved Sardine service or provide a staging storage endpoint and credentials |
+| CMS-DEF-010 | P1 | Clean migration runner defined the `tokens` table in both Dolphin and Base paths | Closed; Base runs first and Dolphin skips an existing token table; clean migration/seed staging passed |
 
 ## Gaps Still Open
 
@@ -75,20 +82,19 @@ These areas have route smoke evidence or mobile evidence but do not yet have com
 - Virtual class cover upload and status edge cases.
 - Assessment verbal schedule, video upload, and full publish/activation evidence.
 - Upload validation and storage readback for cover, video, and document files.
-- Full non-admin permission matrix, including a real restricted CMS role login.
+- Direct API/action-level permission checks for create/update/delete remain separate from the route/menu matrix.
 - Export/import and pagination/filter boundary cases.
-- Training module deletion cascade/archive behavior and related progress/history retention.
-- Staging/production migration, storage, Firebase, payment, and scheduled notification verification.
+- Staging/production storage, Firebase, payment, and scheduled notification verification.
 
 ## QA Interpretation
 
-The tested CMS core content flows are `PASS-QA` for local development, with module deletion lifecycle still blocked by `CMS-DEF-008`. This does not yet mean the full CMS is release-ready: migration verification, remaining assessment/upload coverage, permission matrix, data-retention policy, and production configuration gates remain. Do not mark those items `PASS-UAT` without client/product-owner evidence.
+The tested CMS core content flows and module archive lifecycle are `PASS-QA` for local development. The CMS production build and clean seeded migration staging also pass. The release candidate remains blocked by the unavailable Sardine storage dependency, incomplete assessment/upload coverage, production configuration, and auditable UAT evidence. Do not mark those items `PASS-UAT` without client/product-owner evidence.
 
 ## Next Gate
 
-1. Define and implement the module deletion cascade/archive policy, then retest `CMS-DEF-008` with database evidence.
-2. Run the full migration set on a clean staging database and verify `course_items.title_japan` plus all notification tables.
-3. Finish virtual class cover/status and assessment verbal/video tests.
-4. Test upload and storage readback with safe QA files.
-5. Execute a restricted-role permission matrix.
-6. Build and test the release candidate, then complete signing and Play Console preparation.
+1. Start the approved Sardine service or provide the staging storage endpoint, credentials, and retention policy; then close `CMS-DEF-009` with upload/readback evidence.
+2. Finish virtual class cover/status and assessment verbal/video tests.
+3. Add direct API/action-level permission checks for the restricted-role matrix.
+4. Attach formal UAT evidence and known-issue approval.
+5. Tag the CMS release candidate with backend migration, seed, environment, and checksum metadata.
+6. Complete production configuration, signing, and Play Console preparation.

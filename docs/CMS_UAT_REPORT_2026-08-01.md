@@ -12,13 +12,15 @@ The CMS core content-management flows were executed on the local backend and CMS
 | Roles and permissions | Yes | Yes | Yes | Yes | PASS-QA |
 | Training category | Yes | Yes | Yes | Yes | PASS-QA |
 | Training module | Yes | Yes | Yes | Yes | PASS-QA |
-| Training module deletion lifecycle | Parent delete | Descendant check | Not applicable | Cleanup required | BLOCKED - CMS-DEF-008 |
+| Training module deletion lifecycle | Parent delete | Descendant archive check | Not applicable | Structural descendants archived | PASS-QA |
 | Training material and text content | Yes | Yes | Yes | Yes | PASS-QA |
 | Virtual class | Yes | Yes | Yes | Yes | PASS-QA |
 | Assessment package/question | Yes | Yes | Yes | Yes | PASS-QA |
 | Forum post | Yes | Yes | Not applicable | Yes | PASS-QA |
 | Seminar | Yes | Yes | Yes | Yes | PASS-QA |
 | Notification content | Yes | Yes | Yes | Yes | PASS-QA |
+| Restricted role permission matrix | Yes | Yes | Route denial | Not applicable | PASS-QA |
+| Upload/storage | Attempted safe cover fixture | Sardine unavailable | Not applicable | Readback blocked | BLOCKED - CMS-DEF-009 |
 
 ## Validation Evidence
 
@@ -32,20 +34,21 @@ The CMS core content-management flows were executed on the local backend and CMS
 1. Notification `link` was accepted by the CMS but dropped by backend request validation. The backend now validates an optional URL and the value was confirmed in edit readback.
 2. CMS logout now clears local auth state even if refresh-token revocation fails.
 3. Japanese course item seed values were repaired and read back in the module list.
-4. Local training module creation was blocked by an unapplied existing `title_japan` migration. The migration was applied locally; staging/production migration execution remains a release gate.
+4. Local training module creation was blocked by an unapplied existing `title_japan` migration. The migration and full domain set now pass clean SQLite staging; production migration execution remains a release gate.
 5. Virtual Class create stayed on the form because its local `PageConfig.url` was empty. The redirect now returns to the parent module tab and was retested.
 
-6. Module deletion soft-deleted the parent but left generated assessment child rows active. The local QA fixture sweep removed the temporary descendants and returned zero matching active or soft-deleted QA rows. A product retention decision and backend cascade/archive implementation are still required.
+6. Module deletion now recursively archives the parent and structural descendants. Browser delete and transaction-level regression passed; active descendant/orphan counts returned zero while progress, question-bank, and file records remain preserved.
+7. Clean migration staging initially exposed a duplicate `tokens` table definition. Migration order and Dolphin ownership were corrected; a clean run of all domain migrations and seeders now passes.
+8. Restricted-role login with only `Materi Pelatihan` permission showed training navigation and denied `/forum` plus `/management/user` after asynchronous permissions loaded.
 
 ## Open Scope
 
 - Virtual class cover upload and status edge cases.
 - Assessment verbal schedule, video upload, and full publish evidence.
-- Upload/storage readback.
-- Restricted-role permission matrix.
-- Training module deletion cascade/archive and related progress/history retention policy.
+- Upload/storage readback, blocked by the unavailable Sardine service at `127.0.0.1:9003`.
+- Direct API/action-level permission checks beyond the route/menu matrix.
 - Production migration and service configuration.
 
 ## Decision
 
-CMS core content flows are ready for the next internal QA gate on local development, but module deletion lifecycle is blocked by `CMS-DEF-008`. The project is not yet a full release candidate until the open scope and production gates are completed.
+CMS core content flows, module archive behavior, clean migration staging, and the CMS production build are ready for the next release-candidate gate on local development. The project is not yet release-ready because Sardine storage is unavailable, assessment/upload coverage is incomplete, production configuration is not verified, and formal UAT evidence still needs to be attached.

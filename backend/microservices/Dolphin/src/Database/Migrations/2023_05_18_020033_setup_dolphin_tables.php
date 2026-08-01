@@ -46,16 +46,18 @@ return new class extends Migration {
 
     public function up(): void
     {
-        Schema::create("tokens", function (Blueprint $table) {
-            $table->string("id", 36)->primary();
-            $table->bigInteger("user_id")->nullable()->unsigned()->index();
-            $table->string('refresh_token', 2048);
-            $table->integer("platform_id")->nullable()->unsigned();
-            $table->boolean("is_blocked")->default(false);
-            $table->timestamp("expires_at")->nullable();
-            $table->timestamps();
-            $table->timestamp("deleted_at")->nullable();
-        });
+        if (!Schema::hasTable('tokens')) {
+            Schema::create("tokens", function (Blueprint $table) {
+                $table->string("id", 36)->primary();
+                $table->bigInteger("user_id")->nullable()->unsigned()->index();
+                $table->string('refresh_token', 2048);
+                $table->integer("platform_id")->nullable()->unsigned();
+                $table->boolean("is_blocked")->default(false);
+                $table->timestamp("expires_at")->nullable();
+                $table->timestamps();
+                $table->timestamp("deleted_at")->nullable();
+            });
+        }
 
         Schema::create("otps", function (Blueprint $table) {
             $table->increments("id");
@@ -71,7 +73,6 @@ return new class extends Migration {
 
     public function down(): void
     {
-        Schema::dropIfExists('tokens');
         Schema::dropIfExists('otps');
     }
 };
