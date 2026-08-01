@@ -20,7 +20,8 @@ Repo ini dibuat dari source handoff developer sebelumnya dan sudah disanitasi su
 7. Untuk hasil audit layar mobile, baca [docs/MOBILE_SCREEN_AUDIT.md](docs/MOBILE_SCREEN_AUDIT.md).
 8. Untuk laporan stage, persentase, risiko, dan estimasi rilis, baca [docs/PROJECT_STATUS_REPORT.md](docs/PROJECT_STATUS_REPORT.md).
 9. Untuk persiapan rilis Google Play, baca [docs/GOOGLE_PLAY_RELEASE_CHECKLIST.md](docs/GOOGLE_PLAY_RELEASE_CHECKLIST.md).
-10. Jalankan backend dulu, lalu CMS, lalu mobile app.
+10. Untuk test matrix formal QA/UAT, baca [docs/QA_UAT_TEST_PLAN.md](docs/QA_UAT_TEST_PLAN.md).
+11. Jalankan backend dulu, lalu CMS, lalu mobile app.
 
 ## Stack Utama
 

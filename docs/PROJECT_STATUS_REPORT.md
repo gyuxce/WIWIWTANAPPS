@@ -20,6 +20,8 @@ Estimasi kesiapan menuju **rilis Google Play production**: **45-50%**, karena ma
 - TypeScript mobile lulus dan APK `developmentQa` terbaru berhasil dibuild. APK ini masih ditandatangani debug untuk audit lokal, bukan untuk Google Play.
 - APK QA terbaru berhasil di-install ke emulator. Log menunjukkan `[QA auto-login] signed in` dan UI siswa terbuka pada layar progress dengan data fase/interview.
 - Smoke test end-to-end lokal siswa lulus untuk Home, Progress, Training, Detail Training, Dokumen, Forum, Notifikasi, dan relaunch/session recovery.
+- Formal QA batch 1 selesai: API health HTTP 200, backend PHPUnit 2 tests passed, CMS production build, mobile TypeScript, mojibake scan, dan secret hygiene lulus.
+- Mobile Jest belum menjadi gate QA karena `App-test.tsx` legacy mengimpor banyak native SDK tanpa mock lengkap; blocker test infrastructure sudah dicatat terpisah dari runtime APK.
 - Login otomatis dari `.env` hanya untuk QA lokal; credential contoh tidak lagi ditanam sebagai fallback di source.
 - Build type `qa` sekarang mengizinkan HTTP cleartext hanya melalui manifest `mobile/android/app/src/qa/AndroidManifest.xml`, karena backend emulator lokal memakai `10.0.2.2`; production tetap tidak diberi izin HTTP cleartext.
 - Build lokal saat ini memakai Node 24 karena dependency Metro yang terpasang (`metro-config` 0.83.x) mensyaratkan Node 20.19.4 atau lebih baru. Penyelarasan dependency dengan baseline Node 18 dicatat sebagai hardening build terpisah.
@@ -37,7 +39,7 @@ Mapping stage:
 | 3 | Audit CMS dan flow admin dasar | Sebagian besar selesai |
 | 4 | Audit dan stabilisasi mobile siswa | Smoke test local QA selesai; polish dan edge case masih berjalan |
 | 5 | Data/i18n/backend schema hardening | Sebagian selesai; course bilingual sudah ada, forum/notifikasi dinamis masih pending |
-| 6 | QA end-to-end dan UAT client | Gate berikutnya; smoke test lokal sudah menjadi baseline |
+| 6 | QA end-to-end dan UAT client | QA batch 1 selesai; UAT client dan negative test masih pending |
 | 7 | Release preparation Google Play | Belum mulai |
 
 ## Progress Per Area
