@@ -135,7 +135,7 @@ Catatan: hasil `PASS-SMOKE` pada dokumen ini adalah baseline teknis dari emulato
 | QA-NEG-003 | Filename sangat panjang | Layout tidak overflow dan label tetap terbaca | P2 | PASS-SMOKE |
 | QA-NEG-004 | Data backend null/incomplete | Guard UI aktif dan tidak crash | P1 | PARTIAL |
 | QA-NEG-005 | Network lambat | Loading state terlihat dan request tidak menduplikasi data secara salah | P2 | BLOCKED |
-| QA-NEG-006 | Double tap submit | Hanya satu request/data record yang dibuat | P1 | FIXED-PENDING-RETEST |
+| QA-NEG-006 | Double tap submit | Hanya satu request/data record yang dibuat | P1 | PASS-QA |
 | QA-NEG-007 | Device rotation/background | State tidak hilang atau crash saat app kembali aktif | P2 | PASS-QA |
 | QA-NEG-008 | Android permission denied | App memberi fallback/error yang dapat dipahami | P1 | PASS-QA |
 
@@ -170,7 +170,7 @@ Gunakan satu baris per defect. Jangan menutup defect hanya karena workaround dit
 | --- | --- | --- | --- | --- | --- | --- |
 | DEF-001 | QA-ENV-005 | P2 | Existing `App-test.tsx` belum dapat berjalan karena membutuhkan konfigurasi mock native SDK yang luas | Jest output | Engineering | Blocked - test infra |
 | DEF-002 | QA-AUTH-006 | P2 | Toast `Error internal server` muncul transient saat startup/recovery walaupun session akhirnya pulih dan Progress termuat; endpoint pemicu belum diketahui | Logcat `ReactNativeJS` dan UI Progress | Engineering | Open - isolate endpoint |
-| DEF-003 | QA-NEG-006 | P1 | Dua request forum paralel sebelum fix sama-sama `201 Created` dan membuat dua record | API reproduction batch 2; fixture dibersihkan | Engineering | Fixed - UI retest pending |
+| DEF-003 | QA-NEG-006 | P1 | Dua request forum paralel sebelum fix sama-sama `201 Created`; setelah guard UI, dua tap cepat menghasilkan satu record | API reproduction, emulator UI retest, database count `1`, fixture cleanup | Engineering | Closed - PASS-QA (mobile guard) |
 
 ## Execution Notes
 
@@ -179,7 +179,7 @@ Gunakan satu baris per defect. Jangan menutup defect hanya karena workaround dit
 - Migration/seed reproducibility: fresh SQLite sementara berhasil menjalankan migrate:fresh, migration Base/Master/Finance/Forum/Training/TableRefs, DevDatabaseSeeder, UpdateCourseJapaneseTitlesSeeder, dan UpdateCourseItemJapaneseTitlesSeeder tanpa error.
 - Negative test batch 2 dicatat di [NEGATIVE_TEST_BATCH_2_2026-08-01.md](NEGATIVE_TEST_BATCH_2_2026-08-01.md). Double-submit forum berhasil direproduksi sebelum fix: dua request paralel membuat dua record, lalu fixture dibersihkan sampai tersisa nol.
 - Null/incomplete hardening sudah ditambahkan pada progress card, SectionLesson, dan DetailTrainingScreen. TypeScript lulus, APK QA terbaru berhasil dibuat/di-install, MainActivity resumed, dan tidak ada fatal Android runtime log. Replay payload malformed end-to-end masih pending.
-- Guard double-submit ForumEditor sudah memakai synchronous ref lock, state loading tombol, serta recovery pada invalid JSON dan request rejection. Manual double-tap UI dengan APK terbaru masih perlu retest final.
+- Guard double-submit ForumEditor sudah memakai synchronous ref lock, state loading tombol, serta recovery pada invalid JSON dan request rejection. Retest UI pada APK terbaru lulus untuk tombol draft dan publish: masing-masing dua tap cepat menampilkan loading state, satu modal sukses, dan satu matching database record; seluruh fixture kemudian dibersihkan.
 - Network lambat belum dieksekusi karena network shaping/delayed proxy yang aman dan reproducible belum tersedia. API unavailable batch 1 tidak dianggap sebagai latency test.
 - Backend local `.env` sempat menunjuk ke absolute path database dari workspace lama; path lokal sudah diarahkan ke workspace aktif dan tidak di-commit.
 - Auth API contract batch: credential valid merespons HTTP 200, credential invalid merespons HTTP 422, dan access token invalid merespons HTTP 401. UI login juga sudah diverifikasi menampilkan error dan tidak masuk Home.
@@ -189,7 +189,7 @@ Gunakan satu baris per defect. Jangan menutup defect hanya karena workaround dit
 - Device lifecycle test: background/resume dan rotasi layar kembali menampilkan UI Progress tanpa `FATAL EXCEPTION`, crash, atau kehilangan session. Permission Kalender ditolak dan aplikasi tetap dapat digunakan.
 - `QA-NEG-004` sekarang `PARTIAL`: code-level guard dan build smoke sudah diverifikasi, tetapi fixture response malformed belum direplay ke emulator.
 - `QA-NEG-005` sekarang `BLOCKED` sampai network shaping/delayed proxy tersedia.
-- `QA-NEG-006` sekarang `FIXED-PENDING-RETEST`: duplicate record berhasil direproduksi sebelum fix, source fix dan APK QA sudah dibuat, tetapi tap UI final belum diulang.
+- `QA-NEG-006` sekarang `PASS-QA`: dua tap cepat pada Forum Editor menghasilkan satu record pada emulator; marker QA dihapus setelah verifikasi. Direct API parallel replay sebelum fix tetap dicatat sebagai rekomendasi backend idempotency.
 - Selama startup/recovery muncul toast generik `Error internal server` beberapa kali, tetapi layar Progress akhirnya termuat dan session tetap aktif. Endpoint pemicu belum terisolasi; dicatat sebagai `DEF-002` P2 untuk investigasi sebelum production.
 - CMS build membutuhkan `npm ci` ketika dependency lokal belum lengkap; `cms/yarn.lock` dikembalikan dan tidak menjadi bagian dari perubahan.
 - Mobile Jest belum menjadi gate QA karena test lama mengimpor native SDK secara penuh dan berhenti sebelum assertion; ini dicatat sebagai blocker test infrastructure terpisah dari runtime APK.
@@ -200,7 +200,7 @@ Gunakan satu baris per defect. Jangan menutup defect hanya karena workaround dit
 ## Next Gate
 
 1. Putuskan perbaikan atau waiver untuk blocker `QA-ENV-005`/`DEF-001`.
-2. Selesaikan retest negative batch 2: replay null/incomplete, siapkan network shaping, dan ulangi double tap pada APK terbaru.
+2. Selesaikan sisa negative batch 2: replay null/incomplete dan siapkan network shaping untuk latency test.
 3. Siapkan build QA yang diberi version label dan kumpulkan screenshot/log evidence per layar.
 4. Kirim UAT checklist ke client/product owner untuk eksekusi dengan data bisnis.
 5. Setelah UAT diterima, lanjut ke release hardening dan Google Play internal testing.

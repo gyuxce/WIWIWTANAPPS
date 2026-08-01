@@ -19,7 +19,7 @@ Hasil di bawah adalah QA internal. Ini bukan sign-off client dan bukan validasi 
 | --- | --- | --- | --- |
 | QA-NEG-004 | Data backend null/incomplete | Guard source dan build diverifikasi; replay payload malformed belum dilakukan | `PARTIAL` |
 | QA-NEG-005 | Network lambat | Belum dapat dijalankan tanpa network shaping yang aman/reproducible | `BLOCKED` |
-| QA-NEG-006 | Double tap submit | Dua request paralel membuat dua record; guard mobile diperbaiki | `FIXED-PENDING-RETEST` |
+| QA-NEG-006 | Double tap submit | Dua tap cepat pada UI menghasilkan satu record; fixture dibersihkan | `PASS-QA` |
 
 ## QA-NEG-004 - Null/Incomplete Data
 
@@ -78,8 +78,12 @@ Kesimpulan: API lokal belum mempunyai idempotency key atau duplicate protection.
 - APK `developmentQa` berhasil dibuat setelah bundling native selesai.
 - APK berhasil di-install ke emulator.
 - `MainActivity` resumed dan tidak ada fatal Android runtime log.
+- Pada Forum Editor, judul, deskripsi, dan topic `Teori Bahasa Jepang` diisi. Tombol `下書きに保存` dan `セーブ` masing-masing ditekan dua kali cepat.
+- Screenshot 150 ms pada kedua jalur menunjukkan loading state. Jalur draft menampilkan satu modal `投稿が下書きに正常に追加されました`; jalur publish menampilkan satu modal `投稿は正常に作成されました`.
+- Query database untuk marker draft dan publish masing-masing menghasilkan `1` record. Setelah cleanup exact marker, kedua query kembali `0`.
+- Logcat tidak menemukan `FATAL EXCEPTION` pada proses aplikasi.
 
-Full manual double-tap pada layar forum masih perlu satu retest UI dengan APK terbaru. Status defect karena itu `FIXED-PENDING-RETEST`, bukan closed final.
+Keputusan: `PASS-QA` untuk double-tap pada jalur draft dan publish UI mobile. Reproduction dua request langsung ke API tetap menjadi rekomendasi hardening backend berupa idempotency key atau duplicate protection, tetapi tidak menggagalkan guard UI yang diuji pada batch ini.
 
 ## File Yang Berubah
 

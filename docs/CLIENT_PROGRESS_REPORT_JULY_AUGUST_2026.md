@@ -14,7 +14,7 @@ Per 1 Agustus 2026:
 | --- | ---: | --- |
 | Kesiapan menuju internal release candidate | **60-65%** | Core mobile flow sudah dapat dijalankan dan diaudit di emulator |
 | Kesiapan menuju Google Play production | **45-50%** | Production environment, UAT, signing final, Firebase, storage, payment, dan Play Console masih perlu diselesaikan |
-| QA/UAT formal | **45%** | Test plan, environment gate, smoke, negative mobile batch 1, dan batch 2 sudah tersedia; beberapa retest masih pending |
+| QA/UAT formal | **50%** | Test plan, environment gate, smoke, dan negative mobile batch 1-2 sudah tersedia; double-tap UI lulus, replay malformed payload dan latency masih pending |
 | Google Play release preparation | **25%** | Checklist dan dasar signing sudah ada; AAB production dan akses production belum divalidasi |
 
 Persentase di atas adalah estimasi kesiapan berbasis gate project, bukan jumlah baris kode atau jumlah commit.
@@ -152,7 +152,7 @@ Catatan QA:
 
 - `QA-NEG-004` null/incomplete: guard source dan build sudah diverifikasi, tetapi replay payload malformed ke emulator masih pending.
 - `QA-NEG-005` network lambat: blocked sampai network shaping atau delayed proxy tersedia.
-- `QA-NEG-006` double tap: dua request paralel terbukti membuat dua record sebelum fix; guard mobile sudah diterapkan dan retest UI masih pending.
+- `QA-NEG-006` double tap: dua request paralel terbukti membuat dua record sebelum fix; setelah guard mobile, dua tap cepat pada Forum Editor menghasilkan satu record dan fixture dibersihkan (`PASS-QA`).
 - Detail evidence batch 2 tersedia di `docs/NEGATIVE_TEST_BATCH_2_2026-08-01.md`.
 - Toast generik `Error internal server` masih muncul transient pada sebagian startup/recovery dan dicatat sebagai defect P2 untuk diisolasi.
 - Mobile Jest legacy masih menjadi blocker test infrastructure karena membutuhkan mock native SDK yang luas; hal ini berbeda dari runtime APK yang sudah dapat berjalan.

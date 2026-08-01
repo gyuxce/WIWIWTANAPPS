@@ -108,7 +108,7 @@ Audit mobile terakhir:
 - Fase pelatihan sudah bisa dibuka dengan seed lokal subscription aktif dan `training_program=2`.
 - Detail modul, level, grup materi, layar materi, handling error media, tab kelas virtual, dan tab asesmen sudah diaudit. Detailnya ada di [docs/MOBILE_SCREEN_AUDIT.md](docs/MOBILE_SCREEN_AUDIT.md).
 - TypeScript mobile sudah lolos `corepack yarn tsc --noEmit` dan build `developmentDebug` berhasil.
-- Negative test batch 2 sudah mereproduksi double-submit forum sebelum fix, menambahkan guard submit dan null-safety training. Detail status partial, blocked, dan retest ada di [docs/NEGATIVE_TEST_BATCH_2_2026-08-01.md](docs/NEGATIVE_TEST_BATCH_2_2026-08-01.md).
+- Negative test batch 2 sudah mereproduksi double-submit forum sebelum fix, menambahkan guard submit dan null-safety training. Retest UI double-tap sudah `PASS-QA`; detail status partial dan blocked yang tersisa ada di [docs/NEGATIVE_TEST_BATCH_2_2026-08-01.md](docs/NEGATIVE_TEST_BATCH_2_2026-08-01.md).
 
 Build Android production:
 

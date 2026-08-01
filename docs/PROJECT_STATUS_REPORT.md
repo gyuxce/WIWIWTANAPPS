@@ -14,7 +14,7 @@ Estimasi kesiapan menuju **rilis Google Play production**: **45-50%**, karena ma
 
 ## Checkpoint Terbaru - 1 Agustus 2026
 
-- Posisi aktual: QA/UAT formal tahap awal, setelah stabilisasi mobile Android dan negative test batch 2.
+- Posisi aktual: QA/UAT formal tahap awal, setelah stabilisasi mobile Android dan retest negative test batch 2.
 - Login API siswa tervalidasi dengan HTTP 200 dari backend lokal.
 - Handling login mobile diperbaiki agar respons/error API terbaca jelas dan aplikasi tidak pindah ke Home sebelum profil berhasil dimuat.
 - TypeScript mobile lulus dan APK `developmentQa` terbaru berhasil dibuild. APK ini masih ditandatangani debug untuk audit lokal, bukan untuk Google Play.
@@ -31,7 +31,7 @@ Estimasi kesiapan menuju **rilis Google Play production**: **45-50%**, karena ma
 - Guard signing sudah ditambahkan agar build production gagal dengan pesan yang jelas, bukan `NullPointerException`.
 - Paket eksekusi UAT client sudah siap dikirim dan diisi oleh reviewer.
 - Internal UAT baseline sudah dijalankan dengan hasil `CONDITIONAL PASS`; detail evidence dipisahkan dari approval client.
-- Negative test batch 2 sudah dijalankan: duplicate submit forum berhasil direproduksi sebelum fix, guard mobile sudah diterapkan, null-safety training diperkuat, dan slow-network dicatat blocked karena shaping belum tersedia. Detail ada di `docs/NEGATIVE_TEST_BATCH_2_2026-08-01.md`.
+- Negative test batch 2 sudah dijalankan: duplicate submit forum berhasil direproduksi sebelum fix, guard mobile sudah diterapkan dan lulus retest UI, null-safety training diperkuat, dan slow-network dicatat blocked karena shaping belum tersedia. Detail ada di `docs/NEGATIVE_TEST_BATCH_2_2026-08-01.md`.
 - Fresh SQLite migration dan seed seluruh domain sudah lulus; path DB lokal lama ditemukan dan dikoreksi tanpa memasukkan `.env` ke repo.
 
 ## Stage Saat Ini
@@ -47,7 +47,7 @@ Mapping stage:
 | 3 | Audit CMS dan flow admin dasar | Sebagian besar selesai |
 | 4 | Audit dan stabilisasi mobile siswa | Core flow dan recovery utama selesai; edge case sudah masuk QA |
 | 5 | Data/i18n/backend schema hardening | Sebagian selesai; course bilingual sudah ada, forum/notifikasi dinamis masih pending |
-| 6 | QA end-to-end dan UAT client | QA batch 1 dan negative mobile batch 1 selesai; internal baseline conditional pass, eksekusi client masih pending |
+| 6 | QA end-to-end dan UAT client | QA batch 1 dan negative mobile batch 2 selesai untuk double-tap UI; internal baseline conditional pass, eksekusi client masih pending |
 | 7 | Release preparation Google Play | Preflight sudah dilakukan; signing/AAB, production config, compliance, dan Play Console masih pending |
 
 ## Progress Per Area
@@ -62,7 +62,7 @@ Mapping stage:
 | Training module/progress logic | 80% | Bug NaN, mismatch progress, detail training sudah diperbaiki |
 | Media/document handling | 65% | Handling UI sudah lebih aman, tetapi file GCS/production media masih perlu validasi |
 | i18n/mixed language | 45% | Teks statis penting, course category, dan course item/module mulai rapi; forum topic dan notification data masih perlu schema/backend/CMS |
-| QA/UAT formal | 45% | Internal baseline conditional pass; batch 2 sudah menghasilkan fix dan evidence, replay malformed payload, latency test, serta UAT client masih pending |
+| QA/UAT formal | 50% | Internal baseline conditional pass; double-tap UI sudah PASS-QA, replay malformed payload, latency test, serta UAT client masih pending |
 | Google Play release readiness | 25% | Environment dan preflight sudah dicek; signing/AAB, Play Console, privacy policy, production env, dan store assets belum selesai |
 
 ## Yang Sudah Diselesaikan
@@ -92,7 +92,7 @@ Mapping stage:
 - Guard signing production sudah ditambahkan agar error konfigurasi terbaca jelas dan tidak membingungkan saat build.
 - Hasil audit dicatat di `docs/MOBILE_SCREEN_AUDIT.md`.
 - Negative test mobile batch 1 sudah dicatat di `docs/QA_UAT_TEST_PLAN.md`, termasuk evidence API status, UI state, storage session, logcat, dan lifecycle emulator.
-- Negative test batch 2 sudah dicatat di `docs/NEGATIVE_TEST_BATCH_2_2026-08-01.md`: double-submit forum terbukti membuat dua record sebelum fix, guard mobile sudah diterapkan, dan null/incomplete guard sudah diperkuat.
+- Negative test batch 2 sudah dicatat di `docs/NEGATIVE_TEST_BATCH_2_2026-08-01.md`: double-submit forum terbukti membuat dua record sebelum fix, guard mobile sudah diterapkan, retest dua tap UI menghasilkan satu record, dan null/incomplete guard sudah diperkuat.
 
 ## Temuan/Risiko Utama
 
@@ -153,7 +153,6 @@ Prioritas terdekat:
 1. **Tutup gate QA yang tersisa**
    - Replay null/incomplete ke emulator.
    - Siapkan network shaping/delayed proxy untuk latency test.
-   - Ulangi manual double tap pada Forum Editor dengan APK terbaru.
    - Putuskan apakah blocker Jest legacy akan diperbaiki atau diberi waiver.
    - Isolasi toast `Error internal server` transient pada startup/recovery.
 
