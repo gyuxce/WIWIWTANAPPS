@@ -66,7 +66,7 @@ class AssesmentVerbalController extends BaseCrud
         $this->query = $this->query->where('item_id', $courseItemData->id)
                         ->where(function($query) {
                             $query->where('status', '!=', UserCourseItemStatusConstant::REPEAT)
-                                ->orWhereNotNull('status');
+                                ->orWhereNull('status');
                         });
 
         $startedAt = $request->input('started_at');

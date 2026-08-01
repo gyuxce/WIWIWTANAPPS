@@ -89,6 +89,7 @@ Catatan: hasil `PASS-SMOKE` pada dokumen ini adalah baseline teknis dari emulato
 | QA-AUTH-006 | Access token expired | Refresh token dicoba dan session tetap aktif | P0 | PASS-QA |
 | QA-AUTH-007 | Refresh token invalid | Session dihapus dan user kembali login secara jelas | P1 | PASS-QA |
 | QA-AUTH-008 | Role/access boundary | Student tidak dapat membuka route CMS/admin | P1 | PASS-QA |
+| QA-AUTH-009 | Student action-level admin boundary | Token siswa ditolak untuk GET/POST/PUT/DELETE endpoint admin tanpa mutasi data | P1 | PASS-QA |
 
 ## CMS Admin Flow
 
@@ -99,9 +100,9 @@ Catatan: hasil `PASS-SMOKE` pada dokumen ini adalah baseline teknis dari emulato
 | QA-CMS-003 | Buat/edit user | Validasi field, format email, create/edit/delete, dan penyimpanan berhasil | P1 | PASS-QA |
 | QA-CMS-004 | Daftar dan buat role | Permission dapat dipilih, dibaca kembali, dan dihapus | P1 | PASS-QA |
 | QA-CMS-005 | Kategori training | Create/edit/delete dan title Jepang tersimpan | P1 | PASS-QA |
-| QA-CMS-006 | Modul training | Module, item, dan title Jepang tersimpan; urutan belum diuji | P1 | PARTIAL |
+| QA-CMS-006 | Modul training | Module, item, dan title Jepang tersimpan; pagination/filter boundary lulus, urutan belum diuji | P1 | PARTIAL |
 | QA-CMS-007 | Virtual class | Create/edit/detail/delete, date picker, link, cover upload/readback, dan no-premature-submit behavior | P1 | PASS-QA |
-| QA-CMS-008 | Assessment | Package/question create-readback-edit-delete, activation toggle, dan video upload/readback lulus; verbal schedule/full publish/real playback belum lengkap | P1 | PARTIAL |
+| QA-CMS-008 | Assessment | Package/question CRUD, activation toggle, verbal schedule update/readback/filter, dan video upload/readback lulus; full publish/real playback belum lengkap | P1 | PARTIAL |
 | QA-CMS-009 | Seminar | Daftar, create/edit/delete, date picker, link, dan detail terbuka | P2 | PASS-QA |
 | QA-CMS-010 | Forum | Topic/list/detail, publish, delete, dan empty state stabil | P1 | PASS-QA |
 | QA-CMS-011 | Notification content | Create/edit/delete, schedule, link, repeat, dan target user benar | P1 | PASS-QA |
@@ -112,6 +113,7 @@ Catatan: hasil `PASS-SMOKE` pada dokumen ini adalah baseline teknis dari emulato
 | QA-CMS-016 | Upload/storage | Category cover uploads and reads back through the local staging storage contract | P1 | PASS-QA |
 | QA-CMS-017 | Virtual Class cover storage | Cover upload persists the file pointer and reads back identical bytes through local Sardine staging | P1 | PASS-QA |
 | QA-CMS-018 | Assessment video storage | Video upload persists the course-item file pointer after API completion and reads back identical bytes through local Sardine staging | P1 | PASS-QA; playback pending |
+| QA-CMS-019 | Pagination/filter boundary | Module page 1/2, beyond-last, dan no-result filter mengembalikan response stabil serta meta yang benar | P2 | PASS-QA |
 
 ## Student Mobile Core Flow
 
@@ -127,9 +129,9 @@ Catatan: hasil `PASS-SMOKE` pada dokumen ini adalah baseline teknis dari emulato
 | QA-STU-008 | Student documents | Search/filter, filename, preview/download, dan empty state benar | P1 | PASS-SMOKE |
 | QA-STU-009 | Forum | Topic list, search/sort, detail, dan empty state benar | P1 | PASS-SMOKE |
 | QA-STU-010 | Notifications | Tab, badge, list, detail, dan empty state benar | P1 | PASS-SMOKE |
-| QA-STU-011 | Profile | Profile data, language, dan status tampil benar | P2 | PENDING |
+| QA-STU-011 | Profile | Profile data, language, dan status tampil benar pada mode Indonesia dan Jepang | P2 | PASS-QA |
 | QA-STU-012 | Drawer navigation | Semua route yang tersedia dapat dibuka dan kembali | P1 | PASS-SMOKE |
-| QA-STU-013 | Language mode | Label statis dan data bilingual tidak campur secara merusak | P2 | PENDING |
+| QA-STU-013 | Language mode | Label statis dan data bilingual berubah sesuai fase; header bilingual yang memang disengaja tetap konsisten | P2 | PASS-QA |
 | QA-STU-014 | Device back/relaunch | Back navigation dan relaunch tidak membuat blank screen | P0 | PASS-SMOKE |
 | QA-STU-015 | Student document storage | Authenticated upload, database file pointer, download, and byte readback work through local Sardine staging | P1 | PASS-QA |
 
@@ -191,6 +193,7 @@ Gunakan satu baris per defect. Jangan menutup defect hanya karena workaround dit
 | CMS-DEF-011 | QA-STU-015 | P1 | Student document upload membentuk URL Google Cloud Storage dari response Sardine | `UserFilesController.php`, authenticated upload/download, matching 7,944-byte SHA-256 | Engineering | Closed - PASS-QA on local Sardine staging |
 | CMS-DEF-012 | QA-CMS-018 | P1 | Dialog video asesmen dapat menampilkan sukses sebelum file-pointer request selesai | `detail/assesment/index.js`, upload dialog retest, database pointer/readback | Engineering | Closed - PASS-QA; real playback remains release check |
 | CMS-DEF-013 | QA-CMS-007 | P2 | Tombol `OK` date picker ikut men-submit Formik parent form | `DateTimepicker.js`, browser retest stayed on create route with no QA record | Engineering | Closed - PASS-QA |
+| CMS-DEF-014 | QA-CMS-008 | P1 | Sesi Asesmen lisan dengan `status = null` hilang dari daftar karena filter memakai `orWhereNotNull`; jadwal belum selesai tidak terlihat di CMS | `AssesmentVerbalController.php`, API list/schedule/filter retest, fixture restored | Engineering | Closed - PASS-QA |
 
 ## Execution Notes
 
@@ -216,13 +219,14 @@ Gunakan satu baris per defect. Jangan menutup defect hanya karena workaround dit
 - Notification link persistence was reproduced as a backend validation defect, fixed by adding the optional URL rule, then verified through CMS edit readback and database-backed API response.
 - Seminar empty date validation was reproduced before the fix and now returns the user-facing required-field message.
 - Virtual Class CRUD was executed from the module detail tab. The create redirect defect was fixed and the temporary class was read back, edited, and deleted.
-- Assessment package/question flow was executed with a temporary package and question. Activation was toggled off and restored on the seeded assessment; verbal schedule and video upload remain separate gaps.
+- Assessment package/question flow was executed with a temporary package and question. Activation was toggled off and restored on the seeded assessment. Verbal schedule update/readback and scheduled/unscheduled filters now pass; the seeded fixture was restored to `working_date=2024-03-03`, `link=null`, and `is_scheduled=1`. Real MP4 playback remains open.
 - CMS module deletion retest now archives the parent and generated assessment descendants recursively. The transaction-level regression and browser delete flow both passed; database evidence showed zero active children/orphans, while student progress, question-bank rows, and file records remain preserved by policy.
-- Restricted-role matrix: the temporary role with only `Materi Pelatihan` permission saw only training navigation after async permissions loaded; `/forum` and `/management/user` both rendered `Access Denied`. Direct API/action-level CRUD checks remain a separate gap.
+- Restricted-role matrix: the temporary role with only `Materi Pelatihan` permission saw only training navigation after async permissions loaded; `/forum` and `/management/user` both rendered `Access Denied`. A student token was also replayed against admin GET/POST/PUT/DELETE user endpoints; all four returned `401` and no data was changed. Direct CRUD with a restricted-role token remains optional follow-up evidence.
 - Upload/storage audit: `tools/sardine-staging` was started on `127.0.0.1:9003`. Category cover, Virtual Class cover, Assessment video, and student document upload/readback paths returned Sardine URLs, persisted file pointers, and matched source/readback SHA-256 values. The assessment fixture was storage-only, so real MP4 playback and approved production Sardine verification remain open.
 - Storage QA cleanup: temporary Virtual Class, assessment video, and student document records/files were restored or force-deleted; the final database check returned zero QA event/child/user-file rows and no matching fixture artifacts remained under the staging runtime.
 - Date-picker regression: selecting a Virtual Class date and clicking `OK` stayed on `/virtual/create` after the button type fix, with no incomplete record created.
 - CMS release checks: production build compiled successfully; backend PHPUnit passed `2` tests / `2` assertions; targeted ESLint passed for `virtual/create.js`; full source lint remains a 33-error legacy baseline after generated build output was excluded.
+- Residual local QA batch 1 Agustus 2026: Assessment verbal status-null listing, schedule update/readback, scheduled filter, unschedule/readback, mobile Profile mode Indonesia/Jepang, module pagination boundaries, no-result filter, and student admin-action boundary passed. The emulator final state was restored to phase 5/Japanese mode.
 - Mobile Jest sudah menjadi gate code-level terbatas untuk regression test yang tersedia. `App-test.tsx` dan helper DEF-002 lulus dengan `2` suites / `4` tests; mock native dependency berada di `mobile/jest.setup.js` dan hanya aktif pada Jest.
 - `PASS-SMOKE` harus diulang sebagai `PASS-QA` setelah test data, build, dan bukti eksekusi formal ditetapkan.
 - UAT client dilaporkan sudah `Approved` oleh project owner pada 1 Agustus 2026. Template formal sign-off tersedia di [UAT_SIGN_OFF_2026-08-01.md](UAT_SIGN_OFF_2026-08-01.md), tetapi acceptance criteria, nama reviewer, evidence, dan konfirmasi tertulis tetap harus diisi agar approval menjadi auditable.
@@ -232,8 +236,8 @@ Gunakan satu baris per defect. Jangan menutup defect hanya karena workaround dit
 
 1. Lengkapi dan minta konfirmasi pada [UAT_SIGN_OFF_2026-08-01.md](UAT_SIGN_OFF_2026-08-01.md), termasuk scope, evidence, known issue, nama reviewer, dan tanda tangan/approval tertulis.
 2. Close `CMS-DEF-009` after the approved Sardine staging/production endpoint is available and the same upload/readback evidence passes there; use [SARDINE_PRODUCTION_QA.md](SARDINE_PRODUCTION_QA.md) for the probe and handoff checklist.
-3. Run the local storage cases against the approved Sardine staging/production endpoint, validate a real playable MP4, and finish assessment verbal/full-publish evidence.
-4. Add direct API/action-level permission checks and attach formal UAT evidence.
+3. Run the local storage cases against the approved Sardine staging/production endpoint, validate a real playable MP4, and finish remaining assessment full-publish evidence.
+4. If required by the final role matrix, replay create/update/delete with a restricted-role token; the student admin-action boundary is already `PASS-QA`.
 5. Tag the CMS release candidate with version, migration/seed revision, environment, and build evidence.
 6. Selesaikan `REL-001`: keystore/signing production, AAB production, dan checksum.
 7. Lanjutkan production config, privacy/Data Safety, Firebase/storage/payment, Play Console internal testing, dan release smoke test.

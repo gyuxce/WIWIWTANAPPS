@@ -215,3 +215,11 @@ Audit layar aplikasi siswa Android lokal.
 - Notifikasi: PASS. Tab prioritas, untukmu, dan forum tampil; empty state notifikasi terbuka normal.
 - Relaunch/session recovery: PASS. Setelah `force-stop` dan relaunch, aplikasi kembali ke layar progress siswa; proses aktif dan tidak ada `FATAL EXCEPTION`, `TypeError`, atau error jaringan pada Logcat.
 - Kesimpulan: smoke test fungsional lokal siswa lulus untuk jalur utama. Sisa pekerjaan berpindah ke test case formal, validasi data edge case, hardening build, dan persiapan release production.
+
+### Residual QA Profile dan Language Mode 2026-08-01
+
+- APK QA `developmentQa` ter-install pada emulator `emulator-5554`; backend lokal diakses melalui `10.0.2.2:8000`.
+- Dengan `last_phase=5`, Profile menampilkan data siswa, status `Siswa Aktif - SSW`, dan label Jepang pada isi utama seperti akun, progres, edit profil, privacy, serta kontak admin.
+- Dengan fixture sementara `last_phase=1`, Profile menampilkan label Indonesia seperti `Akun`, `Progres saya`, `Edit Profil`, `Privasi dan Keamanan`, dan `Kontak Admin`; fixture kemudian dipulihkan ke `last_phase=5`.
+- Header tertentu memang merender pasangan Indonesia/Jepang secara bersamaan, sehingga label Jepang di header bukan mixed-language defect. Isi utama berubah sesuai setting `pengaturan-bahasa=2` dan fase user.
+- Setelah force-stop/relaunch pada kedua mode, app kembali ke layar siswa tanpa blank screen atau `FATAL EXCEPTION`. Permission Calendar/Notification ditolak selama setup QA dan aplikasi tetap usable.

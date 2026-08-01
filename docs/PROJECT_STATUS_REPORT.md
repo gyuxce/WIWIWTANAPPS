@@ -40,6 +40,8 @@ Estimasi kesiapan menuju **rilis Google Play production**: **45-50%**, karena ma
 - Client UAT dilaporkan sudah approved oleh project owner pada 1 Agustus 2026. DEF-001 dan DEF-002 sudah ditutup berdasarkan evidence QA; formal sign-off, acceptance criteria, dan evidence per flow masih perlu dilampirkan.
 - DEF-002 sudah diretest pada APK baru dengan expired access token dan refresh token aktif. Access token baru tersimpan, tanpa `Error internal server` dan tanpa `FATAL EXCEPTION`.
 - Fresh SQLite migration dan seed seluruh domain sudah lulus; path DB lokal lama ditemukan dan dikoreksi tanpa memasukkan `.env` ke repo.
+- Residual local QA batch selesai untuk scope yang dapat diuji lokal: Assessment verbal schedule/readback/filter, Profile mode Indonesia/Jepang, module pagination/filter boundary, dan student action-level admin boundary. Sesi seed Assessment dan fase siswa sudah dipulihkan setelah test.
+- `CMS-DEF-014` ditutup: filter daftar Assessment lisan sekarang mempertahankan sesi dengan `status = null`, sehingga jadwal yang belum selesai tidak hilang dari CMS.
 
 ## Stage Saat Ini
 
@@ -63,13 +65,13 @@ Mapping stage:
 | --- | ---: | --- |
 | Repo, struktur, dokumentasi awal | 90% | Repo sudah rapi, README/docs aktif diperbarui |
 | Backend local development | 75% | Laravel local jalan, SQLite dan local auth fallback sudah bisa dipakai |
-| CMS local/admin | 70% | CMS bisa login admin dan beberapa fitur sudah diaudit |
+| CMS local/admin | 75% | Core CMS, archive lifecycle, local storage, assessment schedule, dan permission boundary sudah diaudit; production dependencies masih terbuka |
 | Mobile Android build | 80% | APK `developmentQa` berhasil build/install dengan env eksplisit; production signing/AAB masih blocked |
-| Mobile siswa core flow | 70% | Login, session recovery, progress, training, dokumen, forum, notifikasi dasar sudah diaudit |
+| Mobile siswa core flow | 75% | Login, session recovery, progress, training, dokumen, forum, notifikasi, Profile, dan dua mode bahasa sudah diaudit |
 | Training module/progress logic | 80% | Bug NaN, mismatch progress, detail training sudah diperbaiki |
 | Media/document handling | 70% | Local Sardine upload/readback untuk cover, video, dan dokumen sudah lulus; production media masih perlu validasi |
-| i18n/mixed language | 45% | Teks statis penting, course category, dan course item/module mulai rapi; forum topic dan notification data masih perlu schema/backend/CMS |
-| QA/UAT formal | 70% | Negative batch 2 serta DEF-001/DEF-002 sudah PASS-QA; formal sign-off, evidence client, dan retest CMS release candidate masih perlu dilengkapi |
+| i18n/mixed language | 50% | Mode fase Indonesia/Jepang serta course category/item/module sudah diverifikasi; forum topic dan notification data masih perlu schema/backend/CMS |
+| QA/UAT formal | 75% | Residual local QA dan DEF-001/DEF-002 sudah PASS-QA untuk scope yang diuji; formal sign-off, production retest, dan evidence client masih perlu dilengkapi |
 | Google Play release readiness | 30% | Local preflight dan env guard sudah lebih rapi; signing/AAB, Play Console, privacy policy, production env, dan store assets belum selesai |
 
 ## Yang Sudah Diselesaikan

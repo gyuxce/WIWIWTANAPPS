@@ -41,7 +41,7 @@ All main CMS routes opened without an authentication redirect. This is a navigat
 | Training seed | Existing module rows have Japanese titles | PASS-QA | Seed repair applied; six seeded module rows no longer show `-` |
 | Training material | Required fields, create/edit/delete, text content persistence | PASS-QA | Text content reloaded with title, description, and body; temporary material removed |
 | Virtual class | Required fields, date picker, create/detail/edit/delete, link, cover upload/readback | PASS-QA | Temporary class returned to the module tab after the redirect fix; cover URL and byte readback passed through local Sardine staging; QA class was removed |
-| Assessment package/question | Package create/readback/edit/delete, question add/save/readback/remove, activation toggle, video upload/readback | PASS-QA | Temporary package and question were removed; seeded assessment status was restored; video pointer, storage metadata, and byte readback passed through local Sardine staging |
+| Assessment package/question | Package create/readback/edit/delete, question add/save/readback/remove, activation toggle, verbal schedule update/readback/filter, video upload/readback | PASS-QA (local functional) | Temporary package and question were removed; seeded assessment status was restored; status-null verbal schedule became visible after the query fix, schedule/filter readback passed, and video pointer/storage byte readback passed through local Sardine staging |
 | Forum | Required fields, topic selection, publish, detail, delete | PASS-QA | Temporary post reached detail page and was deleted with cleanup reason |
 | Seminar | Required fields, date picker, create/detail/edit/delete | PASS-QA | Temporary seminar read back date, description, link, edit result, then removed |
 | Notification | Required fields, schedule, repeat, target all users, create/edit/delete | PASS-QA | Temporary notification read back; link persistence verified after backend fix; then removed |
@@ -63,6 +63,7 @@ All main CMS routes opened without an authentication redirect. This is a navigat
 - Student document upload now preserves the URL returned by Sardine instead of rebuilding a Google Cloud Storage URL, so upload and authenticated download work with local and non-Google adapters.
 - Assessment video upload now waits for the file-pointer API request before showing success, refreshing the list, and closing the dialog.
 - The Virtual Class date-picker `OK` button is explicitly non-submit, preventing date selection from prematurely creating an incomplete class inside the parent Formik form.
+- Assessment verbal list filtering now includes `status IS NULL`, so unscheduled/incomplete sessions remain visible; schedule update, scheduled filter, unschedule readback, and fixture restoration passed in local QA.
 - The final local QA fixture sweep removed temporary parent, child assessment, virtual-class, material, article, question, and notification records; all matching active and soft-deleted QA counts returned zero.
 
 ## Defects And Risks
@@ -82,15 +83,15 @@ All main CMS routes opened without an authentication redirect. This is a navigat
 | CMS-DEF-011 | P1 | Student document upload rebuilt the Sardine path as a Google Cloud Storage URL, breaking local/non-Google storage readback | Closed; controller now persists Sardine's returned URL; authenticated upload/download and byte readback passed on local staging |
 | CMS-DEF-012 | P1 | Assessment video dialog could report success and refresh before the file-pointer API request completed | Closed; upload pointer call is awaited and UI retest confirmed success after persistence/readback |
 | CMS-DEF-013 | P2 | Virtual Class date-picker `OK` button inherited native submit behavior and could create a class before cover/details were complete | Closed; button now uses `type="button"`; browser retest stayed on the create form and created no QA record |
+| CMS-DEF-014 | P1 | Assessment verbal sessions with `status = null` were hidden by the list query, making incomplete schedules disappear from CMS | Closed; query uses `orWhereNull('status')`; API schedule/readback/filter retest passed and the seed fixture was restored |
 
 ## Gaps Still Open
 
 These areas have route smoke evidence or mobile evidence but do not yet have complete CMS CRUD/UAT evidence:
 
-- Assessment verbal schedule and full publish evidence.
 - Real MP4 playback validation and production storage readback against the approved Sardine endpoint.
-- Direct API/action-level permission checks for create/update/delete remain separate from the route/menu matrix.
-- Export/import and pagination/filter boundary cases.
+- Restricted-role direct action matrix for create/update/delete, if required beyond the student admin-action boundary already tested.
+- Export/import coverage; module pagination/filter boundaries are now covered locally.
 - Staging/production storage, Firebase, payment, and scheduled notification verification.
 
 ## QA Interpretation
@@ -101,7 +102,7 @@ The tested CMS core content flows, module archive lifecycle, and local Sardine u
 
 1. Provide the approved Sardine staging/production endpoint, credentials, and retention policy; follow [SARDINE_PRODUCTION_QA.md](SARDINE_PRODUCTION_QA.md), rerun upload/readback against it, and close `CMS-DEF-009`.
 2. Run the same cover/video/document checks against the approved Sardine staging/production endpoint and validate a real playable MP4.
-3. Add direct API/action-level permission checks for the restricted-role matrix.
+3. Complete restricted-role direct action checks if they are part of the final permission acceptance criteria.
 4. Attach formal UAT evidence and known-issue approval.
 5. Tag the CMS release candidate with backend migration, seed, environment, and checksum metadata.
 6. Complete production configuration, signing, and Play Console preparation.
