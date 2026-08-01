@@ -4,7 +4,7 @@ Tanggal update: 1 Agustus 2026
 
 ## Ringkasan Eksekutif
 
-Project saat ini berada di fase **stabilisasi dan audit aplikasi mobile siswa**, bukan fase release production.
+Project saat ini berada di fase **formal QA/UAT dan release preparation awal**, bukan fase release production.
 
 Source handoff dari developer sebelumnya sudah dirapikan ke repo, environment lokal sudah bisa dijalankan, CMS dan backend lokal sudah aktif, APK Android development sudah berhasil dibuild dan diinstall ke emulator, dan flow utama siswa sudah mulai stabil.
 
@@ -41,7 +41,7 @@ Mapping stage:
 | 4 | Audit dan stabilisasi mobile siswa | Core flow dan recovery utama selesai; edge case sudah masuk QA |
 | 5 | Data/i18n/backend schema hardening | Sebagian selesai; course bilingual sudah ada, forum/notifikasi dinamis masih pending |
 | 6 | QA end-to-end dan UAT client | QA batch 1 dan negative mobile batch 1 selesai; UAT client masih pending |
-| 7 | Release preparation Google Play | Belum mulai |
+| 7 | Release preparation Google Play | Persiapan awal dimulai; belum siap publish production |
 
 ## Progress Per Area
 

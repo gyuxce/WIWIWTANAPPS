@@ -21,7 +21,8 @@ Repo ini dibuat dari source handoff developer sebelumnya dan sudah disanitasi su
 8. Untuk laporan stage, persentase, risiko, dan estimasi rilis, baca [docs/PROJECT_STATUS_REPORT.md](docs/PROJECT_STATUS_REPORT.md).
 9. Untuk persiapan rilis Google Play, baca [docs/GOOGLE_PLAY_RELEASE_CHECKLIST.md](docs/GOOGLE_PLAY_RELEASE_CHECKLIST.md).
 10. Untuk test matrix formal QA/UAT, baca [docs/QA_UAT_TEST_PLAN.md](docs/QA_UAT_TEST_PLAN.md).
-11. Jalankan backend dulu, lalu CMS, lalu mobile app.
+11. Untuk report progres Juli-Agustus dan action plan client, baca [docs/CLIENT_PROGRESS_REPORT_JULY_AUGUST_2026.md](docs/CLIENT_PROGRESS_REPORT_JULY_AUGUST_2026.md).
+12. Jalankan backend dulu, lalu CMS, lalu mobile app.
 
 ## Stack Utama
 

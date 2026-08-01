@@ -1,12 +1,12 @@
 # Google Play Release Checklist - WIWITAN Apps
 
-Tanggal update: 22 Juli 2026
+Tanggal update: 1 Agustus 2026
 
 Checklist ini dipakai saat project mulai masuk fase rilis Android production. Jangan publish sebelum semua item wajib di bawah selesai.
 
 ## 1. Status Saat Ini
 
-Project belum siap publish production. Posisi sekarang masih **release preparation awal**:
+Project belum siap publish production. Posisi sekarang masih **release preparation awal**, berjalan paralel dengan QA/UAT:
 
 - APK development sudah bisa dibuild dan diinstall ke emulator.
 - Flow siswa utama sudah mulai stabil.
