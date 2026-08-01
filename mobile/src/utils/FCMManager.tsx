@@ -14,6 +14,11 @@ import { apiFCMPost } from "services/UserService";
 import { useAuth } from "hooks/useAuth";
 
 const messaging = getMessaging(getApp());
+const debugLog = (...args: unknown[]) => {
+  if (__DEV__) {
+    console.log(...args);
+  }
+};
 
 const FCMManager = () => {
   const fcmToken = useRef(null) as any;
@@ -33,7 +38,7 @@ const FCMManager = () => {
       authStatus === AuthorizationStatus.PROVISIONAL;
 
     if (enabled) {
-      console.log("Authorization status:", authStatus);
+      debugLog("FCM authorization status", authStatus);
     }
   }
 
@@ -48,18 +53,9 @@ const FCMManager = () => {
       .then(x => {
         if (x) {
           fcmToken.current = x;
-          console.log("data token", x, fcmToken?.current);
           if (auth?.accessToken) {
             apiFCMPost(auth?.accessToken, x, user?.id);
           }
-          // api
-          //   .saveFCMToken(token, x)
-          //   .then(res => {
-          //     window.console.log("ini token", res.data, x);
-          //   })
-          //   .catch(err => {
-          //     console.log("ada error:", err);
-          //   });
         }
       })
       .catch(e => {
@@ -67,7 +63,7 @@ const FCMManager = () => {
       });
 
     const unsubscribe = onMessage(messaging, async remoteMessage => {
-      console.log("FCM Message Data:", remoteMessage.data);
+      debugLog("FCM message received", remoteMessage?.messageId);
     });
 
     return unsubscribe;

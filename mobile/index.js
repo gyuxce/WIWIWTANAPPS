@@ -1,50 +1,30 @@
 /**
  * @format
  */
-console.log('✅ index.js starting');
 import { AppRegistry } from "react-native";
-console.log('✅ imported react-native');
-
-// ---------------------
-// 🔥 FCM Background Handler (modular API)
-// ---------------------
 import { getApp } from "@react-native-firebase/app";
-import { 
+import {
   getMessaging,
-  setBackgroundMessageHandler 
+  setBackgroundMessageHandler,
 } from "@react-native-firebase/messaging";
 
-try {
-  setBackgroundMessageHandler(
-    getMessaging(getApp()),
-    async remoteMessage => {
-      console.log("📩 Background Message:", remoteMessage);
-    }
-  );
-  console.log("✅ FCM background handler registered");
-} catch (err) {
-  console.log("❌ Failed to register FCM background handler:", err);
-}
-
-let App = null;
-try {
-  App = require('./App').default;
-  console.log('✅ App imported successfully');
-} catch (err) {
-  console.log('❌ Error importing App:', err);
-}
+import App from "./App";
 import { name as appName } from "./app.json";
 
-// ErrorUtils.setGlobalHandler((error, isFatal) => {
-//   console.log('🔥 Global JS Error:', error);
-//   if (isFatal) {
-//     alert(`Fatal: ${error.name}\n${error.message}`);
-//   }
-// });
+const debugLog = (...args) => {
+  if (__DEV__) {
+    // eslint-disable-next-line no-console
+    console.log(...args);
+  }
+};
 
 try {
-  AppRegistry.registerComponent(appName, () => App);
-  console.log('✅ Registered app component');
+  setBackgroundMessageHandler(getMessaging(getApp()), async remoteMessage => {
+    debugLog("Background message received", remoteMessage?.messageId);
+  });
+  debugLog("FCM background handler registered");
 } catch (err) {
-  console.log('❌ Failed to register app:', err);
+  debugLog("Failed to register FCM background handler", err);
 }
+
+AppRegistry.registerComponent(appName, () => App);

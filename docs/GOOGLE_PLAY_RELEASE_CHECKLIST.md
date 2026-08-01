@@ -18,6 +18,7 @@ Project belum siap publish production. Posisi sekarang masih **release preparati
 - Production signing masih **BLOCKED** karena keystore upload dan credential `MYAPP_UPLOAD_*` belum tersedia.
 - AAB production belum terbentuk karena proses berhenti di tahap signing.
 - Production bundle sekarang wajib memilih `ENVFILE` secara eksplisit; konfigurasi lokal emulator tidak boleh ikut masuk ke production artifact.
+- Production log hygiene sudah diperketat: Redux logger serta log FCM token/payload hanya aktif pada development/QA.
 - Play Console, privacy policy, data safety, Firebase production, storage, payment, dan backend production belum diaudit penuh.
 
 ## 1A. Latest Local Release Preflight - 1 Agustus 2026
@@ -29,6 +30,8 @@ Project belum siap publish production. Posisi sekarang masih **release preparati
 | JavaScript/native compilation | PASS | Build maju sampai tahap bundle signing |
 | R8/minification | PASS | Lolos dengan Gradle heap 3 GB dan workers 1 |
 | Local QA env isolation | PASS | `ENVFILE` wajib eksplisit; production-shaped env menolak URL emulator dan auto-login |
+| Production log hygiene | PASS | Redux logger dan FCM/index diagnostics guarded by `__DEV__`; no token/payload logging in production |
+| Production debug compile | TIMEOUT | Temporary production-shaped env validated, but `app:assembleProductionDebug` exceeded 6 minutes without APK; no client database or production credentials were used |
 | Release signing | BLOCKED | `mobile/android/app/wiwitan.keystore` belum tersedia; empat `MYAPP_UPLOAD_*` belum diset |
 | Production AAB | BLOCKED | Belum ada file `.aab` yang dapat diupload |
 

@@ -15,6 +15,7 @@ and formal release evidence.
 - Cross-platform Gradle helper passes the selected env file into the Android build process.
 - `mobile/.env.production.example` documents the non-secret production env shape; the real `.env.production` remains ignored.
 - Production package scripts validate env before starting Gradle.
+- Redux logger and FCM/index diagnostics are now development-only; production builds do not log FCM tokens or notification payloads.
 
 ## Validation Evidence
 
@@ -30,6 +31,9 @@ and formal release evidence.
 | Emulator install | PASS | `adb install -r` returned `Success` on `emulator-5554` |
 | Launch smoke | PASS | MainActivity resumed; app process alive; no `FATAL EXCEPTION` in the post-launch log window |
 | Production build guard | PASS-BLOCKED | `yarn build:aab:prod` stopped before Gradle because real `.env.production` is not available |
+| Production env validator with template | PASS | Temporary `.env.production` copied from the example passed `STATUS=PRODUCTION`, HTTPS URL, URL scheme, and empty auto-login checks; fixture removed afterward |
+| Production debug compile without client DB | TIMEOUT | Two local attempts (`includeX86ForLocal=true` and default production ABIs) exceeded 4 and 6 minutes without producing an APK; Gradle daemons were stopped. This is a local build-time follow-up, not a production signing result |
+| Production log hygiene | PASS | TypeScript, Jest (`2` suites / `4` tests), and targeted ESLint for `index.js` passed after logger/FCM guards |
 
 The APK above is a local QA artifact signed with the debug key. It is not a
 Google Play upload artifact.
@@ -47,8 +51,8 @@ Google Play upload artifact.
 
 ## Next Execution
 
-1. Complete remaining local QA hardening for assessment playback/publish,
-   profile/language, direct permission actions, and pagination boundaries.
+1. Isolate the production debug compile timeout with Gradle/native build logs,
+   without using client data or production credentials.
 2. When production access arrives, create the local untracked `.env.production`
    from `mobile/.env.production.example` and run its validator.
 3. Run the Sardine probe and repeat CMS/student storage readback against the

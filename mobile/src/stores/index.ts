@@ -119,7 +119,8 @@ const persistConfig = {
 //@ts-ignore
 const persistedReducer = pReducer(persistConfig, rootReducerWithReset);
 
-const store = createStore(persistedReducer, applyMiddleware(thunk, logger));
+const middleware = __DEV__ ? [thunk, logger] : [thunk];
+const store = createStore(persistedReducer, applyMiddleware(...middleware));
 const persistor = persistStore(store);
 
 export { store, persistor };
