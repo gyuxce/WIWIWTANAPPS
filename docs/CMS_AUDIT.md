@@ -4,6 +4,8 @@ Last audit: 2026-08-01
 
 Scope: local CMS functional QA after the project owner took over execution from the previous developer.
 
+Production storage probe and handoff checklist: [SARDINE_PRODUCTION_QA.md](SARDINE_PRODUCTION_QA.md)
+
 ## Environment
 
 | Component | Value |
@@ -97,7 +99,7 @@ The tested CMS core content flows, module archive lifecycle, and local Sardine u
 
 ## Next Gate
 
-1. Provide the approved Sardine staging/production endpoint, credentials, and retention policy; rerun upload/readback against it and close `CMS-DEF-009`.
+1. Provide the approved Sardine staging/production endpoint, credentials, and retention policy; follow [SARDINE_PRODUCTION_QA.md](SARDINE_PRODUCTION_QA.md), rerun upload/readback against it, and close `CMS-DEF-009`.
 2. Run the same cover/video/document checks against the approved Sardine staging/production endpoint and validate a real playable MP4.
 3. Add direct API/action-level permission checks for the restricted-role matrix.
 4. Attach formal UAT evidence and known-issue approval.

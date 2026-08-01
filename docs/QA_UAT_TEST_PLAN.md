@@ -231,7 +231,7 @@ Gunakan satu baris per defect. Jangan menutup defect hanya karena workaround dit
 ## Next Gate
 
 1. Lengkapi dan minta konfirmasi pada [UAT_SIGN_OFF_2026-08-01.md](UAT_SIGN_OFF_2026-08-01.md), termasuk scope, evidence, known issue, nama reviewer, dan tanda tangan/approval tertulis.
-2. Close `CMS-DEF-009` after the approved Sardine staging/production endpoint is available and the same upload/readback evidence passes there.
+2. Close `CMS-DEF-009` after the approved Sardine staging/production endpoint is available and the same upload/readback evidence passes there; use [SARDINE_PRODUCTION_QA.md](SARDINE_PRODUCTION_QA.md) for the probe and handoff checklist.
 3. Run the local storage cases against the approved Sardine staging/production endpoint, validate a real playable MP4, and finish assessment verbal/full-publish evidence.
 4. Add direct API/action-level permission checks and attach formal UAT evidence.
 5. Tag the CMS release candidate with version, migration/seed revision, environment, and build evidence.
