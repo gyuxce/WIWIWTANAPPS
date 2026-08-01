@@ -12,6 +12,7 @@ Project belum siap publish production. Posisi sekarang masih **release preparati
 - APK development/QA sudah bisa dibuild dan diinstall ke emulator.
 - Flow siswa utama sudah mulai stabil.
 - Preflight `bundleProductionRelease` sudah dijalankan; R8 berhasil setelah heap Gradle dinaikkan.
+- Client UAT sudah dilaporkan approved; formal sign-off/evidence tetap menjadi item release handoff.
 - Production signing masih **BLOCKED** karena keystore upload dan credential `MYAPP_UPLOAD_*` belum tersedia.
 - AAB production belum terbentuk karena proses berhenti di tahap signing.
 - Play Console, privacy policy, data safety, Firebase production, storage, payment, dan backend production belum diaudit penuh.

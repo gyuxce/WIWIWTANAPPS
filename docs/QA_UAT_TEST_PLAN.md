@@ -1,7 +1,7 @@
 # QA/UAT Test Plan - WIWITAN Apps
 
 Tanggal mulai: 1 Agustus 2026  
-Stage: Stage 6 - Formal QA dan UAT
+Stage: Stage 7 - Release Preparation setelah QA/UAT
 
 ## Tujuan
 
@@ -133,8 +133,8 @@ Catatan: hasil `PASS-SMOKE` pada dokumen ini adalah baseline teknis dari emulato
 | QA-NEG-001 | API tidak tersedia | Error state jelas, tidak infinite loading atau crash | P0 | PASS-QA |
 | QA-NEG-002 | Empty course/module | Tampil `0`, empty state, atau pesan yang benar; tidak `NaN` | P0 | PASS-SMOKE |
 | QA-NEG-003 | Filename sangat panjang | Layout tidak overflow dan label tetap terbaca | P2 | PASS-SMOKE |
-| QA-NEG-004 | Data backend null/incomplete | Guard UI aktif dan tidak crash | P1 | PARTIAL |
-| QA-NEG-005 | Network lambat | Loading state terlihat dan request tidak menduplikasi data secara salah | P2 | BLOCKED |
+| QA-NEG-004 | Data backend null/incomplete | Guard UI aktif dan tidak crash saat fixture null/incomplete direplay | P1 | PASS-QA |
+| QA-NEG-005 | Network lambat | Loading overlay terlihat selama delay 2.5 detik dan data pulih tanpa `NaN`/crash | P2 | PASS-QA |
 | QA-NEG-006 | Double tap submit | Hanya satu request/data record yang dibuat | P1 | PASS-QA |
 | QA-NEG-007 | Device rotation/background | State tidak hilang atau crash saat app kembali aktif | P2 | PASS-QA |
 | QA-NEG-008 | Android permission denied | App memberi fallback/error yang dapat dipahami | P1 | PASS-QA |
@@ -145,7 +145,7 @@ UAT dilakukan dengan akun dan data yang disetujui client. Setiap item harus memi
 
 Template eksekusi yang siap dikirim ke client tersedia di [UAT_CLIENT_EXECUTION_PACK.md](UAT_CLIENT_EXECUTION_PACK.md).
 
-Hasil pengujian lokal/internal terbaru tersedia di [INTERNAL_UAT_REPORT_2026-08-01.md](INTERNAL_UAT_REPORT_2026-08-01.md). Hasil internal tidak mengubah status UAT client menjadi `Accept`.
+Hasil pengujian lokal/internal terbaru tersedia di [INTERNAL_UAT_REPORT_2026-08-01.md](INTERNAL_UAT_REPORT_2026-08-01.md). Per 1 Agustus 2026, project owner melaporkan bahwa client UAT sudah `Approved`. Bukti sign-off tertulis, nama reviewer, dan evidence per test case tetap perlu dilampirkan pada paket UAT agar status dapat diaudit.
 
 Detail negative test batch 2 tersedia di [NEGATIVE_TEST_BATCH_2_2026-08-01.md](NEGATIVE_TEST_BATCH_2_2026-08-01.md).
 
@@ -160,7 +160,7 @@ Detail negative test batch 2 tersedia di [NEGATIVE_TEST_BATCH_2_2026-08-01.md](N
 | UAT-007 | Admin mengelola konten | Admin dapat membuat, mengubah, dan menerbitkan konten training | PENDING |
 | UAT-008 | Admin mengelola user/role | Admin dapat mengatur akses tanpa membuka menu yang salah | PENDING |
 | UAT-009 | Bahasa aplikasi | Copy dan data bilingual yang disepakati client tampil benar | PENDING |
-| UAT-010 | Persetujuan akhir | Client menyetujui known issue dan hasil UAT | PENDING |
+| UAT-010 | Persetujuan akhir | Client menyetujui known issue dan hasil UAT | PASS-UAT - approval reported; evidence pending |
 
 ## Defect Log
 
@@ -178,29 +178,29 @@ Gunakan satu baris per defect. Jangan menutup defect hanya karena workaround dit
 - QA environment batch 1: API health, backend PHPUnit, CMS build, mobile TypeScript, mojibake scan, dan secret hygiene lulus.
 - Migration/seed reproducibility: fresh SQLite sementara berhasil menjalankan migrate:fresh, migration Base/Master/Finance/Forum/Training/TableRefs, DevDatabaseSeeder, UpdateCourseJapaneseTitlesSeeder, dan UpdateCourseItemJapaneseTitlesSeeder tanpa error.
 - Negative test batch 2 dicatat di [NEGATIVE_TEST_BATCH_2_2026-08-01.md](NEGATIVE_TEST_BATCH_2_2026-08-01.md). Double-submit forum berhasil direproduksi sebelum fix: dua request paralel membuat dua record, lalu fixture dibersihkan sampai tersisa nol.
-- Null/incomplete hardening sudah ditambahkan pada progress card, SectionLesson, dan DetailTrainingScreen. TypeScript lulus, APK QA terbaru berhasil dibuat/di-install, MainActivity resumed, dan tidak ada fatal Android runtime log. Replay payload malformed end-to-end masih pending.
+- Null/incomplete hardening sudah ditambahkan pada progress card, SectionLesson, dan DetailTrainingScreen. Fixture null/incomplete direplay melalui `scripts/qa-http-proxy.mjs` ke emulator; course menampilkan `0%`/`0 / 0`, Detail Training tetap usable, dan tidak ada fatal Android runtime log. `QA-NEG-004` ditutup `PASS-QA`.
 - Guard double-submit ForumEditor sudah memakai synchronous ref lock, state loading tombol, serta recovery pada invalid JSON dan request rejection. Retest UI pada APK terbaru lulus untuk tombol draft dan publish: masing-masing dua tap cepat menampilkan loading state, satu modal sukses, dan satu matching database record; seluruh fixture kemudian dibersihkan.
-- Network lambat belum dieksekusi karena network shaping/delayed proxy yang aman dan reproducible belum tersedia. API unavailable batch 1 tidak dianggap sebagai latency test.
+- Latency test memakai delayed proxy `scripts/qa-http-proxy.mjs` pada delay 2.5 detik. Detail Training menampilkan loading overlay/spinner, kemudian pulih ke data `20%` dan `4 / 20` tanpa `NaN` atau crash. `QA-NEG-005` ditutup `PASS-QA`.
 - Backend local `.env` sempat menunjuk ke absolute path database dari workspace lama; path lokal sudah diarahkan ke workspace aktif dan tidak di-commit.
 - Auth API contract batch: credential valid merespons HTTP 200, credential invalid merespons HTTP 422, dan access token invalid merespons HTTP 401. UI login juga sudah diverifikasi menampilkan error dan tidak masuk Home.
 - Negative mobile QA batch pada AVD `Wiwitan_API35_Lite`: credential salah menampilkan `Login gagal` dan tetap di layar login; logout mengembalikan user ke landing; API mati menampilkan `Network request failed` tanpa crash; backend kembali normal setelah test.
 - Expired-session test: access token lokal dibuat benar-benar kedaluwarsa dengan signature valid dan refresh token tetap valid; aplikasi berhasil menyimpan access token baru dan kembali ke layar Progress. Invalid access token + invalid refresh token menghapus auth/user dari storage dan mengembalikan aplikasi ke landing dengan tombol `Masuk`.
 - Access boundary test: token student mendapatkan HTTP 401 pada `GET /api/v1/base/users`, sedangkan `GET /api/v1/auth/user/me` tetap HTTP 200. Ini membuktikan route CMS/admin tidak terbuka untuk student pada local API.
 - Device lifecycle test: background/resume dan rotasi layar kembali menampilkan UI Progress tanpa `FATAL EXCEPTION`, crash, atau kehilangan session. Permission Kalender ditolak dan aplikasi tetap dapat digunakan.
-- `QA-NEG-004` sekarang `PARTIAL`: code-level guard dan build smoke sudah diverifikasi, tetapi fixture response malformed belum direplay ke emulator.
-- `QA-NEG-005` sekarang `BLOCKED` sampai network shaping/delayed proxy tersedia.
+- `QA-NEG-004` sekarang `PASS-QA`: fixture response null/incomplete berhasil direplay ke emulator dengan proxy lokal dan tidak menghasilkan `NaN`, blank, atau crash.
+- `QA-NEG-005` sekarang `PASS-QA`: delayed proxy 2.5 detik memperlihatkan loading overlay dan data pulih setelah request selesai.
 - `QA-NEG-006` sekarang `PASS-QA`: dua tap cepat pada Forum Editor menghasilkan satu record pada emulator; marker QA dihapus setelah verifikasi. Direct API parallel replay sebelum fix tetap dicatat sebagai rekomendasi backend idempotency.
 - Selama startup/recovery muncul toast generik `Error internal server` beberapa kali, tetapi layar Progress akhirnya termuat dan session tetap aktif. Endpoint pemicu belum terisolasi; dicatat sebagai `DEF-002` P2 untuk investigasi sebelum production.
 - CMS build membutuhkan `npm ci` ketika dependency lokal belum lengkap; `cms/yarn.lock` dikembalikan dan tidak menjadi bagian dari perubahan.
 - Mobile Jest belum menjadi gate QA karena test lama mengimpor native SDK secara penuh dan berhenti sebelum assertion; ini dicatat sebagai blocker test infrastructure terpisah dari runtime APK.
 - `PASS-SMOKE` harus diulang sebagai `PASS-QA` setelah test data, build, dan bukti eksekusi formal ditetapkan.
-- UAT belum dimulai sampai client menyediakan acceptance criteria, akun/data uji, dan reviewer yang ditunjuk.
+- UAT client dilaporkan sudah `Approved` oleh project owner pada 1 Agustus 2026. Acceptance criteria, nama reviewer, dan artefact sign-off belum tersimpan di repo sehingga kelengkapan administrasi UAT masih perlu ditutup.
 - Defect P0/P1 harus ditutup atau mendapat waiver tertulis sebelum gate release.
 
 ## Next Gate
 
 1. Putuskan perbaikan atau waiver untuk blocker `QA-ENV-005`/`DEF-001`.
-2. Selesaikan sisa negative batch 2: replay null/incomplete dan siapkan network shaping untuk latency test.
-3. Siapkan build QA yang diberi version label dan kumpulkan screenshot/log evidence per layar.
-4. Kirim UAT checklist ke client/product owner untuk eksekusi dengan data bisnis.
-5. Setelah UAT diterima, lanjut ke release hardening dan Google Play internal testing.
+2. Lampirkan sign-off/evidence UAT client dan tutup known issue yang disetujui.
+3. Siapkan release candidate berlabel version dan kumpulkan screenshot/log evidence final.
+4. Tutup atau beri waiver pada `DEF-001` dan isolasi `DEF-002`.
+5. Lanjutkan release hardening, signing keystore, AAB production, dan Google Play internal testing.

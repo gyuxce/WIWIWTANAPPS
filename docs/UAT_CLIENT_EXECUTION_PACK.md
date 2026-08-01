@@ -1,8 +1,10 @@
 # UAT Client Execution Pack - WIWITAN Apps
 
 Periode target: Agustus 2026
-Status: Siap diisi oleh client/product owner
+Status: **CLIENT UAT APPROVED - reported by project owner on 1 August 2026**
 Related QA plan: [QA_UAT_TEST_PLAN.md](QA_UAT_TEST_PLAN.md)
+
+Catatan administrasi: approval client sudah dilaporkan, tetapi nama reviewer, acceptance criteria, evidence per test case, dan tanda tangan/catatan resmi belum dilampirkan pada repository. Lengkapi bagian tersebut sebelum release handoff agar keputusan dapat diaudit.
 
 ## Tujuan
 
@@ -175,8 +177,8 @@ Credential production atau credential pribadi tidak boleh ditulis ke repository.
 | Langkah | Review defect log, risiko, workaround, dan release scope |
 | Expected | Client memberi keputusan akhir tertulis untuk internal testing atau meminta perbaikan tambahan |
 | Evidence | Approval tertulis, meeting notes, atau sign-off dokumen |
-| Actual result | `isi oleh tester` |
-| Decision | `Accept / Accept with known issue / Reject / Blocked` |
+| Actual result | `Client UAT dilaporkan approved oleh project owner pada 1 Agustus 2026; detail evidence dan sign-off formal belum dilampirkan` |
+| Decision | `Accept - approval reported; formal sign-off pending` |
 
 ## UAT Defect Log
 

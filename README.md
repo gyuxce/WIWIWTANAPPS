@@ -108,7 +108,24 @@ Audit mobile terakhir:
 - Fase pelatihan sudah bisa dibuka dengan seed lokal subscription aktif dan `training_program=2`.
 - Detail modul, level, grup materi, layar materi, handling error media, tab kelas virtual, dan tab asesmen sudah diaudit. Detailnya ada di [docs/MOBILE_SCREEN_AUDIT.md](docs/MOBILE_SCREEN_AUDIT.md).
 - TypeScript mobile sudah lolos `corepack yarn tsc --noEmit` dan build `developmentDebug` berhasil.
-- Negative test batch 2 sudah mereproduksi double-submit forum sebelum fix, menambahkan guard submit dan null-safety training. Retest UI double-tap sudah `PASS-QA`; detail status partial dan blocked yang tersisa ada di [docs/NEGATIVE_TEST_BATCH_2_2026-08-01.md](docs/NEGATIVE_TEST_BATCH_2_2026-08-01.md).
+- Negative test batch 2 sudah mereproduksi double-submit forum sebelum fix, menambahkan guard submit dan null-safety training. Retest UI double-tap, null/incomplete payload, dan latency 2.5 detik sudah `PASS-QA`; detail evidence ada di [docs/NEGATIVE_TEST_BATCH_2_2026-08-01.md](docs/NEGATIVE_TEST_BATCH_2_2026-08-01.md).
+
+QA proxy lokal untuk replay payload dan latency:
+
+```powershell
+# Terminal 1: null/incomplete fixture
+$env:QA_PROXY_MODE="null"
+$env:QA_PROXY_PORT="8888"
+node scripts/qa-http-proxy.mjs
+
+# Terminal 2: delayed response 2.5 detik
+$env:QA_PROXY_MODE="delay"
+$env:QA_PROXY_PORT="8889"
+$env:QA_PROXY_DELAY_MS="2500"
+node scripts/qa-http-proxy.mjs
+```
+
+Proxy ini hanya helper QA lokal; emulator diarahkan ke `10.0.2.2:<port>` saat test dan dikembalikan ke `:0` setelah selesai. Per 1 Agustus 2026, client UAT dilaporkan sudah approved; formal sign-off/evidence tetap perlu dilampirkan sebelum release handoff.
 
 Build Android production:
 

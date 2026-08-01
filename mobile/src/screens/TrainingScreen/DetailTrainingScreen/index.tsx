@@ -1,8 +1,9 @@
-import { View, Image, ScrollView } from "react-native";
+import { ActivityIndicator, View, Image, ScrollView } from "react-native";
 import React, { useEffect, useState } from "react";
 import globalStyles from "utils/GlobalStyles";
 import Header from "components/Header";
 import images from "configs/images";
+import colors from "configs/colors";
 import Space from "components/Space";
 import CardProgressProfile from "components/CardProgressProfile";
 import TabItem from "./TabItem";
@@ -45,6 +46,7 @@ const DetailTraininScreen = ({ route }: Prop) => {
 
   const { trainingModuleProgress, getTrainingModuleProgress } = useExam();
   const [selectedTab, setSelectedTab] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
   const { user } = useAuth();
   const navigation = useNavigation();
   const toSafeNumber = (value?: number | string | null) => {
@@ -69,18 +71,6 @@ const DetailTraininScreen = ({ route }: Prop) => {
     moduleTotal +
     toSafeNumber(selectedCourseProgress?.virtual_count) +
     toSafeNumber(selectedCourseProgress?.assesment_count);
-
-  useEffect(() => {
-    if (user?.is_subscription_active !== 1) {
-      NavigationService.replace("InstallmentPaymentDetailScreen", {
-        price_type: 2,
-      });
-    }
-    navigation.addListener("focus", e => {
-      getTrainingModuleProgress();
-      fetchData();
-    });
-  }, []);
 
   const checkVirtualClassList = () => {
     return (virtualClassNoFilter || []).reduce((total, item) => {
@@ -137,9 +127,45 @@ const DetailTraininScreen = ({ route }: Prop) => {
   ];
 
   const fetchData = async () => {
-    getVirtualClassList(route?.params?.categoryCourse?.id, "");
-    getVirtualClassNoFilter(route?.params?.categoryCourse?.id, "");
-    getAssesmentListNoFilter(route?.params?.categoryCourse?.id);
+    await Promise.all([
+      getVirtualClassList(route?.params?.categoryCourse?.id, ""),
+      getVirtualClassNoFilter(route?.params?.categoryCourse?.id, ""),
+      getAssesmentListNoFilter(route?.params?.categoryCourse?.id),
+    ]);
+  };
+
+  const loadData = async () => {
+    setIsLoading(true);
+    try {
+      await Promise.all([getTrainingModuleProgress(), fetchData()]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (user?.is_subscription_active !== 1) {
+      NavigationService.replace("InstallmentPaymentDetailScreen", {
+        price_type: 2,
+      });
+    }
+
+    loadData();
+    const unsubscribe = navigation.addListener("focus", loadData);
+
+    return unsubscribe;
+  }, []);
+
+  const renderLoadingOverlay = () => {
+    if (!isLoading) {
+      return null;
+    }
+
+    return (
+      <View style={styles.loadingOverlay} pointerEvents="auto">
+        <ActivityIndicator size="large" color={colors.accent} />
+      </View>
+    );
   };
 
   return (
@@ -281,6 +307,7 @@ const DetailTraininScreen = ({ route }: Prop) => {
           <Space height={50} />
         </ScrollView>
       </View>
+      {renderLoadingOverlay()}
     </View>
   );
 };

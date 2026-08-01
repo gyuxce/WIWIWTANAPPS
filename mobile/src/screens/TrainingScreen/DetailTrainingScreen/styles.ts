@@ -40,6 +40,18 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     width: 72,
   },
+  loadingOverlay: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.65)",
+    zIndex: 10,
+    elevation: 10,
+  },
 });
 
 export default styles;

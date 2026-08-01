@@ -4,17 +4,17 @@ Tanggal update: 1 Agustus 2026
 
 ## Ringkasan Eksekutif
 
-Project saat ini berada di fase **formal QA/UAT dan release preparation awal**, bukan fase release production.
+Project saat ini berada di fase **release preparation setelah internal QA dan approval UAT client**, bukan fase release production.
 
 Source handoff dari developer sebelumnya sudah dirapikan ke repo, environment lokal sudah bisa dijalankan, CMS dan backend lokal sudah aktif, APK Android development sudah berhasil dibuild dan diinstall ke emulator, dan flow utama siswa sudah mulai stabil.
 
-Estimasi kesiapan keseluruhan saat ini: **60-65% menuju release candidate internal**.
+Estimasi kesiapan keseluruhan saat ini: **65-70% menuju release candidate internal**.
 
-Estimasi kesiapan menuju **rilis Google Play production**: **45-50%**, karena masih ada pekerjaan release engineering, QA/UAT, konfigurasi production, signing, privacy/compliance, dan validasi backend production.
+Estimasi kesiapan menuju **rilis Google Play production**: **45-50%**, karena masih ada pekerjaan release engineering, konfigurasi production, signing, privacy/compliance, dan validasi backend production.
 
 ## Checkpoint Terbaru - 1 Agustus 2026
 
-- Posisi aktual: QA/UAT formal tahap awal, setelah stabilisasi mobile Android dan retest negative test batch 2.
+- Posisi aktual: release preparation setelah stabilisasi mobile Android, penutupan negative test batch 2, dan approval UAT client yang dilaporkan project owner.
 - Login API siswa tervalidasi dengan HTTP 200 dari backend lokal.
 - Handling login mobile diperbaiki agar respons/error API terbaca jelas dan aplikasi tidak pindah ke Home sebelum profil berhasil dimuat.
 - TypeScript mobile lulus dan APK `developmentQa` terbaru berhasil dibuild. APK ini masih ditandatangani debug untuk audit lokal, bukan untuk Google Play.
@@ -29,14 +29,17 @@ Estimasi kesiapan menuju **rilis Google Play production**: **45-50%**, karena ma
 - Preflight `bundleProductionRelease` sudah dijalankan; R8/minification berhasil setelah heap Gradle dinaikkan menjadi 3 GB.
 - Production signing belum tersedia: keystore upload dan credential `MYAPP_UPLOAD_*` belum diset, sehingga AAB belum terbentuk.
 - Guard signing sudah ditambahkan agar build production gagal dengan pesan yang jelas, bukan `NullPointerException`.
-- Paket eksekusi UAT client sudah siap dikirim dan diisi oleh reviewer.
+- Paket eksekusi UAT client sudah siap dan approval client sudah dilaporkan; nama reviewer, acceptance criteria, dan evidence formal masih perlu dilampirkan.
 - Internal UAT baseline sudah dijalankan dengan hasil `CONDITIONAL PASS`; detail evidence dipisahkan dari approval client.
-- Negative test batch 2 sudah dijalankan: duplicate submit forum berhasil direproduksi sebelum fix, guard mobile sudah diterapkan dan lulus retest UI, null-safety training diperkuat, dan slow-network dicatat blocked karena shaping belum tersedia. Detail ada di `docs/NEGATIVE_TEST_BATCH_2_2026-08-01.md`.
+- Negative test batch 2 sudah dijalankan: duplicate submit forum berhasil direproduksi sebelum fix, guard mobile sudah diterapkan dan lulus retest UI, null-safety training diperkuat, serta null payload dan slow-network sudah lulus replay. Detail ada di `docs/NEGATIVE_TEST_BATCH_2_2026-08-01.md`.
+- `QA-NEG-004` null/incomplete sudah direplay melalui proxy fixture ke emulator. Course dan Detail Training menampilkan zero state valid tanpa `NaN`, blank, atau crash.
+- `QA-NEG-005` latency sudah diuji dengan delayed proxy 2.5 detik. Detail Training menampilkan loading overlay/spinner, lalu pulih ke data normal tanpa `NaN` atau crash.
+- Client UAT dilaporkan sudah approved oleh project owner pada 1 Agustus 2026. Formal sign-off, acceptance criteria, dan evidence per flow masih perlu dilampirkan.
 - Fresh SQLite migration dan seed seluruh domain sudah lulus; path DB lokal lama ditemukan dan dikoreksi tanpa memasukkan `.env` ke repo.
 
 ## Stage Saat Ini
 
-Stage sekarang: **Stage 6 - Formal QA & UAT, negative mobile QA batch 1 selesai**
+Stage sekarang: **Stage 7 - Release Preparation setelah QA/UAT**
 
 Mapping stage:
 
@@ -47,8 +50,8 @@ Mapping stage:
 | 3 | Audit CMS dan flow admin dasar | Sebagian besar selesai |
 | 4 | Audit dan stabilisasi mobile siswa | Core flow dan recovery utama selesai; edge case sudah masuk QA |
 | 5 | Data/i18n/backend schema hardening | Sebagian selesai; course bilingual sudah ada, forum/notifikasi dinamis masih pending |
-| 6 | QA end-to-end dan UAT client | QA batch 1 dan negative mobile batch 2 selesai untuk double-tap UI; internal baseline conditional pass, eksekusi client masih pending |
-| 7 | Release preparation Google Play | Preflight sudah dilakukan; signing/AAB, production config, compliance, dan Play Console masih pending |
+| 6 | QA end-to-end dan UAT client | QA batch 1-2 sudah ditutup untuk scope yang diuji; client UAT dilaporkan approved, evidence formal masih perlu dilampirkan |
+| 7 | Release preparation Google Play | Aktif; signing/AAB, production config, compliance, dan Play Console masih pending |
 
 ## Progress Per Area
 
@@ -62,8 +65,8 @@ Mapping stage:
 | Training module/progress logic | 80% | Bug NaN, mismatch progress, detail training sudah diperbaiki |
 | Media/document handling | 65% | Handling UI sudah lebih aman, tetapi file GCS/production media masih perlu validasi |
 | i18n/mixed language | 45% | Teks statis penting, course category, dan course item/module mulai rapi; forum topic dan notification data masih perlu schema/backend/CMS |
-| QA/UAT formal | 50% | Internal baseline conditional pass; double-tap UI sudah PASS-QA, replay malformed payload, latency test, serta UAT client masih pending |
-| Google Play release readiness | 25% | Environment dan preflight sudah dicek; signing/AAB, Play Console, privacy policy, production env, dan store assets belum selesai |
+| QA/UAT formal | 60-65% | Negative batch 2 sudah PASS-QA dan UAT client dilaporkan approved; evidence formal dan known issue closure masih perlu dilengkapi |
+| Google Play release readiness | 30% | Environment dan preflight sudah dicek; signing/AAB, Play Console, privacy policy, production env, dan store assets belum selesai |
 
 ## Yang Sudah Diselesaikan
 
@@ -93,6 +96,9 @@ Mapping stage:
 - Hasil audit dicatat di `docs/MOBILE_SCREEN_AUDIT.md`.
 - Negative test mobile batch 1 sudah dicatat di `docs/QA_UAT_TEST_PLAN.md`, termasuk evidence API status, UI state, storage session, logcat, dan lifecycle emulator.
 - Negative test batch 2 sudah dicatat di `docs/NEGATIVE_TEST_BATCH_2_2026-08-01.md`: double-submit forum terbukti membuat dua record sebelum fix, guard mobile sudah diterapkan, retest dua tap UI menghasilkan satu record, dan null/incomplete guard sudah diperkuat.
+- QA-NEG-004 null/incomplete sudah direplay dengan proxy fixture dan ditutup `PASS-QA`.
+- QA-NEG-005 slow network sudah diuji dengan delayed proxy 2.5 detik; loading overlay ditambahkan pada Detail Training dan ditutup `PASS-QA`.
+- Client UAT dilaporkan approved oleh project owner; artefact sign-off dan evidence formal masih menjadi release-handoff item.
 
 ## Temuan/Risiko Utama
 
@@ -101,7 +107,7 @@ Mapping stage:
 | Data production belum divalidasi penuh | Bisa beda dengan seed lokal | Perlu akses/staging production-like |
 | i18n data dinamis belum full bilingual | Teks course item, forum topic, notification masih bisa campur bahasa | Perlu desain schema/backend/CMS |
 | Media GCS/file production belum tervalidasi | Preview gambar/video/audio bisa gagal jika permission/storage salah | Perlu audit storage production |
-| QA formal belum lengkap | Bug edge case dan latency behavior mungkin belum terlihat | Perlu replay malformed payload, network shaping, test plan, dan UAT |
+| QA formal belum lengkap | Bug timeout, retry, dan edge case yang belum masuk scope bisa masih tersembunyi | Perlu final evidence, timeout/retry test pada staging, dan known issue closure |
 | Toast `Error internal server` transient saat startup/recovery | User melihat error generik walaupun session akhirnya pulih | P2 open; endpoint pemicu perlu diisolasi |
 | Release Google Play belum siap | Belum bisa publish production | Perlu keystore upload, `MYAPP_UPLOAD_*`, Play Console, privacy, dan AAB |
 | Push notification/Firebase belum diaudit production | Notifikasi real device bisa belum siap | Perlu credential dan test device |
@@ -150,9 +156,9 @@ Syarat:
 
 Prioritas terdekat:
 
-1. **Tutup gate QA yang tersisa**
-   - Replay null/incomplete ke emulator.
-   - Siapkan network shaping/delayed proxy untuk latency test.
+1. **Lengkapi handoff QA/UAT**
+   - Lampirkan formal sign-off, acceptance criteria, dan evidence UAT client yang sudah dilaporkan approved.
+   - Tutup known issue yang disetujui atau buat waiver tertulis.
    - Putuskan apakah blocker Jest legacy akan diperbaiki atau diberi waiver.
    - Isolasi toast `Error internal server` transient pada startup/recovery.
 
@@ -162,21 +168,13 @@ Prioritas terdekat:
    - Storage/media.
    - Payment/vendor.
 
-3. **Jalankan UAT client**
-   - Login/logout/session.
-   - Home/progress/training.
-   - Dokumen.
-   - Forum/notifikasi.
-   - Payment.
-   - Sertifikasi/final interview.
-
-4. **Lengkapi release signing dan build AAB**
+3. **Lengkapi release signing dan build AAB**
    - Minta keystore upload resmi dari owner atau buat sekali dengan persetujuan owner.
    - Simpan keystore dan password di luar repo.
    - Set `MYAPP_UPLOAD_*` pada mesin build.
    - Jalankan ulang `bundleProductionRelease` dan simpan checksum AAB.
 
-5. **Siapkan release track**
+4. **Siapkan release track**
    - Debug APK untuk internal review.
    - Staging/release APK atau AAB.
    - Google Play checklist.
@@ -185,7 +183,7 @@ Prioritas terdekat:
 
 Versi singkat:
 
-> Project sudah masuk fase stabilisasi aplikasi mobile siswa. Source handoff sudah dirapikan ke repo, backend/CMS/mobile sudah bisa berjalan lokal, APK Android sudah berhasil dibuild dan diuji di emulator. Beberapa bug penting sudah diperbaiki, termasuk session recovery, blank screen setelah relaunch, progress training NaN, mismatch progress training, dokumen, dan i18n awal. Saat ini kesiapan menuju internal release candidate sekitar 60-65%. Untuk rilis Google Play production masih perlu fase QA/UAT, validasi environment production, signing, Firebase/storage/payment, dan persiapan store listing.
+> Project sudah melewati stabilisasi aplikasi mobile siswa dan negative QA batch 2. Null/incomplete payload serta latency 2.5 detik sudah lulus pada emulator, dan client UAT dilaporkan approved. Kesiapan menuju internal release candidate sekitar 65-70%. Untuk rilis Google Play production masih perlu validasi environment production, signing/AAB, Firebase/storage/payment, privacy/compliance, Play Console, dan store listing.
 
 Versi timeline:
 

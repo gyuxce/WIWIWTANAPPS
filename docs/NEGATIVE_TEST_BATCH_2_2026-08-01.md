@@ -17,8 +17,8 @@ Hasil di bawah adalah QA internal. Ini bukan sign-off client dan bukan validasi 
 
 | ID | Skenario | Hasil | Keputusan |
 | --- | --- | --- | --- |
-| QA-NEG-004 | Data backend null/incomplete | Guard source dan build diverifikasi; replay payload malformed belum dilakukan | `PARTIAL` |
-| QA-NEG-005 | Network lambat | Belum dapat dijalankan tanpa network shaping yang aman/reproducible | `BLOCKED` |
+| QA-NEG-004 | Data backend null/incomplete | Fixture null/incomplete direplay melalui proxy ke emulator; Detail Training tetap usable tanpa `NaN`, blank, atau crash | `PASS-QA` |
+| QA-NEG-005 | Network lambat | Delayed proxy 2.5 detik menunjukkan loading overlay, data pulih setelah respons, tanpa `NaN` atau crash | `PASS-QA` |
 | QA-NEG-006 | Double tap submit | Dua tap cepat pada UI menghasilkan satu record; fixture dibersihkan | `PASS-QA` |
 
 ## QA-NEG-004 - Null/Incomplete Data
@@ -32,20 +32,34 @@ Hasil di bawah adalah QA internal. Ini bukan sign-off client dan bukan validasi 
 - Mobile TypeScript lulus dengan `corepack yarn tsc --noEmit --pretty false`.
 - APK QA terbaru ter-install dan `MainActivity` resumed tanpa `AndroidRuntime` fatal error.
 
-### Batasan
+### Replay fixture ke emulator
 
-Belum ada proxy atau fixture API yang memaksa payload malformed masuk ke emulator saat layar Detail Training dibuka. Karena itu status tetap `PARTIAL`, bukan `PASS-QA` penuh.
+- `scripts/qa-http-proxy.mjs` dijalankan pada port `8888` dengan mode `null`, upstream ke backend lokal `127.0.0.1:8000`.
+- Proxy memaksa field numerik progress dan cover menjadi `null`, serta `classVirtual` dan `assesment` menjadi `null` pada endpoint training yang relevan.
+- Emulator diarahkan ke `10.0.2.2:8888`, lalu layar Training dan Detail Training dibuka.
+- Endpoint yang terintersep mengembalikan `200` dengan marker `fixture=null-incomplete`.
+
+### Hasil
+
+- Kartu course menampilkan `0%` dan `0 / 0`, bukan `NaN%` atau `NaN / NaN`.
+- Detail Training tetap menampilkan header, progress card, tab `0/0`, dan level card dengan fallback cover.
+- Empty array/null guard berjalan untuk virtual class dan assessment.
+- Logcat emulator tidak menemukan `FATAL EXCEPTION`.
+
+Keputusan: `PASS-QA` untuk payload null/incomplete pada alur Training dan Detail Training.
 
 ## QA-NEG-005 - Network Lambat
 
-Status `BLOCKED` untuk batch ini. Network shaping yang terkontrol belum tersedia pada environment Windows/AVD ini. Test API tidak tersedia pada batch 1 sudah lulus, tetapi itu tidak sama dengan latency test.
+### Setup dan hasil
 
-Acceptance criteria yang masih harus dibuktikan:
+- `scripts/qa-http-proxy.mjs` dijalankan pada port `8889` dengan mode `delay` dan `QA_PROXY_DELAY_MS=2500`.
+- Emulator diarahkan ke `10.0.2.2:8889` saat Detail Training dibuka.
+- Loading overlay transparan dan spinner terlihat selama request training tertunda.
+- Setelah respons selesai, overlay hilang dan data kembali tampil normal: progress `20%`, `4 / 20`, tab `0/12`, `4/4`, dan `0/4`.
+- Tidak ditemukan `NaN`, blank state permanen, atau `FATAL EXCEPTION`.
+- Tidak ada duplicate record; request GET yang terlihat pada proxy adalah request pembacaan data training dan tidak membuat perubahan data.
 
-- loading indicator terlihat selama request lambat;
-- tidak ada request atau record ganda;
-- timeout menampilkan error yang dapat dipahami;
-- retry tidak merusak state sebelumnya.
+Keputusan: `PASS-QA` untuk latency 2.5 detik pada Detail Training. Timeout/error network dan retry destructive tetap menjadi cakupan lanjutan bila environment staging tersedia.
 
 ## QA-NEG-006 - Double Tap Submit
 
@@ -90,10 +104,12 @@ Keputusan: `PASS-QA` untuk double-tap pada jalur draft dan publish UI mobile. Re
 - `mobile/src/screens/ForumEditorScreen/ForumEditorScreen.tsx`
 - `mobile/src/screens/TrainingScreen/DetailTrainingScreen/index.tsx`
 - `mobile/src/components/SectionLesson/index.tsx`
+- `mobile/src/screens/TrainingScreen/DetailTrainingScreen/styles.ts`
+- `scripts/qa-http-proxy.mjs`
 
 ## Next Action
 
-1. Jalankan manual replay null/incomplete pada Detail Training dengan proxy/fixture response yang dikontrol.
-2. Siapkan network shaping atau delayed proxy untuk QA-NEG-005.
-3. Buka Forum Editor pada APK terbaru dan lakukan double tap publish/draft; pastikan hanya satu modal sukses dan satu record.
-4. Setelah tiga item selesai, ulangi formal QA P1 dan lanjutkan UAT client.
+1. Lampirkan screenshot/log proxy sebagai evidence batch 2 pada artefact QA bila dibutuhkan client.
+2. Isolasi toast `Error internal server` transient pada startup/recovery (`DEF-002`).
+3. Putuskan waiver atau perbaikan test infrastructure Jest legacy (`DEF-001`).
+4. Lanjutkan release hardening, signing keystore, dan build AAB production setelah UAT client approved.
