@@ -20,7 +20,7 @@ The CMS core content-management flows were executed on the local backend and CMS
 | Seminar | Yes | Yes | Yes | Yes | PASS-QA |
 | Notification content | Yes | Yes | Yes | Yes | PASS-QA |
 | Restricted role permission matrix | Yes | Yes | Route denial | Not applicable | PASS-QA |
-| Upload/storage | Safe category cover fixture | Local Sardine staging adapter | CMS cover readback | Byte hash matched | PASS-QA; production dependency CMS-DEF-009 |
+| Upload/storage | Category cover, Virtual Class cover, Assessment video, student document | Local Sardine staging adapter | File pointers, CMS/API readback, authenticated document download | All source/readback byte hashes matched | PASS-QA; production dependency CMS-DEF-009 |
 
 ## Validation Evidence
 
@@ -40,15 +40,18 @@ The CMS core content-management flows were executed on the local backend and CMS
 6. Module deletion now recursively archives the parent and structural descendants. Browser delete and transaction-level regression passed; active descendant/orphan counts returned zero while progress, question-bank, and file records remain preserved.
 7. Clean migration staging initially exposed a duplicate `tokens` table definition. Migration order and Dolphin ownership were corrected; a clean run of all domain migrations and seeders now passes.
 8. Restricted-role login with only `Materi Pelatihan` permission showed training navigation and denied `/forum` plus `/management/user` after asynchronous permissions loaded.
+9. Virtual Class cover upload persisted the Sardine URL and `cover_file_id`; the source and storage readback both measured 346 bytes with matching SHA-256.
+10. Assessment video upload persisted the course-item file pointer only after the upload request completed; the 28-byte storage fixture read back with a matching SHA-256. Real video playback remains a separate release check.
+11. Student document upload no longer rewrites the Sardine URL to Google Cloud Storage. Authenticated upload and download read back the 7,944-byte fixture with a matching SHA-256.
+12. The Virtual Class date-picker `OK` button was changed to `type="button"`; browser retest confirmed date selection does not submit the parent form or create an incomplete class.
 
 ## Open Scope
 
-- Virtual class cover upload and status edge cases.
-- Assessment verbal schedule, video upload, and full publish evidence.
-- Video/document upload and production storage readback; category cover passed against the local `tools/sardine-staging` adapter at `127.0.0.1:9003`.
+- Assessment verbal schedule and full publish evidence.
+- Real MP4 playback and production storage readback against the approved Sardine endpoint; local upload/readback coverage now passes for category cover, Virtual Class cover, Assessment video, and student documents.
 - Direct API/action-level permission checks beyond the route/menu matrix.
 - Production migration and service configuration.
 
 ## Decision
 
-CMS core content flows, module archive behavior, clean migration staging, CMS production build, and category cover storage readback are ready for the next release-candidate gate on local development. The project is not yet release-ready because the approved Sardine production endpoint is not configured, video/document coverage is incomplete, production configuration is not verified, and formal UAT evidence still needs to be attached.
+CMS core content flows, module archive behavior, clean migration staging, CMS production build, and local Sardine storage readback are ready for the next release-candidate gate on local development. The project is not yet release-ready because the approved Sardine production endpoint, real MP4 playback evidence, production configuration, and formal UAT evidence are still outstanding.

@@ -192,7 +192,7 @@ const DialogNotification = ({ isOpen, onClose, dataTemplate, onRefresh }) => {
 
   const onSubmit = async (body) => {
     try {
-      apiUploadFile({ id: dataTemplate.id, file_id: body.file });
+      await apiUploadFile({ id: dataTemplate.id, file_id: body.file });
       openNotification('Success', 'success', 'Berhasil simpan data');
       onRefresh();
       removeVideoAssesment();

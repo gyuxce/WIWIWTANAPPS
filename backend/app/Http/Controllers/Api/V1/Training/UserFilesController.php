@@ -176,7 +176,9 @@ class UserFilesController extends BaseCrud
             'file_name' => null,
         ]);
 
-        $data['file_url'] = "https://storage.googleapis.com/" . config('filesystems.bucket') . $uploaded['data']['url'];
+        // Sardine owns the public URL. Keep it as returned so local QA and
+        // non-Google production adapters can serve the file correctly.
+        $data['file_url'] = $uploaded['data']['url'];
 
         $files = new File();
         $files->fill([

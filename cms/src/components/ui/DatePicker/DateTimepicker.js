@@ -237,7 +237,7 @@ const DateTimepicker = forwardRef((props, ref) => {
           clearable={false}
           size="sm"
         />
-        <Button size="sm" disabled={!_value} onClick={handleOk}>
+        <Button type="button" size="sm" disabled={!_value} onClick={handleOk}>
           {okButtonContent}
         </Button>
       </div>
