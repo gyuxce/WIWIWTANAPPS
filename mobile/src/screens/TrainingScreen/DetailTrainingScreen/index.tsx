@@ -83,16 +83,16 @@ const DetailTraininScreen = ({ route }: Prop) => {
   }, []);
 
   const checkVirtualClassList = () => {
-    return virtualClassNoFilter?.reduce((total, item) => {
-      return total + item.classVirtual.length;
+    return (virtualClassNoFilter || []).reduce((total, item) => {
+      return total + (item?.classVirtual?.length || 0);
     }, 0);
   };
 
   const checkInactiveVirtualClass = () => {
-    return virtualClassNoFilter?.reduce((total, item) => {
+    return (virtualClassNoFilter || []).reduce((total, item) => {
       return (
         total +
-        item.classVirtual.filter(item =>
+        (item?.classVirtual || []).filter(item =>
           moment(item?.event?.started_at).isBefore(new Date()),
         ).length
       );
@@ -100,19 +100,19 @@ const DetailTraininScreen = ({ route }: Prop) => {
   };
 
   const checkAssesmentList = () => {
-    return assesmentListNoFilter?.reduce((total, item) => {
-      return total + (item.assesment.length || 0);
+    return (assesmentListNoFilter || []).reduce((total, item) => {
+      return total + (item?.assesment?.length || 0);
     }, 0);
   };
 
   const checkInactiveAssesmentList = () => {
-    return assesmentListNoFilter?.reduce((total, item) => {
+    return (assesmentListNoFilter || []).reduce((total, item) => {
       return (
         total +
-        (item.assesment.filter(
+        ((item?.assesment || []).filter(
           item =>
-            item.assesmentStudent?.status === 1 ||
-            item.assesmentStudent?.status === 3,
+            item?.assesmentStudent?.status === 1 ||
+            item?.assesmentStudent?.status === 3,
         ).length || 0)
       );
     }, 0);
@@ -184,12 +184,8 @@ const DetailTraininScreen = ({ route }: Prop) => {
                 ? { uri: user?.profilePicture?.url }
                 : images.userDefault
             }
-            total={
-              courseTotal
-            }
-            progress={
-              courseProgress
-            }
+            total={courseTotal}
+            progress={courseProgress}
             color={
               getCourseImageAndColor(route?.params?.categoryCourse?.type_label)
                 ?.color

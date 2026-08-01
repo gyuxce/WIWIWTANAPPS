@@ -24,7 +24,8 @@ Repo ini dibuat dari source handoff developer sebelumnya dan sudah disanitasi su
 11. Untuk report progres Juli-Agustus dan action plan client, baca [docs/CLIENT_PROGRESS_REPORT_JULY_AUGUST_2026.md](docs/CLIENT_PROGRESS_REPORT_JULY_AUGUST_2026.md).
 12. Untuk paket eksekusi dan sign-off UAT client, baca [docs/UAT_CLIENT_EXECUTION_PACK.md](docs/UAT_CLIENT_EXECUTION_PACK.md).
 13. Untuk hasil pengujian internal terbaru, baca [docs/INTERNAL_UAT_REPORT_2026-08-01.md](docs/INTERNAL_UAT_REPORT_2026-08-01.md).
-14. Jalankan backend dulu, lalu CMS, lalu mobile app.
+14. Untuk hasil negative test batch 2, baca [docs/NEGATIVE_TEST_BATCH_2_2026-08-01.md](docs/NEGATIVE_TEST_BATCH_2_2026-08-01.md).
+15. Jalankan backend dulu, lalu CMS, lalu mobile app.
 
 ## Stack Utama
 
@@ -107,6 +108,7 @@ Audit mobile terakhir:
 - Fase pelatihan sudah bisa dibuka dengan seed lokal subscription aktif dan `training_program=2`.
 - Detail modul, level, grup materi, layar materi, handling error media, tab kelas virtual, dan tab asesmen sudah diaudit. Detailnya ada di [docs/MOBILE_SCREEN_AUDIT.md](docs/MOBILE_SCREEN_AUDIT.md).
 - TypeScript mobile sudah lolos `corepack yarn tsc --noEmit` dan build `developmentDebug` berhasil.
+- Negative test batch 2 sudah mereproduksi double-submit forum sebelum fix, menambahkan guard submit dan null-safety training. Detail status partial, blocked, dan retest ada di [docs/NEGATIVE_TEST_BATCH_2_2026-08-01.md](docs/NEGATIVE_TEST_BATCH_2_2026-08-01.md).
 
 Build Android production:
 

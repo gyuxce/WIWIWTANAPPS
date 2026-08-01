@@ -14,7 +14,7 @@ Estimasi kesiapan menuju **rilis Google Play production**: **45-50%**, karena ma
 
 ## Checkpoint Terbaru - 1 Agustus 2026
 
-- Posisi aktual: QA/UAT formal tahap awal, setelah stabilisasi mobile Android dan negative test batch 1.
+- Posisi aktual: QA/UAT formal tahap awal, setelah stabilisasi mobile Android dan negative test batch 2.
 - Login API siswa tervalidasi dengan HTTP 200 dari backend lokal.
 - Handling login mobile diperbaiki agar respons/error API terbaca jelas dan aplikasi tidak pindah ke Home sebelum profil berhasil dimuat.
 - TypeScript mobile lulus dan APK `developmentQa` terbaru berhasil dibuild. APK ini masih ditandatangani debug untuk audit lokal, bukan untuk Google Play.
@@ -31,6 +31,7 @@ Estimasi kesiapan menuju **rilis Google Play production**: **45-50%**, karena ma
 - Guard signing sudah ditambahkan agar build production gagal dengan pesan yang jelas, bukan `NullPointerException`.
 - Paket eksekusi UAT client sudah siap dikirim dan diisi oleh reviewer.
 - Internal UAT baseline sudah dijalankan dengan hasil `CONDITIONAL PASS`; detail evidence dipisahkan dari approval client.
+- Negative test batch 2 sudah dijalankan: duplicate submit forum berhasil direproduksi sebelum fix, guard mobile sudah diterapkan, null-safety training diperkuat, dan slow-network dicatat blocked karena shaping belum tersedia. Detail ada di `docs/NEGATIVE_TEST_BATCH_2_2026-08-01.md`.
 - Fresh SQLite migration dan seed seluruh domain sudah lulus; path DB lokal lama ditemukan dan dikoreksi tanpa memasukkan `.env` ke repo.
 
 ## Stage Saat Ini
@@ -61,7 +62,7 @@ Mapping stage:
 | Training module/progress logic | 80% | Bug NaN, mismatch progress, detail training sudah diperbaiki |
 | Media/document handling | 65% | Handling UI sudah lebih aman, tetapi file GCS/production media masih perlu validasi |
 | i18n/mixed language | 45% | Teks statis penting, course category, dan course item/module mulai rapi; forum topic dan notification data masih perlu schema/backend/CMS |
-| QA/UAT formal | 40% | Internal baseline conditional pass; migration reproducibility, edge case khusus, dan UAT client masih pending |
+| QA/UAT formal | 45% | Internal baseline conditional pass; batch 2 sudah menghasilkan fix dan evidence, replay malformed payload, latency test, serta UAT client masih pending |
 | Google Play release readiness | 25% | Environment dan preflight sudah dicek; signing/AAB, Play Console, privacy policy, production env, dan store assets belum selesai |
 
 ## Yang Sudah Diselesaikan
@@ -91,6 +92,7 @@ Mapping stage:
 - Guard signing production sudah ditambahkan agar error konfigurasi terbaca jelas dan tidak membingungkan saat build.
 - Hasil audit dicatat di `docs/MOBILE_SCREEN_AUDIT.md`.
 - Negative test mobile batch 1 sudah dicatat di `docs/QA_UAT_TEST_PLAN.md`, termasuk evidence API status, UI state, storage session, logcat, dan lifecycle emulator.
+- Negative test batch 2 sudah dicatat di `docs/NEGATIVE_TEST_BATCH_2_2026-08-01.md`: double-submit forum terbukti membuat dua record sebelum fix, guard mobile sudah diterapkan, dan null/incomplete guard sudah diperkuat.
 
 ## Temuan/Risiko Utama
 
@@ -99,7 +101,7 @@ Mapping stage:
 | Data production belum divalidasi penuh | Bisa beda dengan seed lokal | Perlu akses/staging production-like |
 | i18n data dinamis belum full bilingual | Teks course item, forum topic, notification masih bisa campur bahasa | Perlu desain schema/backend/CMS |
 | Media GCS/file production belum tervalidasi | Preview gambar/video/audio bisa gagal jika permission/storage salah | Perlu audit storage production |
-| QA formal belum lengkap | Bug edge case mungkin belum terlihat | Perlu test plan dan UAT |
+| QA formal belum lengkap | Bug edge case dan latency behavior mungkin belum terlihat | Perlu replay malformed payload, network shaping, test plan, dan UAT |
 | Toast `Error internal server` transient saat startup/recovery | User melihat error generik walaupun session akhirnya pulih | P2 open; endpoint pemicu perlu diisolasi |
 | Release Google Play belum siap | Belum bisa publish production | Perlu keystore upload, `MYAPP_UPLOAD_*`, Play Console, privacy, dan AAB |
 | Push notification/Firebase belum diaudit production | Notifikasi real device bisa belum siap | Perlu credential dan test device |
@@ -149,7 +151,9 @@ Syarat:
 Prioritas terdekat:
 
 1. **Tutup gate QA yang tersisa**
-   - Null/incomplete data, network lambat, dan double tap submit.
+   - Replay null/incomplete ke emulator.
+   - Siapkan network shaping/delayed proxy untuk latency test.
+   - Ulangi manual double tap pada Forum Editor dengan APK terbaru.
    - Putuskan apakah blocker Jest legacy akan diperbaiki atau diberi waiver.
    - Isolasi toast `Error internal server` transient pada startup/recovery.
 

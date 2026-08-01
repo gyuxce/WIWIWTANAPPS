@@ -32,6 +32,8 @@ Catatan: hasil `PASS-SMOKE` pada dokumen ini adalah baseline teknis dari emulato
 | `PASS-UAT` | Diterima client/product owner |
 | `PENDING` | Belum dieksekusi |
 | `BLOCKED` | Tidak bisa dieksekusi karena dependency/environment |
+| `PARTIAL` | Guard atau code-level evidence sudah diverifikasi, tetapi replay end-to-end belum lengkap |
+| `FIXED-PENDING-RETEST` | Perbaikan sudah diterapkan dan dibuild, tetapi skenario UI final belum diulang |
 | `FAIL` | Actual result tidak sesuai expected result |
 
 | Severity | Arti |
@@ -64,7 +66,7 @@ Catatan: hasil `PASS-SMOKE` pada dokumen ini adalah baseline teknis dari emulato
 | ID | Skenario | Expected result | Status | Bukti/catatan |
 | --- | --- | --- | --- | --- |
 | QA-ENV-001 | Backend health endpoint | API merespons HTTP 200 | PASS-QA | `GET /api/v1/constants/` merespons HTTP 200 |
-| QA-ENV-002 | Backend migration/seed | Database QA dapat di-reset dan seed tanpa error | PASS-QA | Fresh SQLite sementara: migrate:fresh, seluruh domain migration, DevDatabaseSeeder, dan UpdateCourseJapaneseTitlesSeeder lulus |
+| QA-ENV-002 | Backend migration/seed | Database QA dapat di-reset dan seed tanpa error | PASS-QA | Fresh SQLite sementara: migrate:fresh, seluruh domain migration, DevDatabaseSeeder, UpdateCourseJapaneseTitlesSeeder, dan UpdateCourseItemJapaneseTitlesSeeder lulus |
 | QA-ENV-003 | CMS production build | `npm run build` selesai tanpa error fatal | PASS-QA | Build CMS selesai setelah `npm ci` |
 | QA-ENV-004 | Mobile TypeScript | `corepack yarn tsc --noEmit --pretty false` lulus | PASS-QA | TypeScript lulus tanpa error |
 | QA-ENV-005 | Mobile Jest baseline | Test runner selesai dan failure dicatat | BLOCKED | `App-test.tsx` membutuhkan mock banyak native SDK; test harness legacy |
@@ -131,9 +133,9 @@ Catatan: hasil `PASS-SMOKE` pada dokumen ini adalah baseline teknis dari emulato
 | QA-NEG-001 | API tidak tersedia | Error state jelas, tidak infinite loading atau crash | P0 | PASS-QA |
 | QA-NEG-002 | Empty course/module | Tampil `0`, empty state, atau pesan yang benar; tidak `NaN` | P0 | PASS-SMOKE |
 | QA-NEG-003 | Filename sangat panjang | Layout tidak overflow dan label tetap terbaca | P2 | PASS-SMOKE |
-| QA-NEG-004 | Data backend null/incomplete | Guard UI aktif dan tidak crash | P1 | PENDING |
-| QA-NEG-005 | Network lambat | Loading state terlihat dan request tidak menduplikasi data secara salah | P2 | PENDING |
-| QA-NEG-006 | Double tap submit | Hanya satu request/data record yang dibuat | P1 | PENDING |
+| QA-NEG-004 | Data backend null/incomplete | Guard UI aktif dan tidak crash | P1 | PARTIAL |
+| QA-NEG-005 | Network lambat | Loading state terlihat dan request tidak menduplikasi data secara salah | P2 | BLOCKED |
+| QA-NEG-006 | Double tap submit | Hanya satu request/data record yang dibuat | P1 | FIXED-PENDING-RETEST |
 | QA-NEG-007 | Device rotation/background | State tidak hilang atau crash saat app kembali aktif | P2 | PASS-QA |
 | QA-NEG-008 | Android permission denied | App memberi fallback/error yang dapat dipahami | P1 | PASS-QA |
 
@@ -144,6 +146,8 @@ UAT dilakukan dengan akun dan data yang disetujui client. Setiap item harus memi
 Template eksekusi yang siap dikirim ke client tersedia di [UAT_CLIENT_EXECUTION_PACK.md](UAT_CLIENT_EXECUTION_PACK.md).
 
 Hasil pengujian lokal/internal terbaru tersedia di [INTERNAL_UAT_REPORT_2026-08-01.md](INTERNAL_UAT_REPORT_2026-08-01.md). Hasil internal tidak mengubah status UAT client menjadi `Accept`.
+
+Detail negative test batch 2 tersedia di [NEGATIVE_TEST_BATCH_2_2026-08-01.md](NEGATIVE_TEST_BATCH_2_2026-08-01.md).
 
 | ID | Business flow | Acceptance criteria | Status |
 | --- | --- | --- | --- |
@@ -166,19 +170,26 @@ Gunakan satu baris per defect. Jangan menutup defect hanya karena workaround dit
 | --- | --- | --- | --- | --- | --- | --- |
 | DEF-001 | QA-ENV-005 | P2 | Existing `App-test.tsx` belum dapat berjalan karena membutuhkan konfigurasi mock native SDK yang luas | Jest output | Engineering | Blocked - test infra |
 | DEF-002 | QA-AUTH-006 | P2 | Toast `Error internal server` muncul transient saat startup/recovery walaupun session akhirnya pulih dan Progress termuat; endpoint pemicu belum diketahui | Logcat `ReactNativeJS` dan UI Progress | Engineering | Open - isolate endpoint |
+| DEF-003 | QA-NEG-006 | P1 | Dua request forum paralel sebelum fix sama-sama `201 Created` dan membuat dua record | API reproduction batch 2; fixture dibersihkan | Engineering | Fixed - UI retest pending |
 
 ## Execution Notes
 
 - Smoke baseline 1 Agustus 2026 lulus untuk Home, Progress, Training, Detail Training, Dokumen, Forum, Notifikasi, dan relaunch/session recovery.
 - QA environment batch 1: API health, backend PHPUnit, CMS build, mobile TypeScript, mojibake scan, dan secret hygiene lulus.
-- Migration/seed reproducibility: fresh SQLite sementara berhasil menjalankan migrate:fresh, migration Base/Master/Finance/Forum/Training/TableRefs, DevDatabaseSeeder, dan UpdateCourseJapaneseTitlesSeeder tanpa error.
+- Migration/seed reproducibility: fresh SQLite sementara berhasil menjalankan migrate:fresh, migration Base/Master/Finance/Forum/Training/TableRefs, DevDatabaseSeeder, UpdateCourseJapaneseTitlesSeeder, dan UpdateCourseItemJapaneseTitlesSeeder tanpa error.
+- Negative test batch 2 dicatat di [NEGATIVE_TEST_BATCH_2_2026-08-01.md](NEGATIVE_TEST_BATCH_2_2026-08-01.md). Double-submit forum berhasil direproduksi sebelum fix: dua request paralel membuat dua record, lalu fixture dibersihkan sampai tersisa nol.
+- Null/incomplete hardening sudah ditambahkan pada progress card, SectionLesson, dan DetailTrainingScreen. TypeScript lulus, APK QA terbaru berhasil dibuat/di-install, MainActivity resumed, dan tidak ada fatal Android runtime log. Replay payload malformed end-to-end masih pending.
+- Guard double-submit ForumEditor sudah memakai synchronous ref lock, state loading tombol, serta recovery pada invalid JSON dan request rejection. Manual double-tap UI dengan APK terbaru masih perlu retest final.
+- Network lambat belum dieksekusi karena network shaping/delayed proxy yang aman dan reproducible belum tersedia. API unavailable batch 1 tidak dianggap sebagai latency test.
 - Backend local `.env` sempat menunjuk ke absolute path database dari workspace lama; path lokal sudah diarahkan ke workspace aktif dan tidak di-commit.
 - Auth API contract batch: credential valid merespons HTTP 200, credential invalid merespons HTTP 422, dan access token invalid merespons HTTP 401. UI login juga sudah diverifikasi menampilkan error dan tidak masuk Home.
 - Negative mobile QA batch pada AVD `Wiwitan_API35_Lite`: credential salah menampilkan `Login gagal` dan tetap di layar login; logout mengembalikan user ke landing; API mati menampilkan `Network request failed` tanpa crash; backend kembali normal setelah test.
 - Expired-session test: access token lokal dibuat benar-benar kedaluwarsa dengan signature valid dan refresh token tetap valid; aplikasi berhasil menyimpan access token baru dan kembali ke layar Progress. Invalid access token + invalid refresh token menghapus auth/user dari storage dan mengembalikan aplikasi ke landing dengan tombol `Masuk`.
 - Access boundary test: token student mendapatkan HTTP 401 pada `GET /api/v1/base/users`, sedangkan `GET /api/v1/auth/user/me` tetap HTTP 200. Ini membuktikan route CMS/admin tidak terbuka untuk student pada local API.
 - Device lifecycle test: background/resume dan rotasi layar kembali menampilkan UI Progress tanpa `FATAL EXCEPTION`, crash, atau kehilangan session. Permission Kalender ditolak dan aplikasi tetap dapat digunakan.
-- `QA-NEG-004`, `QA-NEG-005`, dan `QA-NEG-006` masih `PENDING` karena membutuhkan fixture null/incomplete, network shaping terkontrol, dan skenario submit yang tidak mengubah data bisnis secara tidak sengaja.
+- `QA-NEG-004` sekarang `PARTIAL`: code-level guard dan build smoke sudah diverifikasi, tetapi fixture response malformed belum direplay ke emulator.
+- `QA-NEG-005` sekarang `BLOCKED` sampai network shaping/delayed proxy tersedia.
+- `QA-NEG-006` sekarang `FIXED-PENDING-RETEST`: duplicate record berhasil direproduksi sebelum fix, source fix dan APK QA sudah dibuat, tetapi tap UI final belum diulang.
 - Selama startup/recovery muncul toast generik `Error internal server` beberapa kali, tetapi layar Progress akhirnya termuat dan session tetap aktif. Endpoint pemicu belum terisolasi; dicatat sebagai `DEF-002` P2 untuk investigasi sebelum production.
 - CMS build membutuhkan `npm ci` ketika dependency lokal belum lengkap; `cms/yarn.lock` dikembalikan dan tidak menjadi bagian dari perubahan.
 - Mobile Jest belum menjadi gate QA karena test lama mengimpor native SDK secara penuh dan berhenti sebelum assertion; ini dicatat sebagai blocker test infrastructure terpisah dari runtime APK.
@@ -189,7 +200,7 @@ Gunakan satu baris per defect. Jangan menutup defect hanya karena workaround dit
 ## Next Gate
 
 1. Putuskan perbaikan atau waiver untuk blocker `QA-ENV-005`/`DEF-001`.
-2. Selesaikan negative case yang masih pending: null/incomplete data, network lambat, dan double tap submit.
+2. Selesaikan retest negative batch 2: replay null/incomplete, siapkan network shaping, dan ulangi double tap pada APK terbaru.
 3. Siapkan build QA yang diberi version label dan kumpulkan screenshot/log evidence per layar.
 4. Kirim UAT checklist ke client/product owner untuk eksekusi dengan data bisnis.
 5. Setelah UAT diterima, lanjut ke release hardening dan Google Play internal testing.

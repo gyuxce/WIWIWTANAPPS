@@ -14,7 +14,7 @@ Per 1 Agustus 2026:
 | --- | ---: | --- |
 | Kesiapan menuju internal release candidate | **60-65%** | Core mobile flow sudah dapat dijalankan dan diaudit di emulator |
 | Kesiapan menuju Google Play production | **45-50%** | Production environment, UAT, signing final, Firebase, storage, payment, dan Play Console masih perlu diselesaikan |
-| QA/UAT formal | **40%** | Test plan, environment gate, smoke, dan negative mobile batch 1 sudah tersedia |
+| QA/UAT formal | **45%** | Test plan, environment gate, smoke, negative mobile batch 1, dan batch 2 sudah tersedia; beberapa retest masih pending |
 | Google Play release preparation | **25%** | Checklist dan dasar signing sudah ada; AAB production dan akses production belum divalidasi |
 
 Persentase di atas adalah estimasi kesiapan berbasis gate project, bukan jumlah baris kode atau jumlah commit.
@@ -134,7 +134,7 @@ Yang belum selesai:
 
 ### Formal QA Dan Negative Test
 
-Pada 1 Agustus, QA formal batch awal dan negative mobile batch 1 dijalankan pada emulator lokal.
+Pada 1 Agustus, QA formal dan negative mobile batch 1-2 dijalankan pada emulator lokal.
 
 Hasil yang lulus:
 
@@ -150,9 +150,10 @@ Hasil yang lulus:
 
 Catatan QA:
 
-- `QA-NEG-004` null/incomplete data masih pending.
-- `QA-NEG-005` network lambat masih pending.
-- `QA-NEG-006` double tap submit masih pending.
+- `QA-NEG-004` null/incomplete: guard source dan build sudah diverifikasi, tetapi replay payload malformed ke emulator masih pending.
+- `QA-NEG-005` network lambat: blocked sampai network shaping atau delayed proxy tersedia.
+- `QA-NEG-006` double tap: dua request paralel terbukti membuat dua record sebelum fix; guard mobile sudah diterapkan dan retest UI masih pending.
+- Detail evidence batch 2 tersedia di `docs/NEGATIVE_TEST_BATCH_2_2026-08-01.md`.
 - Toast generik `Error internal server` masih muncul transient pada sebagian startup/recovery dan dicatat sebagai defect P2 untuk diisolasi.
 - Mobile Jest legacy masih menjadi blocker test infrastructure karena membutuhkan mock native SDK yang luas; hal ini berbeda dari runtime APK yang sudah dapat berjalan.
 
@@ -164,7 +165,7 @@ Angka berikut diambil dari checkpoint project yang sudah dicatat pada 22 Juli da
 | --- | ---: | ---: | --- |
 | Internal release candidate | 60-65% | 60-65% | Core flow tetap pada level yang sama; stabilisasi dan QA menurunkan risiko, bukan menambah fitur besar |
 | Google Play production readiness | 45-50% | 45-50% | Masih menunggu akses dan validasi production |
-| QA/UAT formal | 25% | 40% | Naik karena formal test plan, environment gates, smoke, dan negative mobile batch 1 sudah dijalankan |
+| QA/UAT formal | 25% | 45% | Naik karena formal test plan, environment gates, smoke, negative batch 1, dan evidence batch 2 sudah dijalankan |
 | Google Play release preparation | 20% | 25% | Naik karena checklist dan dasar signing sudah dirapikan |
 | Mobile core flow | Audit sedang berjalan | Core flow dan recovery utama sudah lulus smoke/QA lokal | Progress kualitatif meningkat |
 | Data/i18n | Course category mulai diverifikasi | Course item/module title Jepang sudah terhubung; forum/notification masih pending | Scope bilingual bertambah |
@@ -180,7 +181,7 @@ Interpretasi untuk client: project tidak berhenti selama Juli. Sebagian besar pe
 | 3 | Audit CMS dan admin dasar | Sebagian besar selesai; validasi bisnis client masih diperlukan |
 | 4 | Mobile student stabilization | Core flow, bug utama, dan session recovery sudah stabil di QA lokal |
 | 5 | Data/i18n/backend hardening | Sebagian selesai; forum dan notification dynamic data masih pending |
-| 6 | Formal QA dan UAT | QA batch 1 dan negative mobile batch 1 selesai; UAT client belum dimulai |
+| 6 | Formal QA dan UAT | QA batch 1-2 sudah dijalankan; beberapa negative retest dan UAT client masih pending |
 | 7 | Release preparation Google Play | Mulai, tetapi belum siap publish production |
 
 ## Next Action Agustus
@@ -210,10 +211,9 @@ Flow UAT prioritas:
 
 ### Prioritas 2: Tutup QA Gate Yang Tersisa
 
-- Pastikan migration dan seed dapat diulang dari database kosong.
-- Jalankan fixture null/incomplete data.
-- Jalankan network shaping untuk koneksi lambat.
-- Uji double tap pada form yang membuat record, dengan test data khusus.
+- Replay fixture null/incomplete ke emulator.
+- Siapkan network shaping untuk koneksi lambat.
+- Ulangi double tap pada Forum Editor dengan APK terbaru.
 - Isolasi endpoint pemicu toast `Error internal server`.
 - Putuskan apakah test Jest legacy akan diperbaiki atau diberi waiver dengan bukti runtime QA.
 
@@ -264,7 +264,7 @@ Timeline ini bergantung pada akses client dan hasil UAT.
 
 ## Kesimpulan Untuk Client
 
-Project sudah melewati fase recovery source, setup environment, audit CMS, setup Android, stabilisasi mobile, perbaikan bug utama, dan QA teknis awal. Per 1 Agustus, aplikasi sudah siap masuk **UAT client**, tetapi belum siap dipublish ke Google Play production.
+Project sudah melewati fase recovery source, setup environment, audit CMS, setup Android, stabilisasi mobile, perbaikan bug utama, dan QA teknis awal. Per 1 Agustus, aplikasi sudah punya baseline untuk masuk **UAT client** setelah retest negative batch 2 yang tersisa, tetapi belum siap dipublish ke Google Play production.
 
 Keputusan dan action paling penting bulan Agustus adalah menjalankan UAT dengan data client, menutup defect/blocker yang ditemukan, lalu melakukan release preparation secara paralel sampai AAB production dan environment production tervalidasi.
 
@@ -272,4 +272,5 @@ Dokumen pendukung:
 
 - [Project status report](PROJECT_STATUS_REPORT.md)
 - [Formal QA/UAT test plan](QA_UAT_TEST_PLAN.md)
+- [Negative test batch 2](NEGATIVE_TEST_BATCH_2_2026-08-01.md)
 - [Google Play release checklist](GOOGLE_PLAY_RELEASE_CHECKLIST.md)

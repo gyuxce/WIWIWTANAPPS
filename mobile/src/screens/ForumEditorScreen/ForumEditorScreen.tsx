@@ -10,7 +10,7 @@ import colors from "configs/colors";
 import fonts from "configs/fonts";
 import icons from "configs/icons";
 import { useForum } from "hooks/useForum";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Platform, ScrollView, View } from "react-native";
 import WebView from "react-native-webview";
 import type { ModalAlertProps } from "types/AppTypes";
@@ -34,7 +34,7 @@ import type { RootStackParamList } from "types/NavigatorTypes";
 import type { QueryType } from "types/QueryTypes";
 import LoadingModal from "components/LoadingModal/LoadingModal";
 import { wait } from "utils/Utils";
-import { API_URL } from '@env';
+import { API_URL } from "@env";
 import { onErrorState } from "stores/error/errorSlice";
 import { useTranslation } from "react-i18next";
 
@@ -64,6 +64,7 @@ const ForumEditorScreen = ({ route }: Prop) => {
   //delta is retrieve or new data
   const [delta, setDelta] = useState(JSON.stringify({ ops: [] }));
   const [isLoadingModal, setIsLoadingModal] = useState(false);
+  const isSubmittingRef = useRef(false);
   //deltaText is delta to send to server
   const [deltaText, setDeltaText] = useState(null as any);
   const [form, setForm] = useState({ title: "", topic: {} } as {
@@ -330,10 +331,23 @@ const ForumEditorScreen = ({ route }: Prop) => {
   }, []);
 
   const onPressPost = (isDraft: number, isPublish: number) => {
+    if (isSubmittingRef.current) {
+      return;
+    }
+
+    isSubmittingRef.current = true;
     setIsLoadingModal(true);
     const dataHarsh = harshWord.map(item => item?.name);
 
-    const text = JSON.parse(deltaText);
+    let text: any;
+    try {
+      text = JSON.parse(deltaText);
+    } catch {
+      isSubmittingRef.current = false;
+      setIsLoadingModal(false);
+      ErrorStatus(422, dispatch);
+      return;
+    }
     const highlightedTextSet = new Set();
 
     text?.ops?.forEach((item: any) => {
@@ -367,6 +381,7 @@ const ForumEditorScreen = ({ route }: Prop) => {
             setShowModal({ showModal: false, title: "" });
           },
         });
+        isSubmittingRef.current = false;
       });
     } else {
       const body: PostForumType = {
@@ -378,8 +393,8 @@ const ForumEditorScreen = ({ route }: Prop) => {
         is_publish: isPublish,
       };
       if (route?.params?.id) {
-        apiPutForumPost(auth?.accessToken, body, route?.params?.id).then(
-          ({ data }) => {
+        apiPutForumPost(auth?.accessToken, body, route?.params?.id)
+          .then(({ data }) => {
             if (data) {
               setIsLoadingModal(false);
               wait(500).then(() => {
@@ -404,37 +419,51 @@ const ForumEditorScreen = ({ route }: Prop) => {
                       : NavigationService.back();
                   },
                 });
+                isSubmittingRef.current = false;
               });
             } else {
+              isSubmittingRef.current = false;
               setIsLoadingModal(false);
               ErrorStatus(500, dispatch);
             }
-          },
-        );
-      } else {
-        apiPostForumPost(auth?.accessToken, body).then(({ data }) => {
-          if (data) {
-            setIsLoadingModal(false);
-            wait(500).then(() => {
-              setShowModal({
-                showModal: true,
-                titleBigJapan: "ありがとう",
-                titleBig: "Terimakasih",
-                title: `${isPublish ? t("post_publish") : t("post_draft")} `,
-                leftText: t("kembali"),
-                leftFunction: () => {
-                  setShowModal({ showModal: false, title: "" });
-                  isDraft
-                    ? NavigationService.replace("ForumDraftScreen")
-                    : NavigationService.back();
-                },
-              });
-            });
-          } else {
+          })
+          .catch(() => {
+            isSubmittingRef.current = false;
             setIsLoadingModal(false);
             ErrorStatus(500, dispatch);
-          }
-        });
+          });
+      } else {
+        apiPostForumPost(auth?.accessToken, body)
+          .then(({ data }) => {
+            if (data) {
+              setIsLoadingModal(false);
+              wait(500).then(() => {
+                setShowModal({
+                  showModal: true,
+                  titleBigJapan: "ありがとう",
+                  titleBig: "Terimakasih",
+                  title: `${isPublish ? t("post_publish") : t("post_draft")} `,
+                  leftText: t("kembali"),
+                  leftFunction: () => {
+                    setShowModal({ showModal: false, title: "" });
+                    isDraft
+                      ? NavigationService.replace("ForumDraftScreen")
+                      : NavigationService.back();
+                  },
+                });
+                isSubmittingRef.current = false;
+              });
+            } else {
+              isSubmittingRef.current = false;
+              setIsLoadingModal(false);
+              ErrorStatus(500, dispatch);
+            }
+          })
+          .catch(() => {
+            isSubmittingRef.current = false;
+            setIsLoadingModal(false);
+            ErrorStatus(500, dispatch);
+          });
       }
     }
   };
@@ -669,6 +698,7 @@ const ForumEditorScreen = ({ route }: Prop) => {
               fontSize: 12,
               lineHeight: 18,
             }}
+            isLoading={isLoadingModal}
             disabled={!isValid()}
             withBorder={isValid()}
           />
@@ -686,6 +716,7 @@ const ForumEditorScreen = ({ route }: Prop) => {
                 fontSize: 12,
                 lineHeight: 18,
               }}
+              isLoading={isLoadingModal}
             />
           ) : null}
           {route?.params?.id && (

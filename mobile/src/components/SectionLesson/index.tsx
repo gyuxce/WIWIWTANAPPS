@@ -97,9 +97,9 @@ const SectionLesson = ({
               opacity: user?.last_phase >= 3 ? 1 : 0.2,
             }}
             image={
-              item?.cover === null
-                ? getCourseImageAndColor(item?.type_label)?.image
-                : { uri: item?.cover?.url }
+              item?.cover?.url
+                ? { uri: item.cover.url }
+                : getCourseImageAndColor(item?.type_label)?.image
             }
             onPress={() => {
               //if (user?.last_phase >= 3) {
