@@ -25,7 +25,7 @@ Estimasi kesiapan menuju **rilis Google Play production**: **45-50%**, karena ma
 
 ## Stage Saat Ini
 
-Stage sekarang: **Stage 4 - Mobile Student Stabilization & Polish**
+Stage sekarang: **Stage 4 - Mobile Student Stabilization & Polish, gate login QA sudah ditutup**
 
 Mapping stage:
 
@@ -34,9 +34,9 @@ Mapping stage:
 | 1 | Repo recovery & cleanup dari source handoff | Selesai |
 | 2 | Local backend/CMS/mobile setup | Selesai untuk local dev |
 | 3 | Audit CMS dan flow admin dasar | Sebagian besar selesai |
-| 4 | Audit dan stabilisasi mobile siswa | Sedang berjalan |
-| 5 | Data/i18n/backend schema hardening | Baru mulai |
-| 6 | QA end-to-end dan UAT client | Belum mulai penuh |
+| 4 | Audit dan stabilisasi mobile siswa | Hampir selesai untuk local QA; smoke test end-to-end masih pending |
+| 5 | Data/i18n/backend schema hardening | Sebagian selesai; course bilingual sudah ada, forum/notifikasi dinamis masih pending |
+| 6 | QA end-to-end dan UAT client | Gate berikutnya setelah login QA stabil |
 | 7 | Release preparation Google Play | Belum mulai |
 
 ## Progress Per Area
