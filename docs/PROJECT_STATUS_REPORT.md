@@ -31,6 +31,7 @@ Estimasi kesiapan menuju **rilis Google Play production**: **45-50%**, karena ma
 - Guard signing sudah ditambahkan agar build production gagal dengan pesan yang jelas, bukan `NullPointerException`.
 - Paket eksekusi UAT client sudah siap dikirim dan diisi oleh reviewer.
 - Internal UAT baseline sudah dijalankan dengan hasil `CONDITIONAL PASS`; detail evidence dipisahkan dari approval client.
+- Fresh SQLite migration dan seed seluruh domain sudah lulus; path DB lokal lama ditemukan dan dikoreksi tanpa memasukkan `.env` ke repo.
 
 ## Stage Saat Ini
 
@@ -85,6 +86,7 @@ Mapping stage:
 - Checklist rilis Google Play sudah dibuat sebagai acuan menuju AAB production.
 - UAT client execution pack sudah dibuat dengan matrix login, progress, training, dokumen, forum, notifikasi, CMS, role, bilingual, dan sign-off.
 - Internal UAT report 1 Agustus 2026 sudah mencatat gate backend, CMS build, mobile TypeScript, APK launch, security hygiene, dan open issue.
+- QA-ENV-002 migration/seed reproducibility sudah ditutup sebagai `PASS-QA` pada fresh SQLite sementara.
 - Preflight production sudah melewati R8; blocker rilis sekarang terisolasi pada keystore upload dan credential signing yang belum tersedia.
 - Guard signing production sudah ditambahkan agar error konfigurasi terbaca jelas dan tidak membingungkan saat build.
 - Hasil audit dicatat di `docs/MOBILE_SCREEN_AUDIT.md`.
@@ -147,7 +149,6 @@ Syarat:
 Prioritas terdekat:
 
 1. **Tutup gate QA yang tersisa**
-   - Migration/seed reproducibility.
    - Null/incomplete data, network lambat, dan double tap submit.
    - Putuskan apakah blocker Jest legacy akan diperbaiki atau diberi waiver.
    - Isolasi toast `Error internal server` transient pada startup/recovery.

@@ -64,7 +64,7 @@ Catatan: hasil `PASS-SMOKE` pada dokumen ini adalah baseline teknis dari emulato
 | ID | Skenario | Expected result | Status | Bukti/catatan |
 | --- | --- | --- | --- | --- |
 | QA-ENV-001 | Backend health endpoint | API merespons HTTP 200 | PASS-QA | `GET /api/v1/constants/` merespons HTTP 200 |
-| QA-ENV-002 | Backend migration/seed | Database QA dapat di-reset dan seed tanpa error | PENDING | Catat command dan database |
+| QA-ENV-002 | Backend migration/seed | Database QA dapat di-reset dan seed tanpa error | PASS-QA | Fresh SQLite sementara: migrate:fresh, seluruh domain migration, DevDatabaseSeeder, dan UpdateCourseJapaneseTitlesSeeder lulus |
 | QA-ENV-003 | CMS production build | `npm run build` selesai tanpa error fatal | PASS-QA | Build CMS selesai setelah `npm ci` |
 | QA-ENV-004 | Mobile TypeScript | `corepack yarn tsc --noEmit --pretty false` lulus | PASS-QA | TypeScript lulus tanpa error |
 | QA-ENV-005 | Mobile Jest baseline | Test runner selesai dan failure dicatat | BLOCKED | `App-test.tsx` membutuhkan mock banyak native SDK; test harness legacy |
@@ -171,6 +171,8 @@ Gunakan satu baris per defect. Jangan menutup defect hanya karena workaround dit
 
 - Smoke baseline 1 Agustus 2026 lulus untuk Home, Progress, Training, Detail Training, Dokumen, Forum, Notifikasi, dan relaunch/session recovery.
 - QA environment batch 1: API health, backend PHPUnit, CMS build, mobile TypeScript, mojibake scan, dan secret hygiene lulus.
+- Migration/seed reproducibility: fresh SQLite sementara berhasil menjalankan migrate:fresh, migration Base/Master/Finance/Forum/Training/TableRefs, DevDatabaseSeeder, dan UpdateCourseJapaneseTitlesSeeder tanpa error.
+- Backend local `.env` sempat menunjuk ke absolute path database dari workspace lama; path lokal sudah diarahkan ke workspace aktif dan tidak di-commit.
 - Auth API contract batch: credential valid merespons HTTP 200, credential invalid merespons HTTP 422, dan access token invalid merespons HTTP 401. UI login juga sudah diverifikasi menampilkan error dan tidak masuk Home.
 - Negative mobile QA batch pada AVD `Wiwitan_API35_Lite`: credential salah menampilkan `Login gagal` dan tetap di layar login; logout mengembalikan user ke landing; API mati menampilkan `Network request failed` tanpa crash; backend kembali normal setelah test.
 - Expired-session test: access token lokal dibuat benar-benar kedaluwarsa dengan signature valid dan refresh token tetap valid; aplikasi berhasil menyimpan access token baru dan kembali ke layar Progress. Invalid access token + invalid refresh token menghapus auth/user dari storage dan mengembalikan aplikasi ke landing dengan tombol `Masuk`.
@@ -186,7 +188,7 @@ Gunakan satu baris per defect. Jangan menutup defect hanya karena workaround dit
 
 ## Next Gate
 
-1. Tutup `QA-ENV-002` dan putuskan perbaikan untuk blocker `QA-ENV-005`.
+1. Putuskan perbaikan atau waiver untuk blocker `QA-ENV-005`/`DEF-001`.
 2. Selesaikan negative case yang masih pending: null/incomplete data, network lambat, dan double tap submit.
 3. Siapkan build QA yang diberi version label dan kumpulkan screenshot/log evidence per layar.
 4. Kirim UAT checklist ke client/product owner untuk eksekusi dengan data bisnis.

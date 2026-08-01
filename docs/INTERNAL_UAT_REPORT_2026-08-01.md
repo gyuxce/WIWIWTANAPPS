@@ -36,6 +36,7 @@ Laporan ini adalah hasil pengujian internal menggunakan source, seed lokal, back
 | INT-ENV-004 | Mobile TypeScript | `corepack yarn tsc --noEmit --pretty false` selesai tanpa error | PASS |
 | INT-ENV-005 | Encoding | `scripts/check-mojibake.py` -> `No mojibake candidates found` | PASS |
 | INT-ENV-006 | Secret hygiene | `.env`, `google-services.json`, dan keystore lokal tidak tracked | PASS |
+| INT-ENV-007 | Migration/seed reproducibility | Fresh SQLite sementara menjalankan migrate:fresh, seluruh domain migration, DevDatabaseSeeder, dan UpdateCourseJapaneseTitlesSeeder tanpa error | PASS |
 | INT-MOB-001 | APK QA | `app:assembleDevelopmentQa` berhasil; APK ter-install ke emulator | PASS |
 | INT-MOB-002 | Mobile launch/session | `MainActivity` resumed, proses hidup, log memuat student profile dan route `HomeScreen`, tanpa fatal exception | PASS-SMOKE |
 | INT-MOB-003 | Student core routes | Home, Progress, Training, Detail Training, Dokumen, Forum, Notifikasi, dan relaunch pernah lulus smoke test emulator | PASS-SMOKE |
@@ -58,7 +59,7 @@ Artinya core flow dan environment lokal cukup untuk melanjutkan test cycle, teta
 | --- | --- | --- | --- |
 | DEF-001 | P2 | Jest legacy membutuhkan mock native SDK yang belum lengkap | Blocked - test infrastructure |
 | DEF-002 | P2 | Toast `Error internal server` transient saat startup/recovery; endpoint pemicu belum terisolasi | Open |
-| QA-ENV-002 | P1 | Reproducibility migration/seed perlu dibuktikan dari kondisi database bersih | Pending |
+| QA-ENV-002 | P1 | Reproducibility migration/seed sudah dibuktikan pada fresh SQLite sementara | Closed - PASS |
 | QA-NEG-004 | P1 | Fixture backend null/incomplete belum diuji end-to-end | Pending |
 | QA-NEG-005 | P2 | Network lambat belum diuji dengan shaping terkontrol | Pending |
 | QA-NEG-006 | P1 | Double tap submit belum diuji dengan fixture yang aman | Pending |
@@ -70,12 +71,12 @@ Artinya core flow dan environment lokal cukup untuk melanjutkan test cycle, teta
 - Login mobile pada sebagian smoke run memakai konfigurasi auto-login QA lokal.
 - Belum ada validasi device fisik, push notification production, storage production, payment production, atau Play Console.
 - Hasil internal tidak menggantikan sign-off dari client/product owner.
+- Backend local `.env` sempat menunjuk ke absolute path database dari workspace lama; path lokal sudah diarahkan ke workspace aktif dan file `.env` tetap tidak di-commit.
 
 ## 7. Next Internal Test Cycle
 
-1. Reset database SQLite lalu jalankan migration dan seed dari kondisi bersih.
-2. Jalankan fixture null/incomplete, network lambat, dan double tap submit.
-3. Nyalakan CMS untuk retest CRUD content, user, role, permission, dan validation.
-4. Ulangi student flow dari fresh install/session tanpa auto-login bila akun lokal tersedia.
-5. Setelah internal gate stabil, minta client mengisi acceptance criteria dan data UAT.
-6. Setelah signing tersedia, build AAB production dan jalankan release smoke test.
+1. Jalankan fixture null/incomplete, network lambat, dan double tap submit.
+2. Nyalakan CMS untuk retest CRUD content, user, role, permission, dan validation.
+3. Ulangi student flow dari fresh install/session tanpa auto-login bila akun lokal tersedia.
+4. Setelah internal gate stabil, minta client mengisi acceptance criteria dan data UAT.
+5. Setelah signing tersedia, build AAB production dan jalankan release smoke test.
