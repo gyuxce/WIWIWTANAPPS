@@ -83,3 +83,15 @@ Thumbs.db
 /backend-serve.err.log
 /gradle-qa.log
 /audit-app-current.png
+/audit-auto-login-*.png
+/audit-after-onboarding*.png
+/audit-after-student-login*.png
+/audit-login-*.png
+/RKStorage-before-launch.sqlite
+/RKStorage-after-launch.sqlite
+/RKStorage-inject.sqlite
+/student-login-token.json
+/gradle-stack.txt
+/mobile/android/hs_err_pid*.log
+/commandlinetools-win-*_latest.zip
+/cmdline-tools-extract/

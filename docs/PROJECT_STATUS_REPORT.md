@@ -1,6 +1,6 @@
 # Project Status Report - WIWITAN Apps
 
-Tanggal update: 22 Juli 2026
+Tanggal update: 1 Agustus 2026
 
 ## Ringkasan Eksekutif
 
@@ -11,6 +11,15 @@ Source handoff dari developer sebelumnya sudah dirapikan ke repo, environment lo
 Estimasi kesiapan keseluruhan saat ini: **60-65% menuju release candidate internal**.
 
 Estimasi kesiapan menuju **rilis Google Play production**: **45-50%**, karena masih ada pekerjaan release engineering, QA/UAT, konfigurasi production, signing, privacy/compliance, dan validasi backend production.
+
+## Checkpoint Terbaru - 1 Agustus 2026
+
+- Posisi aktual: akhir stabilisasi mobile Android, sebelum QA/UAT formal.
+- Login API siswa tervalidasi dengan HTTP 200 dari backend lokal.
+- Handling login mobile diperbaiki agar respons/error API terbaca jelas dan aplikasi tidak pindah ke Home sebelum profil berhasil dimuat.
+- TypeScript mobile lulus dan APK `developmentQa` terbaru berhasil dibuild. APK ini masih ditandatangani debug untuk audit lokal, bukan untuk Google Play.
+- Verifikasi emulator setelah APK terbaru masih menjadi langkah berikutnya. Login otomatis dari `.env` hanya untuk QA lokal; credential contoh tidak lagi ditanam sebagai fallback di source.
+- Build lokal saat ini memakai Node 24 karena dependency Metro yang terpasang (`metro-config` 0.83.x) mensyaratkan Node 20.19.4 atau lebih baru. Penyelarasan dependency dengan baseline Node 18 dicatat sebagai hardening build terpisah.
 
 ## Stage Saat Ini
 

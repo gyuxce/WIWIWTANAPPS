@@ -188,3 +188,14 @@ Audit layar aplikasi siswa Android lokal.
 - Backend lokal: credential `user1@62teknologi.com` / `password` tervalidasi langsung ke endpoint host `POST /api/v1/auth/sign-in` dan mengembalikan `200`. Database user lokal juga valid: `role_id = null`, `is_active = 1`, dan password cocok.
 - Temuan blocker sementara: submit login lewat input otomatis ADB masih menghasilkan modal `Login gagal`. Counter `count_login_attempt` user tidak naik, sehingga indikasinya request dari app tidak masuk sebagai request credential yang sama, atau state form mobile tidak menerima input ADB seperti input manual. Ini perlu diverifikasi ulang dengan input manual di emulator/Android Studio atau dengan instrumentation yang lebih stabil.
 - Catatan environment: `mobile/.env` sudah memakai `API_URL=http://10.0.2.2:8000/api/v1` dan `URL_CMS=http://10.0.2.2:3000`; `adb reverse tcp:8000 tcp:8000` juga sudah dicoba, tetapi bukan akar masalah utama karena host API sukses.
+
+### Perbaikan Login dan APK QA 2026-08-01
+
+- Backend lokal kembali tervalidasi dengan request `POST /api/v1/auth/sign-in` memakai akun siswa dan mengembalikan HTTP `200` serta token lokal.
+- `apiSignin` mobile sekarang memakai request JSON langsung dan membaca body respons secara eksplisit. Error HTTP tidak lagi berubah menjadi status angka yang berakhir sebagai pesan `undefined`.
+- `LoginScreen` sekarang hanya berpindah ke `HomeScreen` setelah `getMe` berhasil memuat profil. Jika token diterima tetapi profil gagal dimuat, aplikasi menampilkan pesan yang jelas dan tidak meninggalkan loading modal.
+- QA auto-login hanya membaca `AUTO_LOGIN_EMAIL` dan `AUTO_LOGIN_PASSWORD` dari `mobile/.env`; fallback credential yang tertanam di source sudah dihapus dan mode production tetap menonaktifkan auto-login.
+- Verifikasi: `corepack yarn tsc --noEmit --pretty false` berhasil.
+- Verifikasi: `app:assembleDevelopmentQa -PincludeX86ForLocal=true` berhasil pada 1 Agustus 2026 dan menghasilkan APK baru di `mobile/android/app/build/outputs/apk/development/qa/app-development-qa.apk`.
+- Catatan build: dependency Metro yang terpasang menggunakan `metro-config` 0.83.x sehingga build lokal saat ini memakai Node 24.16.0. Node 18 portable dari helper repo gagal pada `Array.prototype.toReversed`; penyelarasan dependency menjadi pekerjaan hardening build berikutnya.
+- Status pending: install APK terbaru ke emulator dan ulangi login/smoke test siswa. APK baru belum dianggap tervalidasi visual sebelum langkah ini selesai.

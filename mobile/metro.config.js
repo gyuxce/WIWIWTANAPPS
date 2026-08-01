@@ -5,6 +5,7 @@ const defaultConfig = getDefaultConfig(__dirname);
 
 module.exports = {
   ...defaultConfig,
+  maxWorkers: 1,
   transformer: {
     ...defaultConfig.transformer,
     // Add any custom transformer options here

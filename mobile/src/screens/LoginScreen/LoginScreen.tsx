@@ -297,10 +297,12 @@ const LoginScreen = () => {
         is_mobile: "1",
       }).then(({ data, status, message }) => {
         if (status !== "success") {
+          const loginMessage =
+            message || "Login gagal. Periksa koneksi dan data akun Anda.";
           dispatch(
             onErrorState({
               visible: true,
-              text: message || "Something went wrong",
+              text: loginMessage,
               icon: icons.searchClose,
               withCloseIcon: true,
               withIcon: true,
@@ -308,7 +310,7 @@ const LoginScreen = () => {
           );
           Alert.alert(
             "Login gagal",
-            message,
+            loginMessage,
             [
               {text: "OK"},
             ],
@@ -341,7 +343,18 @@ const LoginScreen = () => {
           getMe(data?.access_token, {
             accessToken: data?.access_token,
             refreshToken: data?.refresh_token,
-          }).then(() => {
+          }).then(({ status: meStatus, message: meMessage }) => {
+            if (meStatus !== "success") {
+              const profileMessage =
+                (typeof meMessage === "string" ? meMessage : "") ||
+                "Login berhasil, tetapi profil belum dapat dimuat.";
+              setShowModal(false);
+              Alert.alert("Login belum selesai", profileMessage, [
+                {text: "OK"},
+              ]);
+              return;
+            }
+
             attemptPassword(0, 0, 0);
             setShowModal(false);
             navigation.dispatch(
@@ -349,6 +362,15 @@ const LoginScreen = () => {
                 index: 0,
                 routes: [{ name: "HomeScreen" }],
               }),
+            );
+          }).catch(error => {
+            setShowModal(false);
+            Alert.alert(
+              "Login belum selesai",
+              error instanceof Error
+                ? error.message
+                : "Profil belum dapat dimuat.",
+              [{text: "OK"}],
             );
           });
         }

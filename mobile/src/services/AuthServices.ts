@@ -48,14 +48,41 @@ export const apiSignin = async (body: {
   is_mobile: string;
 }) => {
   try {
-    const result = await BaseService("/auth/sign-in")
-      .json(body)
-      .post() as {
+    const response = await fetch(`${API_URL}/auth/sign-in`, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
+    const responseText = await response.text();
+    let result: {
       status?: string;
       data?: unknown;
       message?: string;
       errors?: unknown;
-    };
+    } = {};
+
+    try {
+      result = responseText ? JSON.parse(responseText) : {};
+    } catch {
+      result = {
+        message: responseText || "Respons login tidak valid.",
+      };
+    }
+
+    if (!response.ok) {
+      return {
+        status: "failed",
+        data: result?.data ?? null,
+        message:
+          result?.message ||
+          `Server mengembalikan HTTP ${response.status}.`,
+        errors: result?.errors ?? responseText,
+      };
+    }
+
     return {
       status: result?.status,
       data: result?.data,
