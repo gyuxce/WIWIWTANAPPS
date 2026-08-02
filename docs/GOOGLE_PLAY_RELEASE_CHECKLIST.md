@@ -1,6 +1,6 @@
 # Google Play Release Checklist - WIWITAN Apps
 
-Tanggal update: 1 Agustus 2026
+Tanggal update: 2 Agustus 2026
 
 Checklist ini dipakai saat project mulai masuk fase rilis Android production. Jangan publish sebelum semua item wajib di bawah selesai.
 
@@ -15,6 +15,7 @@ Project belum siap publish production. Posisi sekarang masih **release preparati
 - Flow siswa utama sudah mulai stabil.
 - Preflight `bundleProductionRelease` sudah dijalankan; R8 berhasil setelah heap Gradle dinaikkan.
 - Client UAT sudah dilaporkan approved; formal sign-off/evidence tetap menjadi item release handoff.
+- Production debug compile sudah lulus setelah timeout diisolasi; ini hanya membuktikan build/package lokal, bukan release signing.
 - Production signing masih **BLOCKED** karena keystore upload dan credential `MYAPP_UPLOAD_*` belum tersedia.
 - AAB production belum terbentuk karena proses berhenti di tahap signing.
 - Production bundle sekarang wajib memilih `ENVFILE` secara eksplisit; konfigurasi lokal emulator tidak boleh ikut masuk ke production artifact.
@@ -31,7 +32,7 @@ Project belum siap publish production. Posisi sekarang masih **release preparati
 | R8/minification | PASS | Lolos dengan Gradle heap 3 GB dan workers 1 |
 | Local QA env isolation | PASS | `ENVFILE` wajib eksplisit; production-shaped env menolak URL emulator dan auto-login |
 | Production log hygiene | PASS | Redux logger dan FCM/index diagnostics guarded by `__DEV__`; no token/payload logging in production |
-| Production debug compile | TIMEOUT | Temporary production-shaped env validated, but `app:assembleProductionDebug` exceeded 6 minutes without APK; no client database or production credentials were used |
+| Production debug compile | PASS | Isolated detached build `app:assembleProductionDebug --no-daemon --max-workers=1 --console=plain --info --stacktrace` completed in 15m 8s without client database or production credentials; APK generated and cold-build work was concentrated in dependency transforms, Metro, and native packaging |
 | Release signing | BLOCKED | `mobile/android/app/wiwitan.keystore` belum tersedia; empat `MYAPP_UPLOAD_*` belum diset |
 | Production AAB | BLOCKED | Belum ada file `.aab` yang dapat diupload |
 

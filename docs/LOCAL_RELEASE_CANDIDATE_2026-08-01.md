@@ -32,7 +32,7 @@ and formal release evidence.
 | Launch smoke | PASS | MainActivity resumed; app process alive; no `FATAL EXCEPTION` in the post-launch log window |
 | Production build guard | PASS-BLOCKED | `yarn build:aab:prod` stopped before Gradle because real `.env.production` is not available |
 | Production env validator with template | PASS | Temporary `.env.production` copied from the example passed `STATUS=PRODUCTION`, HTTPS URL, URL scheme, and empty auto-login checks; fixture removed afterward |
-| Production debug compile without client DB | TIMEOUT | Two local attempts (`includeX86ForLocal=true` and default production ABIs) exceeded 4 and 6 minutes without producing an APK; Gradle daemons were stopped. This is a local build-time follow-up, not a production signing result |
+| Production debug compile without client DB | PASS | Isolated `app:assembleProductionDebug --no-daemon --max-workers=1 --console=plain --info --stacktrace` completed in 15m 8s with no client database or production credentials; APK `app-production-debug.apk` produced (157,482,504 bytes), SHA-256 `9A8E905DE041254F67823131D4E7DFEF76554CA2144FD9946EBDDB2E55CA09A9`. Cold-build time was dominated by Gradle dependency transforms, Metro cache reset, and native packaging |
 | Production log hygiene | PASS | TypeScript, Jest (`2` suites / `4` tests), and targeted ESLint for `index.js` passed after logger/FCM guards |
 
 The APK above is a local QA artifact signed with the debug key. It is not a
@@ -51,11 +51,21 @@ Google Play upload artifact.
 
 ## Next Execution
 
-1. Isolate the production debug compile timeout with Gradle/native build logs,
-   without using client data or production credentials.
-2. When production access arrives, create the local untracked `.env.production`
+1. When production access arrives, create the local untracked `.env.production`
    from `mobile/.env.production.example` and run its validator.
-3. Run the Sardine probe and repeat CMS/student storage readback against the
+2. Run the Sardine probe and repeat CMS/student storage readback against the
    approved endpoint.
-4. Configure signing, build the production AAB, install it into an internal
+3. Configure signing, build the production AAB, install it into an internal
    test track, and repeat release smoke tests.
+
+## Gradle Timeout Isolation - 2026-08-02
+
+The earlier timeout was not a Gradle failure. A detached, fully logged build
+was allowed to finish and produced the production-flavor debug APK. The build
+progressed through dependency/AAR transforms, Metro bundling, React Native
+library compilation, NDK native packaging, and APK packaging before reporting
+`BUILD SUCCESSFUL` with `650 actionable tasks: 141 executed, 509 up-to-date`.
+
+The generated APK is for local verification only. It uses the debug signing
+path and does not prove that production release signing or Google Play upload
+is ready. The temporary `.env.production` fixture was removed after the test.

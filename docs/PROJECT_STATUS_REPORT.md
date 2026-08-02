@@ -1,6 +1,6 @@
 # Project Status Report - WIWITAN Apps
 
-Tanggal update: 1 Agustus 2026
+Tanggal update: 2 Agustus 2026
 
 ## Ringkasan Eksekutif
 
@@ -42,7 +42,8 @@ Estimasi kesiapan menuju **rilis Google Play production**: **45-50%**, karena ma
 - Fresh SQLite migration dan seed seluruh domain sudah lulus; path DB lokal lama ditemukan dan dikoreksi tanpa memasukkan `.env` ke repo.
 - Residual local QA batch selesai untuk scope yang dapat diuji lokal: Assessment verbal schedule/readback/filter, Profile mode Indonesia/Jepang, module pagination/filter boundary, dan student action-level admin boundary. Sesi seed Assessment dan fase siswa sudah dipulihkan setelah test.
 - `CMS-DEF-014` ditutup: filter daftar Assessment lisan sekarang mempertahankan sesi dengan `status = null`, sehingga jadwal yang belum selesai tidak hilang dari CMS.
-- Release hygiene tambahan: Redux logger dan diagnostic FCM/index sekarang hanya aktif pada development/QA, sehingga token dan payload notifikasi tidak ditulis ke Logcat production. Production-shaped env validator lulus; production debug compile lokal masih timeout tanpa database klien dan dicatat sebagai follow-up build-time.
+- Release hygiene tambahan: Redux logger dan diagnostic FCM/index sekarang hanya aktif pada development/QA, sehingga token dan payload notifikasi tidak ditulis ke Logcat production. Production-shaped env validator dan production debug compile lokal lulus tanpa database klien; release signing/AAB tetap menjadi follow-up build-time.
+- Gradle timeout sudah diisolasi: `app:assembleProductionDebug` detached build selesai `BUILD SUCCESSFUL` dalam 15m 8s, menghasilkan APK 157 MB tanpa database klien atau credential production. Waktu cold build terutama habis pada dependency/AAR transform, Metro cache reset, dan native packaging; blocker release tetap signing/AAB production.
 
 ## Stage Saat Ini
 
