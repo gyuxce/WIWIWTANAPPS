@@ -27,6 +27,7 @@ Repo ini dibuat dari source handoff developer sebelumnya dan sudah disanitasi su
 14. Untuk hasil negative test batch 2, baca [docs/NEGATIVE_TEST_BATCH_2_2026-08-01.md](docs/NEGATIVE_TEST_BATCH_2_2026-08-01.md).
 15. Untuk lembar formal UAT sign-off dan defect/release decision, baca [docs/UAT_SIGN_OFF_2026-08-01.md](docs/UAT_SIGN_OFF_2026-08-01.md).
 16. Jalankan backend dulu, lalu CMS, lalu mobile app.
+17. Untuk daftar akses, owner, dan status handover production, baca [docs/ACCESS_HANDOVER_MATRIX.md](docs/ACCESS_HANDOVER_MATRIX.md).
 
 ## Stack Utama
 
