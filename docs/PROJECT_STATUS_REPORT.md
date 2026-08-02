@@ -44,6 +44,7 @@ Estimasi kesiapan menuju **rilis Google Play production**: **45-50%**, karena ma
 - `CMS-DEF-014` ditutup: filter daftar Assessment lisan sekarang mempertahankan sesi dengan `status = null`, sehingga jadwal yang belum selesai tidak hilang dari CMS.
 - Release hygiene tambahan: Redux logger dan diagnostic FCM/index sekarang hanya aktif pada development/QA, sehingga token dan payload notifikasi tidak ditulis ke Logcat production. Production-shaped env validator dan production debug compile lokal lulus tanpa database klien; release signing/AAB tetap menjadi follow-up build-time.
 - Gradle timeout sudah diisolasi: `app:assembleProductionDebug` detached build selesai `BUILD SUCCESSFUL` dalam 15m 8s, menghasilkan APK 157 MB tanpa database klien atau credential production. Waktu cold build terutama habis pada dependency/AAR transform, Metro cache reset, dan native packaging; blocker release tetap signing/AAB production.
+- APK production-debug hasil isolasi sudah di-install ke `emulator-5554`; `MainActivity` resumed dan process tetap hidup selama smoke launch 10 detik tanpa `FATAL EXCEPTION`/`AndroidRuntime`. Login dan data server belum diuji karena env production masih placeholder sambil menunggu akses server Wiwitan.
 
 ## Stage Saat Ini
 

@@ -33,6 +33,7 @@ and formal release evidence.
 | Production build guard | PASS-BLOCKED | `yarn build:aab:prod` stopped before Gradle because real `.env.production` is not available |
 | Production env validator with template | PASS | Temporary `.env.production` copied from the example passed `STATUS=PRODUCTION`, HTTPS URL, URL scheme, and empty auto-login checks; fixture removed afterward |
 | Production debug compile without client DB | PASS | Isolated `app:assembleProductionDebug --no-daemon --max-workers=1 --console=plain --info --stacktrace` completed in 15m 8s with no client database or production credentials; APK `app-production-debug.apk` produced (157,482,504 bytes), SHA-256 `9A8E905DE041254F67823131D4E7DFEF76554CA2144FD9946EBDDB2E55CA09A9`. Cold-build time was dominated by Gradle dependency transforms, Metro cache reset, and native packaging |
+| Production debug APK install/launch | PASS | `adb install -r` returned `Success` on `emulator-5554`; explicit `MainActivity` launch resumed and the app process stayed alive for 10 seconds with no `FATAL EXCEPTION` or `AndroidRuntime` entry in the cleared logcat window |
 | Production log hygiene | PASS | TypeScript, Jest (`2` suites / `4` tests), and targeted ESLint for `index.js` passed after logger/FCM guards |
 
 The APK above is a local QA artifact signed with the debug key. It is not a

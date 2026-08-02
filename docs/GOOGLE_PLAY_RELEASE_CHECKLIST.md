@@ -16,6 +16,7 @@ Project belum siap publish production. Posisi sekarang masih **release preparati
 - Preflight `bundleProductionRelease` sudah dijalankan; R8 berhasil setelah heap Gradle dinaikkan.
 - Client UAT sudah dilaporkan approved; formal sign-off/evidence tetap menjadi item release handoff.
 - Production debug compile sudah lulus setelah timeout diisolasi; ini hanya membuktikan build/package lokal, bukan release signing.
+- APK production-debug lokal sudah ter-install dan `MainActivity` launch smoke lulus di emulator; ini belum menjadi artifact upload Google Play.
 - Production signing masih **BLOCKED** karena keystore upload dan credential `MYAPP_UPLOAD_*` belum tersedia.
 - AAB production belum terbentuk karena proses berhenti di tahap signing.
 - Production bundle sekarang wajib memilih `ENVFILE` secara eksplisit; konfigurasi lokal emulator tidak boleh ikut masuk ke production artifact.
