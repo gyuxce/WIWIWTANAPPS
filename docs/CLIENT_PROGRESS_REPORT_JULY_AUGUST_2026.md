@@ -19,6 +19,22 @@ Per 1 Agustus 2026:
 
 Persentase di atas adalah estimasi kesiapan berbasis gate project, bukan jumlah baris kode atau jumlah commit.
 
+## Checkpoint 2 Agustus 2026
+
+- Timeout Gradle production-debug sudah diisolasi. `app:assembleProductionDebug`
+  selesai `BUILD SUCCESSFUL` dalam 15m 8s tanpa database atau credential
+  production klien.
+- APK production-debug sebesar 157 MB berhasil di-install ke emulator dan
+  `MainActivity` launch smoke test lulus tanpa `FATAL EXCEPTION` atau
+  `AndroidRuntime`.
+- Build ini membuktikan packaging dan launch lokal, bukan production release;
+  AAB signing, Firebase production, Play Console, Sardine production, dan
+  server resmi masih menjadi release gates.
+- Matrix akses handover production sudah dibuat di
+  `docs/ACCESS_HANDOVER_MATRIX.md`.
+- GitLab Group private `wiwitan-apps` sudah disiapkan untuk transfer repository;
+  project/source transfer dari developer sebelumnya masih menunggu handover.
+
 ## Pekerjaan Bulan Juli
 
 ### 1. Recovery Source Dan Repository
