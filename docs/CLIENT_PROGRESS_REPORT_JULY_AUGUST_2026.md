@@ -32,8 +32,10 @@ Persentase di atas adalah estimasi kesiapan berbasis gate project, bukan jumlah 
   server resmi masih menjadi release gates.
 - Matrix akses handover production sudah dibuat di
   `docs/ACCESS_HANDOVER_MATRIX.md`.
-- GitLab Group private `wiwitan-apps` sudah disiapkan untuk transfer repository;
-  project/source transfer dari developer sebelumnya masih menunggu handover.
+- GitLab Group private `wiwitan` sudah disiapkan dan tiga project private
+  Backend Laravel, CMS React JS, serta Mobile React Native sudah berisi source
+  baseline dari developer sebelumnya. Verifikasi branch/history dan
+  reconciliation dengan perbaikan terbaru di local repo masih diperlukan.
 
 ## Pekerjaan Bulan Juli
 

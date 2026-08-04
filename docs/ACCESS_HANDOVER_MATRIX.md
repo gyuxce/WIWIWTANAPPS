@@ -21,7 +21,7 @@ chat.
 
 | Area | Status | Owner yang dikonfirmasi | Akses/bukti yang dibutuhkan | PIC handover | Catatan |
 | --- | --- | --- | --- | --- | --- |
-| Source repository | MENUNGGU TRANSFER | Wiwitan | GitLab Group/project private, commit history, branch, tag, issue, CI/CD, webhook, deploy key | Pak Azani + Citta | Buat Group GitLab dulu; jangan buat project kosong sebelum transfer |
+| Source repository | RECEIVED - VERIFY | Wiwitan | Tiga project GitLab private sudah berisi source: Backend Laravel, CMS React JS, dan Mobile React Native | Pak Azani + Citta | Baseline source sudah masuk; verifikasi branch/history/CI/CD dan reconciliation dengan perbaikan terbaru di local repo masih diperlukan |
 | Backend/server | MENUNGGU AKSES | Wiwitan | Hosting/cloud, SSH atau panel, staging/production URL, deployment method, runtime version | Pak Azani | Jangan meminta password lewat chat; gunakan user/invitation atau channel aman |
 | Database | MENUNGGU AKSES | Wiwitan | Staging DB atau dump, production migration procedure, backup/restore, DB host/user | Citta + Pak Azani | Fresh SQLite local migration/seed sudah PASS-QA; production belum diverifikasi |
 | Storage Sardine | MENUNGGU ENDPOINT | Wiwitan | Approved staging/production endpoint, auth contract, bucket/folder, credential, retention/cleanup policy | Pak Azani + Citta | Local adapter upload/readback sudah PASS-QA; `CMS-DEF-009` masih terbuka |
