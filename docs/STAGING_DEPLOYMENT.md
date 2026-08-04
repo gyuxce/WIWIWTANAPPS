@@ -113,3 +113,19 @@ The same preflight can be run without starting anything:
 ```bash
 bash ops/staging/check-microservices.sh
 ```
+
+## Nginx Staging Hosts
+
+Nginx templates are stored in `backend/ops/staging/nginx/`. They are not
+enabled automatically because the staging domain names and TLS certificates
+belong to the Wiwitan environment.
+
+The intended layout is:
+
+- `api.staging.example.com` -> `/srv/wiwitan/backend/public`
+- `cms.staging.example.com` -> `/srv/wiwitan/cms/build`
+
+After replacing the placeholder hostnames and receiving the real domain, copy
+the templates into `/etc/nginx/sites-available/`, create symlinks in
+`/etc/nginx/sites-enabled/`, run `sudo nginx -t`, and reload Nginx. Enable
+HTTPS with the real domain before exposing staging publicly.
