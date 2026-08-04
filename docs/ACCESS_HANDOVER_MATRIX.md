@@ -25,7 +25,7 @@ chat.
 | Backend/server | MENUNGGU AKSES | Wiwitan | Hosting/cloud, SSH atau panel, staging/production URL, deployment method, runtime version | Citta + developer (kamu) | Jangan meminta password lewat chat; gunakan user/invitation atau channel aman |
 | Database | MENUNGGU AKSES | Wiwitan | Staging DB atau dump, production migration procedure, backup/restore, DB host/user | Citta + developer (kamu) | Fresh SQLite local migration/seed sudah PASS-QA; production belum diverifikasi |
 | Storage Sardine | MENUNGGU ENDPOINT | Wiwitan | Approved staging/production endpoint, auth contract, bucket/folder, credential, retention/cleanup policy | Citta + developer (kamu) | Local adapter upload/readback sudah PASS-QA; `CMS-DEF-009` masih terbuka |
-| Firebase | ROTATE BEFORE USE | Wiwitan | Firebase Project Owner/Admin, `google-services.json`, FCM config, service account procedure | Citta + developer (kamu) | Service-account key ditemukan di source baseline; disable/delete key lama setelah pengganti aman tersedia, lalu hapus file dari branch dan audit history |
+| Firebase | NEW KEY CREATED - SWITCH PENDING | Wiwitan | Firebase Project Owner/Admin, `google-services.json`, FCM config, service account procedure | Citta + developer (kamu) | Key pengganti sudah dibuat dan disimpan di luar repository; konfigurasi server staging harus dipindah sebelum key lama dinonaktifkan/dihapus |
 | Google Play Console | MENUNGGU INVITE | Wiwitan | Account Owner/Admin, package `com.wiwitanbaru.wiwitan`, billing, internal testing access | Citta + developer (kamu) | Dibutuhkan untuk AAB upload dan store/compliance setup |
 | Android signing | MENUNGGU HANDOVER | Wiwitan | Keystore, alias, password, backup location, agreed rotation/recovery process | Citta + developer (kamu) | Keystore dan password tidak boleh masuk repository atau chat |
 | Domain/DNS/SSL | MENUNGGU AKSES | Wiwitan | Registrar, DNS provider, records, SSL renewal, API/CMS domain | Citta + developer (kamu) | Cocokkan domain deployment dengan `API_URL` dan `URL_CMS` production |
@@ -74,6 +74,10 @@ Tindakan wajib sebelum repository dianggap siap untuk staging/production:
 
 Jangan menganggap penghapusan file dari branch terbaru saja cukup; private key
 yang pernah masuk history tetap harus dianggap terekspos sampai key dicabut.
+
+Checkpoint 4 Agustus 2026: key pengganti Firebase sudah dibuat oleh PIC dan
+disimpan di luar repository. Server staging belum dipindahkan ke key baru;
+key lama tetap dipertahankan sementara untuk mencegah service aktif terputus.
 
 ## Status Lokal Saat Ini
 

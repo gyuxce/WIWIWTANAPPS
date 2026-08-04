@@ -46,6 +46,7 @@ Estimasi kesiapan menuju **rilis Google Play production**: **45-50%**, karena ma
 - Gradle timeout sudah diisolasi: `app:assembleProductionDebug` detached build selesai `BUILD SUCCESSFUL` dalam 15m 8s, menghasilkan APK 157 MB tanpa database klien atau credential production. Waktu cold build terutama habis pada dependency/AAR transform, Metro cache reset, dan native packaging; blocker release tetap signing/AAB production.
 - APK production-debug hasil isolasi sudah di-install ke `emulator-5554`; `MainActivity` resumed dan process tetap hidup selama smoke launch 10 detik tanpa `FATAL EXCEPTION`/`AndroidRuntime`. Login dan data server belum diuji karena env production masih placeholder sambil menunggu akses server Wiwitan.
 - Source handover Stage 7A menemukan Firebase Admin service-account JSON yang ter-track di baseline Backend GitLab. Nilai key tidak dibuka atau disalin; staging/production handover diblokir sampai key dirotasi, file dikeluarkan dari branch/history, dan guard `.gitignore` diperkuat.
+- Key pengganti Firebase sudah dibuat dan disimpan di luar repository. Server staging masih perlu dipindahkan ke key baru dan dites sebelum key lama dinonaktifkan/dihapus.
 
 ## Stage Saat Ini
 
