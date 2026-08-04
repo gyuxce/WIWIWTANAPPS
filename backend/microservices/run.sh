@@ -1,17 +1,27 @@
-pm2 delete 62dolphin
-cd microservices/Dolphin/bin/ && pm2 start start.json  
-cd ../../../
+#!/usr/bin/env bash
+set -euo pipefail
 
-pm2 delete 62goldfish
-cd microservices/Goldfish/bin/ && pm2 start start.json 
-cd ../../../
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT"
 
+bash "$ROOT/ops/staging/check-microservices.sh"
 
-pm2 delete 62sailfish
-cd microservices/Sailfish/bin/ && pm2 start start.json 
+restart_service() {
+    local name="$1"
+    local directory="$2"
 
-cd ../../../
+    pm2 delete "$name" >/dev/null 2>&1 || true
+    pm2 start "$ROOT/microservices/$directory/bin/start.json"
+}
 
-pm2 delete 62Sardine
-cd microservices/Sardine/bin/ && pm2 start start.json 
-cd ../../../
+restart_service 62dolphin Dolphin
+restart_service 62sailfish Sailfish
+restart_service 62sardine Sardine
+
+# Goldfish is referenced by the legacy script but is not registered by the
+# Laravel application. Start it only when its executable is handed over.
+if [[ -x "$ROOT/microservices/Goldfish/bin/62goldfish" ]]; then
+    restart_service 62goldfish Goldfish
+fi
+
+pm2 save

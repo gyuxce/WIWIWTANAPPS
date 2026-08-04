@@ -11,10 +11,13 @@ service-account JSON files must never be committed to Git or pasted into chat.
 - Backend Composer dependencies and CMS Yarn dependencies are installed.
 - The Firebase staging service-account file is stored outside the repository at
   `/etc/wiwitan/secrets/firebase-staging.json` with mode `600`.
-- The `.env` file has not been created because database, domain, mail, storage,
-  payment, and microservice values are still environment-specific.
-- The `62dolphin` and `62sardine` executables are still required before the
-  complete backend can be started.
+- The staging `.env` exists only on the VPS and is untracked. Database and
+  Firebase checks have passed; domain, mail, payment, storage, and
+  microservice values remain environment-specific.
+- The `62dolphin`, `62sailfish`, and `62sardine` executables are still required
+  before the complete backend can be started. The legacy run script also
+  references `62goldfish`, but Goldfish is not registered as a Laravel
+  provider and is treated as optional until its role is confirmed.
 
 ## Secret Rules
 
@@ -56,13 +59,28 @@ backup, and rollback procedure are confirmed.
 
 ## Microservice Gate
 
-Do not create systemd services or run the complete backend until these files
-are received and verified as Linux x86-64 executables:
+Do not run the complete backend until these files are received and verified as
+Linux x86-64 executables:
 
 ```text
 microservices/Dolphin/bin/62dolphin
+microservices/Sailfish/bin/62sailfish
 microservices/Sardine/bin/62sardine
 ```
+
+The source configuration expects these local ports:
+
+| Service | Port | Role |
+| --- | ---: | --- |
+| Dolphin | 7001 | Authentication, tokens, user identity |
+| Sailfish | 7002 | Notifications, email, FCM, scheduled messaging |
+| Sardine | 7003 | File and document storage |
+| Goldfish | Unknown | Legacy reference in `microservices/run.sh`; confirm before enabling |
+
+The application registers Dolphin, Sailfish, and Sardine as providers. The
+preflight script therefore blocks startup when any of those three required
+executables is missing. Goldfish is reported separately and is started only
+when its executable exists.
 
 Required handover details:
 
@@ -78,5 +96,20 @@ After receipt, verify without exposing secrets:
 file microservices/Dolphin/bin/62dolphin
 file microservices/Sardine/bin/62sardine
 sha256sum microservices/Dolphin/bin/62dolphin
+sha256sum microservices/Sailfish/bin/62sailfish
 sha256sum microservices/Sardine/bin/62sardine
+```
+
+After the handover is verified, run the guarded PM2 launcher from the backend
+root:
+
+```bash
+bash microservices/run.sh
+pm2 status
+```
+
+The same preflight can be run without starting anything:
+
+```bash
+bash ops/staging/check-microservices.sh
 ```
