@@ -18,8 +18,10 @@ Estimasi kesiapan menuju **rilis Google Play production**: **45-50%**, karena ma
 - Backend dan CMS berhasil di-clone dari GitLab; Composer backend dan Yarn CMS berhasil dipasang.
 - Firebase staging project `wiwitanbaru-e5d91` sudah diverifikasi. Service-account JSON dipindahkan ke `/etc/wiwitan/secrets/firebase-staging.json` dengan mode `600`, di luar repository.
 - Guard credential diperkuat pada repo utama melalui commit `9cc0d8b`: pola Firebase Admin SDK JSON ditambahkan ke `.gitignore`, contoh environment diarahkan ke path secret eksternal, dan runbook staging ditambahkan.
-- `.env` staging belum dibuat karena nilai database, domain, mail, storage, payment, dan microservice belum lengkap.
-- Executable `62dolphin` dan `62sardine` tidak ditemukan di GitLab maupun folder handover lokal. Backend penuh belum boleh dijalankan sebelum artifact tersebut diterima dan diverifikasi.
+- `.env` staging sudah dibuat langsung di VPS dan tidak dilacak Git. Database, seed, Firebase secret, dan koneksi dasar sudah diverifikasi; domain, mail, payment, storage, dan microservice masih environment-specific.
+- Audit source menemukan backend mendaftarkan `62dolphin`, `62sailfish`, dan `62sardine`; ketiga executable belum ditemukan di GitLab maupun folder handover lokal. Script lama juga mereferensikan `62goldfish`, tetapi perannya belum jelas dan tidak terdaftar sebagai provider Laravel.
+- Preflight microservice dan launcher PM2 sudah dirapikan di commit `64cb4a8`; startup sekarang akan berhenti jika service wajib belum lengkap dan tidak lagi bergantung pada current working directory.
+- CMS production build berhasil dijalankan pada 4 Agustus 2026. Build menghasilkan folder `cms/build`; warning bundle besar dan Browserslist outdated dicatat sebagai hardening non-blocking.
 
 - Posisi aktual: release preparation setelah stabilisasi mobile Android, penutupan negative test batch 2, dan approval UAT client yang dilaporkan project owner.
 - Login API siswa tervalidasi dengan HTTP 200 dari backend lokal.
@@ -57,7 +59,7 @@ Estimasi kesiapan menuju **rilis Google Play production**: **45-50%**, karena ma
 
 ## Stage Saat Ini
 
-Stage sekarang: **Stage 8A - Staging Server Bootstrap & Source Handover Verification**
+Stage sekarang: **Stage 8B - Parallel Staging Preparation & Microservice Handover Gate**
 
 Mapping stage:
 
@@ -70,16 +72,16 @@ Mapping stage:
 | 5 | Data/i18n/backend schema hardening | Sebagian selesai; course bilingual sudah ada, forum/notifikasi dinamis masih pending |
 | 6 | QA end-to-end dan UAT client | QA batch 1-2 serta DEF-001/DEF-002 sudah ditutup untuk scope yang diuji; client UAT dilaporkan approved, evidence formal masih perlu dilampirkan |
 | 7 | Release preparation Google Play | Menunggu baseline staging stabil; signing/AAB, production config, compliance, dan Play Console masih pending |
-| 8 | Staging server bootstrap & source handover | Infrastruktur dan runtime selesai; `.env`, database, binary microservice, domain, dan deployment service masih pending |
+| 8 | Staging server bootstrap & source handover | VPS, runtime, database, seed, Firebase secret, dan CMS build selesai; binary service, domain, storage, dan deployment service masih pending |
 
 ## Progress Per Area
 
 | Area | Estimasi Progress | Status |
 | --- | ---: | --- |
 | Repo, struktur, dokumentasi awal | 90% | Repo sudah rapi, README/docs aktif diperbarui |
-| Staging infrastructure & runtime | 80% | VPS, hardening, runtime, repository clone, dan Firebase secret selesai; binary, database, domain, dan service deployment masih pending |
+| Staging infrastructure & runtime | 85% | VPS, hardening, runtime, repository clone, database, seed, Firebase secret, dan CMS build selesai; binary service, domain, storage, dan service deployment masih pending |
 | Backend local development | 75% | Laravel local jalan, SQLite dan local auth fallback sudah bisa dipakai |
-| CMS local/admin | 75% | Core CMS, archive lifecycle, local storage, assessment schedule, dan permission boundary sudah diaudit; production dependencies masih terbuka |
+| CMS local/admin | 80% | Core CMS, archive lifecycle, local storage, assessment schedule, permission boundary, dan production build sudah diverifikasi; staging API/domain masih terbuka |
 | Mobile Android build | 80% | APK `developmentQa` berhasil build/install dengan env eksplisit; production signing/AAB masih blocked |
 | Mobile siswa core flow | 75% | Login, session recovery, progress, training, dokumen, forum, notifikasi, Profile, dan dua mode bahasa sudah diaudit |
 | Training module/progress logic | 80% | Bug NaN, mismatch progress, detail training sudah diperbaiki |
