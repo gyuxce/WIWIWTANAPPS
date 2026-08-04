@@ -1,10 +1,10 @@
 # Project Status Report - WIWITAN Apps
 
-Tanggal update: 2 Agustus 2026
+Tanggal update: 4 Agustus 2026
 
 ## Ringkasan Eksekutif
 
-Project saat ini berada di fase **release preparation setelah internal QA dan approval UAT client**, bukan fase release production.
+Project saat ini berada di fase **staging server bootstrap dan source handover verification setelah internal QA dan approval UAT client**, bukan fase release production.
 
 Source handoff dari developer sebelumnya sudah dirapikan ke repo, environment lokal sudah bisa dijalankan, CMS dan backend lokal sudah aktif, APK Android development sudah berhasil dibuild dan diinstall ke emulator, dan flow utama siswa sudah mulai stabil.
 
@@ -12,7 +12,14 @@ Estimasi kesiapan keseluruhan saat ini: **70-75% menuju release candidate intern
 
 Estimasi kesiapan menuju **rilis Google Play production**: **45-50%**, karena masih ada pekerjaan release engineering, konfigurasi production, signing, privacy/compliance, dan validasi backend production.
 
-## Checkpoint Terbaru - 1 Agustus 2026
+## Checkpoint Terbaru - 4 Agustus 2026
+
+- VPS staging Wiwitan sudah dibuat dan diamankan: SSH key-only, deploy user, UFW, swap, PHP 8.2, Composer, Node.js, Yarn, Redis, dan Nginx sudah diverifikasi.
+- Backend dan CMS berhasil di-clone dari GitLab; Composer backend dan Yarn CMS berhasil dipasang.
+- Firebase staging project `wiwitanbaru-e5d91` sudah diverifikasi. Service-account JSON dipindahkan ke `/etc/wiwitan/secrets/firebase-staging.json` dengan mode `600`, di luar repository.
+- Guard credential diperkuat pada repo utama melalui commit `9cc0d8b`: pola Firebase Admin SDK JSON ditambahkan ke `.gitignore`, contoh environment diarahkan ke path secret eksternal, dan runbook staging ditambahkan.
+- `.env` staging belum dibuat karena nilai database, domain, mail, storage, payment, dan microservice belum lengkap.
+- Executable `62dolphin` dan `62sardine` tidak ditemukan di GitLab maupun folder handover lokal. Backend penuh belum boleh dijalankan sebelum artifact tersebut diterima dan diverifikasi.
 
 - Posisi aktual: release preparation setelah stabilisasi mobile Android, penutupan negative test batch 2, dan approval UAT client yang dilaporkan project owner.
 - Login API siswa tervalidasi dengan HTTP 200 dari backend lokal.
@@ -45,12 +52,12 @@ Estimasi kesiapan menuju **rilis Google Play production**: **45-50%**, karena ma
 - Release hygiene tambahan: Redux logger dan diagnostic FCM/index sekarang hanya aktif pada development/QA, sehingga token dan payload notifikasi tidak ditulis ke Logcat production. Production-shaped env validator dan production debug compile lokal lulus tanpa database klien; release signing/AAB tetap menjadi follow-up build-time.
 - Gradle timeout sudah diisolasi: `app:assembleProductionDebug` detached build selesai `BUILD SUCCESSFUL` dalam 15m 8s, menghasilkan APK 157 MB tanpa database klien atau credential production. Waktu cold build terutama habis pada dependency/AAR transform, Metro cache reset, dan native packaging; blocker release tetap signing/AAB production.
 - APK production-debug hasil isolasi sudah di-install ke `emulator-5554`; `MainActivity` resumed dan process tetap hidup selama smoke launch 10 detik tanpa `FATAL EXCEPTION`/`AndroidRuntime`. Login dan data server belum diuji karena env production masih placeholder sambil menunggu akses server Wiwitan.
-- Source handover Stage 7A menemukan Firebase Admin service-account JSON yang ter-track di baseline Backend GitLab. Nilai key tidak dibuka atau disalin; staging/production handover diblokir sampai key dirotasi, file dikeluarkan dari branch/history, dan guard `.gitignore` diperkuat.
-- Key pengganti Firebase sudah dibuat dan disimpan di luar repository. Server staging masih perlu dipindahkan ke key baru dan dites sebelum key lama dinonaktifkan/dihapus.
+- Source handover Stage 7A menemukan Firebase Admin service-account JSON yang ter-track di baseline Backend GitLab. Key baru staging sudah dipasang di luar repository; key lama masih perlu dinonaktifkan setelah pemakaian key baru diverifikasi.
+- Cleanup file dari branch/history GitLab dan rotasi key lama masih menjadi pekerjaan keamanan handover. Guard `.gitignore` sudah diterapkan pada repo utama.
 
 ## Stage Saat Ini
 
-Stage sekarang: **Stage 7 - Release Preparation setelah QA/UAT**
+Stage sekarang: **Stage 8A - Staging Server Bootstrap & Source Handover Verification**
 
 Mapping stage:
 
@@ -62,13 +69,15 @@ Mapping stage:
 | 4 | Audit dan stabilisasi mobile siswa | Core flow dan recovery utama selesai; edge case sudah masuk QA |
 | 5 | Data/i18n/backend schema hardening | Sebagian selesai; course bilingual sudah ada, forum/notifikasi dinamis masih pending |
 | 6 | QA end-to-end dan UAT client | QA batch 1-2 serta DEF-001/DEF-002 sudah ditutup untuk scope yang diuji; client UAT dilaporkan approved, evidence formal masih perlu dilampirkan |
-| 7 | Release preparation Google Play | Aktif; signing/AAB, production config, compliance, dan Play Console masih pending |
+| 7 | Release preparation Google Play | Menunggu baseline staging stabil; signing/AAB, production config, compliance, dan Play Console masih pending |
+| 8 | Staging server bootstrap & source handover | Infrastruktur dan runtime selesai; `.env`, database, binary microservice, domain, dan deployment service masih pending |
 
 ## Progress Per Area
 
 | Area | Estimasi Progress | Status |
 | --- | ---: | --- |
 | Repo, struktur, dokumentasi awal | 90% | Repo sudah rapi, README/docs aktif diperbarui |
+| Staging infrastructure & runtime | 80% | VPS, hardening, runtime, repository clone, dan Firebase secret selesai; binary, database, domain, dan service deployment masih pending |
 | Backend local development | 75% | Laravel local jalan, SQLite dan local auth fallback sudah bisa dipakai |
 | CMS local/admin | 75% | Core CMS, archive lifecycle, local storage, assessment schedule, dan permission boundary sudah diaudit; production dependencies masih terbuka |
 | Mobile Android build | 80% | APK `developmentQa` berhasil build/install dengan env eksplisit; production signing/AAB masih blocked |
@@ -125,6 +134,8 @@ Mapping stage:
 | Release Google Play belum siap | Belum bisa publish production | Perlu keystore upload, `MYAPP_UPLOAD_*`, Play Console, privacy, dan AAB |
 | Push notification/Firebase belum diaudit production | Notifikasi real device bisa belum siap | Perlu credential dan test device |
 | Payment/transaction production belum diaudit penuh | Flow pembayaran bisa bergantung vendor/config | Perlu env/vendor production atau staging |
+| Binary Dolphin/Sardine belum tersedia | Backend penuh tidak dapat dijalankan | Menunggu executable Linux x86-64, checksum, dan instruksi start |
+| Credential Firebase lama masih ada di history GitLab | Risiko key lama disalahgunakan | Perlu disable/delete key lama dan bersihkan history setelah key baru diverifikasi |
 
 ## Estimasi Rilis
 
