@@ -49,6 +49,8 @@ jobs:
 
       - name: Install JavaScript dependencies
         working-directory: mobile
+        env:
+          HUSKY: '0'
         run: |
           corepack enable
           yarn install --frozen-lockfile --non-interactive
