@@ -6,6 +6,7 @@ import {
   Platform,
   KeyboardAvoidingView,
   Alert,
+  Pressable,
 } from "react-native";
 import Space from "components/Space";
 import Button from "components/Button";
@@ -490,16 +491,28 @@ const LoginScreen = () => {
       />
       <Space height={20} />
 
-      <Text
-        type="bold"
-        color={colors.red}
-        style={{ textDecorationLine: "underline" }}
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Lupa Kata Sandi"
+        hitSlop={12}
         onPress={() => NavigationService.navigate("ForgotPasswordScreen")}
-        size={scaledFontSize(20)}
-        variant="CenturyGothicBold"
+        style={({ pressed }) => ({
+          alignSelf: "center",
+          paddingHorizontal: scaledHorizontal(16),
+          paddingVertical: scaledVertical(12),
+          opacity: pressed ? 0.6 : 1,
+        })}
       >
-        Lupa Kata Sandi
-      </Text>
+        <Text
+          type="bold"
+          color={colors.red}
+          style={{ textDecorationLine: "underline" }}
+          size={scaledFontSize(20)}
+          variant="CenturyGothicBold"
+        >
+          Lupa Kata Sandi
+        </Text>
+      </Pressable>
 
       <Space height={scaledVertical(40)} />
 
@@ -566,16 +579,28 @@ const LoginScreen = () => {
 
       <Space height={scaledVertical(30)} />
 
-      <Text
-        type="bold"
-        color={colors.red}
-        style={{ textDecorationLine: "underline" }}
-        size={scaledFontSize(20)}
-        variant="CenturyGothicBold"
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Buat Akun"
+        hitSlop={12}
         onPress={() => NavigationService.navigate("SignupScreen")}
+        style={({ pressed }) => ({
+          alignSelf: "center",
+          paddingHorizontal: scaledHorizontal(16),
+          paddingVertical: scaledVertical(12),
+          opacity: pressed ? 0.6 : 1,
+        })}
       >
-        Buat Akun
-      </Text>
+        <Text
+          type="bold"
+          color={colors.red}
+          style={{ textDecorationLine: "underline" }}
+          size={scaledFontSize(20)}
+          variant="CenturyGothicBold"
+        >
+          Buat Akun
+        </Text>
+      </Pressable>
       <LoadingModal
         showModal={showModal}
         onCloseModal={() => setShowModal(false)}

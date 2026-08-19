@@ -30,6 +30,8 @@ const ForgotPasswordScreen = () => {
   const dispatch = useDispatch();
 
   const onPressForgotPassword = () => {
+    if (!isValid) return;
+
     postForgotPassword(form?.email).then(({ status }) => {
       if (status === "success") {
         NavigationService.replace("VerifyChangePasswordScreen", {
@@ -39,7 +41,7 @@ const ForgotPasswordScreen = () => {
         dispatch(
           onErrorState({
             visible: true,
-            text: "Email tidak ditemukan",
+            text: "Permintaan reset belum dapat diproses. Pastikan email sudah terdaftar dan aktif.",
             icon: icons.searchClose,
             withCloseIcon: true,
             withIcon: true,
