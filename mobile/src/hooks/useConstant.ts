@@ -1,5 +1,4 @@
 import { useDispatch, useSelector } from "react-redux";
-import { apiGetPengaturanBahasa } from "services/ConstantServices";
 import { apiConstant } from "services/UserService";
 import type { StoreStateType } from "stores";
 import {
@@ -11,7 +10,6 @@ import {
   onGetRegisterInformation,
   onGetTrainingProgram,
 } from "stores/constant/constantSlice";
-import { useAuth } from "./useAuth";
 import { onChangeLanguage } from "stores/persist/persistSlice";
 import { useTranslation } from "react-i18next";
 
@@ -26,7 +24,6 @@ export const useConstant = () => {
     forumReportStatus,
     forumReportType,
   } = useSelector((state: StoreStateType) => state.constant);
-  const { auth, user } = useAuth();
   const { i18n } = useTranslation();
 
   const getBloodData = async () => {
@@ -163,16 +160,10 @@ export const useConstant = () => {
 
   const getSettingAdmin = async () => {
     try {
-      const resp = await apiGetPengaturanBahasa(auth?.accessToken);
-      if (resp && resp?.data?.[0]?.value) {
-        if (String(user?.last_phase) >= resp?.data?.[0]?.value) {
-          dispatch(onChangeLanguage("ja"));
-          i18n.changeLanguage("ja");
-        } else {
-          i18n.changeLanguage("id");
-          dispatch(onChangeLanguage("id"));
-        }
-      }
+      // The current production release is Indonesian-only. This hook may run
+      // after token restore, so enforce the same language as the login flow.
+      dispatch(onChangeLanguage("id"));
+      i18n.changeLanguage("id");
 
       return {
         status: "success",

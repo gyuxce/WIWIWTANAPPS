@@ -17,7 +17,6 @@ import { URL_CMS } from '@env';
 import { onErrorState } from "stores/error/errorSlice";
 import icons from "configs/icons";
 import { useTranslation } from "react-i18next";
-import { apiGetPengaturanBahasa } from "services/ConstantServices";
 
 type postResponse = {
   id: null|String;
@@ -168,23 +167,10 @@ export const useAuth = () => {
 
       if (resp?.data) {
         dispatch(onLogin({ auth: activeAuthToken, user: resp?.data }));
-        try {
-          const settingResp = await apiGetPengaturanBahasa(
-            activeAuthToken.accessToken,
-          );
-          const settingValue = settingResp?.data?.[0]?.value;
-          if (settingValue) {
-            if (String(resp?.data?.last_phase) >= settingValue) {
-              dispatch(onChangeLanguage("ja"));
-              i18n.changeLanguage("ja");
-            } else {
-              i18n.changeLanguage("id");
-              dispatch(onChangeLanguage("id"));
-            }
-          }
-        } catch {
-          // Language settings should not invalidate an otherwise valid login.
-        }
+        // The current production release is Indonesian-only. Keep the
+        // persisted language and i18n runtime in sync after every login.
+        dispatch(onChangeLanguage("id"));
+        i18n.changeLanguage("id");
 
         return {
           data: resp?.data,
