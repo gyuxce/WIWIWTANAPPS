@@ -22,13 +22,20 @@ import { onChangeLanguage, onLogin } from "stores/persist/persistSlice";
 import type { AuthType, UserType } from "types/UserTypes";
 import { resetAllState } from "stores";
 import { useTranslation } from "react-i18next";
+import { usePersist } from "hooks/usePersist";
 
 import styles from "./styles";
 
 const ProfileScreen = () => {
   const { auth, postLogout, user } = useAuth();
   const { i18n, t } = useTranslation();
+  const { language } = usePersist();
   const dispatch = useDispatch();
+  const onToggleLanguage = () => {
+    const nextLanguage = language === "id" ? "ja" : "id";
+    dispatch(onChangeLanguage(nextLanguage));
+    i18n.changeLanguage(nextLanguage);
+  };
   const onLogout = () => {
     postLogout(auth.accessToken).then(({ status }) => {
       if (status === "success") {
@@ -173,6 +180,15 @@ const ProfileScreen = () => {
             onPress={() => NavigationService.navigate("PrivasiPolicyScreen")}
           />
           <Button
+            title="Riwayat Pembayaran"
+            style={styles.btn}
+            textType="bold"
+            variant="CenturyGothicBold"
+            textStyle={{ fontWeight: "600", fontSize: 10 }}
+            withBorder={false}
+            onPress={() => NavigationService.navigate("PaymentHistoryScreen")}
+          />
+          <Button
             title={t("kontak_admin")}
             style={styles.btn}
             textType="bold"
@@ -180,6 +196,17 @@ const ProfileScreen = () => {
             textStyle={{ fontWeight: "600", fontSize: 10 }}
             withBorder={false}
             onPress={() => NavigationService.navigate("ContactAdminScreen")}
+          />
+          <Button
+            title={`${t("bahasa")}: ${
+              language === "ja" ? "日本語" : "Indonesia"
+            }`}
+            style={styles.btn}
+            textType="bold"
+            variant="CenturyGothicBold"
+            textStyle={{ fontWeight: "600", fontSize: 10 }}
+            withBorder={false}
+            onPress={onToggleLanguage}
           />
           <Space height={30} />
           <TouchableOpacity

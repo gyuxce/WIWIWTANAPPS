@@ -16,6 +16,13 @@ export const apiForgotPassword = (email: string, redirect_url: string) => {
   }) as Promise<{ status: string }>;
 };
 
+export const apiActivateAccount = (uuid: string) => {
+  return BaseService(`/auth/user/activate/${uuid}`).get() as Promise<{
+    status: string;
+    message?: string;
+  }>;
+};
+
 export const apiResetPassword = (
   token: string,
   password: string,

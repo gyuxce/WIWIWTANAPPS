@@ -12,6 +12,7 @@ import { AUTO_LOGIN_EMAIL, AUTO_LOGIN_PASSWORD, STATUS } from "@env";
 import { ErrorStatus } from "utils/ErrorStatus";
 import globalStyles from "utils/GlobalStyles";
 import { wait } from "utils/Utils";
+import { reportError } from "utils/CrashReporting";
 import "../../i18n/index";
 
 const SplashScreen = () => {
@@ -116,13 +117,20 @@ const SplashScreen = () => {
     };
 
     if (auth?.accessToken) {
-      getMe(auth?.accessToken, auth).then(({ status }) => {
-        if (status === "success") {
-          resetToHomeScreen();
-        } else {
-          ErrorStatus(401, dispatch);
-        }
-      });
+      withTimeout(getMe(auth?.accessToken, auth), 8000)
+        .then(({ status }) => {
+          if (status === "success") {
+            resetToHomeScreen();
+          } else {
+            ErrorStatus(401, dispatch);
+            resetToInitialScreen();
+          }
+        })
+        .catch(error => {
+          reportError(error, "[Splash] getMe failed or timed out");
+          console.log("[Splash] getMe failed or timed out", error);
+          resetToInitialScreen();
+        });
     } else {
       i18n.changeLanguage("id");
       wait(500).then(async () => {

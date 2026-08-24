@@ -33,6 +33,7 @@
     "@react-native-community/datetimepicker": "8.2.0",
     "@react-native-firebase/app": "^23.5.0",
     "@react-native-firebase/auth": "^23.5.0",
+    "@react-native-firebase/crashlytics": "^23.5.0",
     "@react-native-firebase/messaging": "^23.5.0",
     "@react-native-google-signin/google-signin": "^11.0.0",
     "@react-native/assets": "^1.0.0",
@@ -123,7 +124,9 @@
     "moduleNameMapper": {
       "\\.(bmp|gif|jpg|jpeg|png|psd|svg|webp)$": "<rootDir>/__mocks__/assetMock.js"
     },
-    "setupFilesAfterEnv": ["<rootDir>/jest.setup.js"]
+    "setupFilesAfterEnv": [
+      "<rootDir>/jest.setup.js"
+    ]
   },
   "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }

@@ -5,6 +5,7 @@ import {
   Image,
   Platform,
   KeyboardAvoidingView,
+  ScrollView,
   Alert,
   Pressable,
 } from "react-native";
@@ -23,6 +24,7 @@ import {
 } from "utils/ScaledService";
 import globalStyles from "utils/GlobalStyles";
 import icons from "configs/icons";
+import { reportError } from "utils/CrashReporting";
 import { AccessToken, LoginManager } from "react-native-fbsdk-next";
 import { useDispatch } from "react-redux";
 import { CommonActions, useNavigation } from "@react-navigation/core";
@@ -41,6 +43,7 @@ import type { ModalAlertProps } from "types/AppTypes";
 import moment from "moment";
 import { usePersist } from "hooks/usePersist";
 import type { UserType } from "types/UserTypes";
+import { FACEBOOK_LOGIN_ENABLED } from "configs/featureFlags";
 import { apiPostSocialAccount } from "services/AuthServices";
 
 GoogleSignin.configure({
@@ -177,7 +180,8 @@ const LoginScreen = () => {
   ) => {
     let isNewUser = false;
     if (!user) { isNewUser = true; }
-    await apiPostSocialAccount(await getIdToken(user, true)).then(({data}) => {
+    try {
+      const { data } = await apiPostSocialAccount(await getIdToken(user, true));
       if (data) {
         dispatch(
           onLogin({
@@ -220,8 +224,22 @@ const LoginScreen = () => {
       } else {
         isNewUser = true;
       }
-    });
-    setShowModal(false);
+    } catch (error) {
+      reportError(error, "sosmedVerifyToken error");
+      window.console.log("sosmedVerifyToken error", error);
+      isNewUser = false;
+      dispatch(
+        onErrorState({
+          visible: true,
+          text: "Terjadi kesalahan pada sistem, silahkan coba lagi nanti.",
+          icon: icons.searchClose,
+          withCloseIcon: true,
+          withIcon: true,
+        }),
+      );
+    } finally {
+      setShowModal(false);
+    }
     if (isNewUser) {
       Alert.alert(
         "Anda belum terdaftar",
@@ -383,16 +401,19 @@ const LoginScreen = () => {
 
   return (
     <KeyboardAvoidingView
-      style={[
-        globalStyles().container,
-        {
+      style={globalStyles().container}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+    >
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={{
+          flexGrow: 1,
           justifyContent: "center",
           alignItems: "center",
           paddingHorizontal: scaledHorizontal(25),
-        },
-      ]}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-    >
+        }}
+      >
       <Image
         source={images.logoLong2}
         style={{ height: 115, width: "80%", resizeMode: "contain" }}
@@ -546,33 +567,48 @@ const LoginScreen = () => {
 
       <Space height={scaledVertical(10)} />
 
-      <View
-        style={{
-          flexDirection: "row",
-          padding: 10,
-        }}
-      >
+      <View style={{ gap: 10 }}>
         <Button
           onPress={signInGoogle}
           icon={icons.google}
-          withBorder={false}
-          style={{ borderRadius: 0, paddingVertical: 5 }}
+          title="Masuk dengan Google"
+          type="light"
+          withBorder={true}
+          style={{ paddingVertical: 12, minWidth: "100%" }}
+          innerStyle={{ alignItems: "center", gap: 10 }}
+          textType="bold"
+          variant="CenturyGothicBold"
+          textStyle={{ fontSize: scaledFontSize(20), lineHeight: 18 }}
           iconStyle={{ height: 22, width: 22, resizeMode: "contain" }}
         />
-        <Button
-          onPress={signInFacebook}
-          icon={icons.facebook}
-          withBorder={false}
-          iconStyle={{ height: 22, width: 22, resizeMode: "contain" }}
-          style={{ borderRadius: 0, paddingVertical: 5, marginLeft: 10 }}
-        />
+        {FACEBOOK_LOGIN_ENABLED ? (
+          <Button
+            onPress={signInFacebook}
+            icon={icons.facebook}
+            title="Masuk dengan Facebook"
+            type="light"
+            withBorder={true}
+            style={{ paddingVertical: 12, minWidth: "100%" }}
+            innerStyle={{ alignItems: "center", gap: 10 }}
+            textType="bold"
+            variant="CenturyGothicBold"
+            textStyle={{ fontSize: scaledFontSize(20), lineHeight: 18 }}
+            iconStyle={{ height: 22, width: 22, resizeMode: "contain" }}
+          />
+        ) : null}
         {Platform.OS === "ios" ? (
           <Button
             onPress={signInApple}
             icon={icons.apple}
+            title="Masuk dengan Apple"
+            type="light"
+            withBorder={true}
+            style={{ paddingVertical: 12, minWidth: "100%" }}
+            innerStyle={{ alignItems: "center", gap: 10 }}
+            textType="bold"
+            variant="CenturyGothicBold"
+            textStyle={{ fontSize: scaledFontSize(20), lineHeight: 18 }}
             iconStyle={{ height: 22, width: 22, resizeMode: "contain" }}
-            withBorder={false}
-            style={{ borderRadius: 0, marginLeft: 10 }}
           />
         ) : null}
       </View>
@@ -601,6 +637,7 @@ const LoginScreen = () => {
           Buat Akun
         </Text>
       </Pressable>
+      </ScrollView>
       <LoadingModal
         showModal={showModal}
         onCloseModal={() => setShowModal(false)}

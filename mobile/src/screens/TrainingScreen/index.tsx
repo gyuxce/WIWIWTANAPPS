@@ -148,6 +148,8 @@ const TrainingScreen = () => {
         withTextTitle
         titleLeft
         withBurger
+        withSearch
+        onSearch={() => NavigationService.navigate("SearchMateriScreen")}
       />
       <ScrollView
         showsVerticalScrollIndicator={false}

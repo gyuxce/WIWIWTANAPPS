@@ -25,6 +25,9 @@ export type RootStackParamList = {
   VerifyChangePasswordScreen: { email: string };
   ResetPasswordScreen: { token: string };
   SuccessResetPasswordScreen: undefined;
+  ActivateAccountScreen: { uuid: string };
+  PaymentHistoryScreen: undefined;
+  SearchMateriScreen: undefined;
   SignupScreen: {
     fullname?: string;
     email?: string;
@@ -146,6 +149,9 @@ export type RootType =
   | "VerifyChangePasswordScreen"
   | "ResetPasswordScreen"
   | "SuccessResetPasswordScreen"
+  | "ActivateAccountScreen"
+  | "PaymentHistoryScreen"
+  | "SearchMateriScreen"
   | "PrivasiPolicyScreen"
   | "EditProfileScreen"
   | "SplashScreen"

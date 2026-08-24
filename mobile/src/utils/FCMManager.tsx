@@ -49,25 +49,29 @@ const FCMManager = () => {
     if (Platform.OS === "android") {
       PermissionsAndroid.request("android.permission.POST_NOTIFICATIONS");
     }
-    getToken(messaging)
-      .then(x => {
-        if (x) {
-          fcmToken.current = x;
-          if (auth?.accessToken) {
-            apiFCMPost(auth?.accessToken, x, user?.id);
-          }
-        }
-      })
-      .catch(e => {
-        errFcm.current = e;
-      });
 
     const unsubscribe = onMessage(messaging, async remoteMessage => {
       debugLog("FCM message received", remoteMessage?.messageId);
     });
 
     return unsubscribe;
-  }, [errFcm, fcmToken]);
+  }, []);
+
+  useEffect(() => {
+    if (!auth?.accessToken) {
+      return;
+    }
+    getToken(messaging)
+      .then(x => {
+        if (x) {
+          fcmToken.current = x;
+          apiFCMPost(auth?.accessToken, x, user?.id);
+        }
+      })
+      .catch(e => {
+        errFcm.current = e;
+      });
+  }, [auth?.accessToken]);
 
   return <></>;
 };

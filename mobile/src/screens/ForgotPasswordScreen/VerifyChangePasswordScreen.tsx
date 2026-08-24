@@ -15,6 +15,7 @@ import { type RouteProp } from "@react-navigation/core";
 import type { StackNavigationProp } from "@react-navigation/stack";
 import type { RootStackParamList } from "types/NavigatorTypes";
 import { useAuth } from "hooks/useAuth";
+import NavigationService from "utils/NavigationService";
 
 type VerifyURLRouteType = RouteProp<
   RootStackParamList,
@@ -135,6 +136,22 @@ const VerifyChangePasswordScreen = ({ route }: Prop) => {
         {String(Math.floor(timer / 60)).padStart(2, "0")}:
         {String(timer % 60).padStart(2, "0")}
       </Text>
+
+      <Space height={scaledVertical(30)} />
+
+      <Button
+        variant="CenturyGothicBold"
+        textType="bold"
+        title="Sudah Ganti Kata Sandi? Masuk"
+        type="light"
+        style={{ paddingVertical: 12, width: "100%" }}
+        textStyle={{
+          fontSize: scaledFontSize(16),
+          lineHeight: 18,
+        }}
+        onPress={() => NavigationService.navigate("GuestScreen")}
+        withBorder={true}
+      />
     </View>
   );
 };

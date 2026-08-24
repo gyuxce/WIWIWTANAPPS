@@ -4,7 +4,7 @@ import Header from "components/Header";
 import Space from "components/Space";
 import Text from "components/Text";
 import { ResizeMode, Video } from "expo-av";
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import { ScrollView, View } from "react-native";
 import { RootStackParamList } from "types/NavigatorTypes";
 import globalStyles from "utils/GlobalStyles";
@@ -29,6 +29,7 @@ type Prop = {
 
 const AssesmentReviewScreen = ({ route }: Prop) => {
   const video = useRef(null as any);
+  const [shouldPlayVideo, setShouldPlayVideo] = useState(false);
 
   return (
     <View style={globalStyles().topSafeArea}>
@@ -64,10 +65,15 @@ const AssesmentReviewScreen = ({ route }: Prop) => {
               }}
               style={{ height: "100%", width: "100%" }}
               useNativeControls
-              shouldPlay={false}
               resizeMode={ResizeMode.CONTAIN}
               isLooping={false}
+              shouldPlay={shouldPlayVideo}
               volume={80}
+              onPlaybackStatusUpdate={(status: any) => {
+                if (status?.isLoaded) {
+                  setShouldPlayVideo(status?.isPlaying);
+                }
+              }}
             />
           </View>
         ) : (

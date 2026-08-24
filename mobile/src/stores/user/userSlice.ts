@@ -1,10 +1,11 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { SettingType } from "types/ConstantTypes";
 import type { UserDocumentsType } from "types/DocTypes";
-import type { CityType, StatusTestType } from "types/UserTypes";
+import type { CityType, ProvinceType, StatusTestType } from "types/UserTypes";
 
 export type UserState = {
   cityData: CityType[];
+  provinceData: ProvinceType[];
   statusTest: StatusTestType[];
   userDocs: UserDocumentsType[];
   userAdmin: SettingType[];
@@ -14,6 +15,7 @@ export const userSlice = createSlice({
   name: "user",
   initialState: {
     cityData: [] as CityType[],
+    provinceData: [] as ProvinceType[],
     statusTest: [
       {
         title: "Tes Bakat Bahasa",
@@ -44,6 +46,9 @@ export const userSlice = createSlice({
     onGetCityData: (state, action: { payload: CityType[] }) => {
       state.cityData = action.payload;
     },
+    onGetProvinceData: (state, action: { payload: ProvinceType[] }) => {
+      state.provinceData = action.payload;
+    },
     onGetStatusTest: (state, action: { payload: StatusTestType[] }) => {
       state.statusTest = action.payload;
     },
@@ -56,7 +61,12 @@ export const userSlice = createSlice({
   },
 });
 
-export const { onGetCityData, onGetStatusTest, onGetUserDocs, onGetUserAdmin } =
-  userSlice.actions;
+export const {
+  onGetCityData,
+  onGetProvinceData,
+  onGetStatusTest,
+  onGetUserDocs,
+  onGetUserAdmin,
+} = userSlice.actions;
 
 export default userSlice.reducer;

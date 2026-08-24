@@ -1,5 +1,6 @@
 import { useDispatch, useSelector } from "react-redux";
 import {
+  apiActivateAccount,
   apiForgotPassword,
   apiLogout,
   apiMe,
@@ -59,6 +60,21 @@ export const useAuth = () => {
       return {
         status: resp?.status,
         message: "",
+      };
+    } catch (errors) {
+      return {
+        status: "failed",
+        message: errors,
+      };
+    }
+  };
+
+  const postActivateAccount = async (uuid: string) => {
+    try {
+      const resp = await apiActivateAccount(uuid);
+      return {
+        status: resp?.status || "success",
+        message: resp?.message || "",
       };
     } catch (errors) {
       return {
@@ -217,6 +233,7 @@ export const useAuth = () => {
   return {
     postForgotPassword,
     postResetPassword,
+    postActivateAccount,
     postVerifyToken,
     postSignup,
     postLogout,

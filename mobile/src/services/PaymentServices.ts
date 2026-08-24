@@ -66,6 +66,12 @@ export const apiGetLatestTransaction = async (token: string, param?: any) => {
     .get();
 };
 
+export const apiGetPaymentHistory = async (token: string) => {
+  return BaseService("/mobile/finance/transactions/history", token)
+    .headers({ Authorization: `Bearer ${token}` })
+    .get() as Promise<any>;
+};
+
 export const apiGetLatestPayment = async (token: string, param?: any) => {
   let url = "/mobile/finance/transactions/payment/latest?" + convertToQuery(param);
   return BaseService(url, token)

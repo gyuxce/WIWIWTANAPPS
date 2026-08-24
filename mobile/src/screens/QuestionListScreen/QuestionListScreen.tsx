@@ -43,11 +43,11 @@ import {
   scaledHorizontal,
   scaledVertical,
 } from "utils/ScaledService";
-import { alphabet, millisToTime, videoExtensions } from "utils/Utils";
+import { alphabet, videoExtensions } from "utils/Utils";
 import * as FileSystem from "expo-file-system";
 import LoadingModal from "components/LoadingModal/LoadingModal";
+import MediaPlayerControls from "components/MediaPlayerControls";
 import dayjs from "dayjs";
-import moment from "moment";
 import { useTranslation } from "react-i18next";
 import { onPratestMedia } from "stores/persist/persistSlice";
 import { usePersist } from "hooks/usePersist";
@@ -70,6 +70,21 @@ type Prop = {
   navigation: QuestionListNavigationProp;
 };
 
+// Backend sends timestamps in UTC without an explicit offset (e.g. "2026-08-23 10:19:00").
+// Parsing that directly with `new Date()` lets each platform guess the timezone (often the
+// device's local zone), which can shift the value by hours and make the session timer think
+// time already expired the instant the screen mounts. Force it to be read as UTC instead.
+const parseServerDateAsUtc = (dateString?: string): Date => {
+  if (!dateString) {
+    return new Date();
+  }
+  const hasTimezone = /Z$|[+-]\d{2}:?\d{2}$/.test(dateString);
+  const isoString = hasTimezone
+    ? dateString
+    : `${dateString.trim().replace(" ", "T")}Z`;
+  return new Date(isoString);
+};
+
 const QuestionListScreen = ({ route }: Prop) => {
   const [widthText, setWidthText] = useState(0);
   const [widthJapan, setWidthJapan] = useState(0);
@@ -83,11 +98,14 @@ const QuestionListScreen = ({ route }: Prop) => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const video = useRef(null as unknown as Video);
+  // Two AppState listeners force-play the video whenever the app returns to the
+  // foreground. Without this flag, a video the student deliberately paused
+  // would silently start itself again after any app switch.
+  const userPausedVideoRef = useRef(false);
   const scrollViewRef = useRef<ScrollView | null>(null);
   const targetViewRef = useRef<View>(null);
   const [isPlayed, setIsPlayed] = useState(false);
   const [isPlayedVideo, setIsPlayedVideo] = useState(false);
-  const [durationMillis, setDurationMillis] = useState(0);
   const [questionSession, setQuestionSession] = useState(route?.params?.data);
   const [languageTest] = useState(
     examProgress.filter(
@@ -96,7 +114,9 @@ const QuestionListScreen = ({ route }: Prop) => {
   );
   const [sound] = useState(new Audio.Sound() as Audio.Sound);
   const [soundMillis, setSoundMillis] = useState(0);
+  const [soundDuration, setSoundDuration] = useState(0);
   const [videoMillis, setVideoMillis] = useState(0);
+  const [videoDuration, setVideoDuration] = useState(0);
   const navigation = useNavigation();
   const [showModal, setShowModal] = useState(false);
   let intervalId: any = null;
@@ -133,7 +153,9 @@ const QuestionListScreen = ({ route }: Prop) => {
           setSession(index + 1);
 
           createTimer(
-            new Date(questionSession?.userStartedSession?.started_at),
+            parseServerDateAsUtc(
+              questionSession?.userStartedSession?.started_at,
+            ),
             questionSession?.duration,
             index + 1,
             //language?.[0] || ({} as ExamProgressType),
@@ -206,9 +228,11 @@ const QuestionListScreen = ({ route }: Prop) => {
           )
         ) {
           setShowModal(false);
-          setIsPlayedVideo(true);
-          video?.current?.setPositionAsync(pratestMedia?.timeMilisecond);
-          video?.current?.playFromPositionAsync(pratestMedia?.timeMilisecond);
+          if (!userPausedVideoRef.current) {
+            setIsPlayedVideo(true);
+            video?.current?.setPositionAsync(pratestMedia?.timeMilisecond);
+            video?.current?.playFromPositionAsync(pratestMedia?.timeMilisecond);
+          }
           dispatch(
             onPratestMedia({
               fileId: pratestMedia?.fileId,
@@ -452,6 +476,7 @@ const QuestionListScreen = ({ route }: Prop) => {
 
           sound?.setOnPlaybackStatusUpdate((status: any) => {
             setSoundMillis(status?.positionMillis);
+            setSoundDuration(status?.durationMillis || 0);
             if (status?.didJustFinish) {
               dispatch(
                 onPratestMedia({
@@ -462,6 +487,7 @@ const QuestionListScreen = ({ route }: Prop) => {
               );
               sound?.setPositionAsync(0);
               sound?.unloadAsync();
+              setSoundMillis(0);
               setIsPlayed(false);
             }
           });
@@ -475,6 +501,69 @@ const QuestionListScreen = ({ route }: Prop) => {
     },
     [pratestMedia],
   );
+
+  const toggleVideoPlayback = async () => {
+    if (isPlayedVideo) {
+      userPausedVideoRef.current = true;
+      setIsPlayedVideo(false);
+      if (video?.current?.pauseAsync) {
+        await video.current.pauseAsync();
+      }
+      return;
+    }
+    userPausedVideoRef.current = false;
+    // Only jump to the persisted position on the first play of this session;
+    // a pause/resume must carry on from where the student actually stopped.
+    if (videoMillis <= 0 && pratestMedia?.timeMilisecond) {
+      await video?.current?.setPositionAsync(pratestMedia.timeMilisecond);
+    }
+    setIsPlayedVideo(true);
+  };
+
+  const seekVideo = async (millis: number) => {
+    if (!video?.current?.setPositionAsync) {
+      return;
+    }
+    await video.current.setPositionAsync(millis);
+    setVideoMillis(millis);
+  };
+
+  const toggleAudioPlayback = async () => {
+    try {
+      const status = await sound.getStatusAsync();
+      if (!status?.isLoaded) {
+        await playSound(
+          soundMillis > 0 ? soundMillis : pratestMedia?.timeMilisecond || 0,
+        );
+        return;
+      }
+      if (status.isPlaying) {
+        await sound.pauseAsync();
+        setIsPlayed(false);
+        return;
+      }
+      await sound.playAsync();
+      setIsPlayed(true);
+    } catch (error: any) {
+      Alert.alert(
+        "Error",
+        error?.message || "Cannot play audio. Please contact Admin Wiwitan",
+      );
+    }
+  };
+
+  const seekAudio = async (millis: number) => {
+    try {
+      const status = await sound.getStatusAsync();
+      if (!status?.isLoaded) {
+        return;
+      }
+      await sound.setPositionAsync(millis);
+      setSoundMillis(millis);
+    } catch {
+      // A seek on a sound that was unloaded mid-gesture is not worth surfacing.
+    }
+  };
 
   // Handle pausing/resuming audio on app state changes (lock/blur/focus/unlock)
   useEffect(() => {
@@ -499,9 +588,13 @@ const QuestionListScreen = ({ route }: Prop) => {
           );
         } else if (nextAppState === "active") {
           setShowModal(false);
-          setIsPlayedVideo(true);
-          if (video?.current?.playFromPositionAsync) {
-            await video.current.playFromPositionAsync(pratestMedia?.timeMilisecond || 0);
+          if (!userPausedVideoRef.current) {
+            setIsPlayedVideo(true);
+            if (video?.current?.playFromPositionAsync) {
+              await video.current.playFromPositionAsync(
+                pratestMedia?.timeMilisecond || 0,
+              );
+            }
           }
           dispatch(
             onPratestMedia({
@@ -545,7 +638,10 @@ const QuestionListScreen = ({ route }: Prop) => {
       }
     };
 
-    const subscription = AppState.addEventListener("change", handleAppStateChange);
+    const subscription = AppState.addEventListener(
+      "change",
+      handleAppStateChange,
+    );
     return () => {
       subscription.remove();
     };
@@ -557,9 +653,7 @@ const QuestionListScreen = ({ route }: Prop) => {
   function createTimer(started_at: Date, duration: string, session: number) {
     if (intervalRef.current === null) {
       intervalRef.current = setInterval(function () {
-        const now = new Date(
-          moment(new Date()).add(7, "hour").toDate(),
-        ).getTime();
+        const now = new Date().getTime();
         const durationMinutes = Number(duration); // Convert duration to a number
         const targetTime = new Date(
           started_at.getTime() + durationMinutes * 60000,
@@ -754,13 +848,14 @@ const QuestionListScreen = ({ route }: Prop) => {
                     resizeMode={ResizeMode.CONTAIN}
                     isLooping={false}
                     onPlaybackStatusUpdate={(status: any) => {
+                      if (!status?.isLoaded) {
+                        return;
+                      }
                       setVideoMillis(status?.positionMillis);
-                      setDurationMillis(
-                        status?.durationMillis - status?.positionMillis,
-                      );
+                      setVideoDuration(status?.durationMillis || 0);
                       if (
-                        status?.durationMillis - status?.positionMillis ===
-                        0
+                        status?.durationMillis > 0 &&
+                        status?.durationMillis - status?.positionMillis === 0
                       ) {
                         dispatch(
                           onPratestMedia({
@@ -773,14 +868,8 @@ const QuestionListScreen = ({ route }: Prop) => {
                         setIsPlayedVideo(false);
                       }
                     }}
-                    positionMillis={
-                      pratestMedia?.sessionId !== "" ||
-                      pratestMedia?.sessionId !== undefined
-                        ? pratestMedia?.timeMilisecond
-                        : 0
-                    }
                   />
-                  {!isPlayedVideo ? (
+                  {!isPlayedVideo && videoMillis <= 0 ? (
                     <TouchableOpacity
                       style={{
                         top: 0,
@@ -791,12 +880,8 @@ const QuestionListScreen = ({ route }: Prop) => {
                         alignItems: "center",
                         position: "absolute",
                       }}
-                      onPress={() => {
-                        video?.current?.setPositionAsync(
-                          pratestMedia?.timeMilisecond || 0,
-                        );
-                        setIsPlayedVideo(true);
-                      }}
+                      activeOpacity={0.8}
+                      onPress={toggleVideoPlayback}
                     >
                       <Image
                         source={icons.playButton}
@@ -811,24 +896,25 @@ const QuestionListScreen = ({ route }: Prop) => {
                 </View>
               ) : null}
               <Space height={10} />
-              <Text textAlign="center" size={20}>
-                {millisToTime(durationMillis)}
-              </Text>
+              <MediaPlayerControls
+                isPlaying={isPlayedVideo}
+                positionMillis={videoMillis}
+                durationMillis={videoDuration}
+                onTogglePlay={toggleVideoPlayback}
+                onSeek={seekVideo}
+              />
               <Space height={10} />
             </Card>
           ) : (
-            <View>
-              <Button
-                iconStyle={{ resizeMode: "contain", height: 28, width: 28 }}
-                icon={icons.playAudio}
-                title={t("putar_audio")}
-                onPress={() => playSound(pratestMedia?.timeMilisecond || 0)}
-                style={{ paddingVertical: 12, minWidth: "100%" }}
-                innerStyle={{ alignItems: "center", gap: 10 }}
-                disabled={isPlayed}
-                withBorder={!isPlayed}
+            <Card style={{ paddingHorizontal: 0 }}>
+              <MediaPlayerControls
+                isPlaying={isPlayed}
+                positionMillis={soundMillis}
+                durationMillis={soundDuration}
+                onTogglePlay={toggleAudioPlayback}
+                onSeek={seekAudio}
               />
-            </View>
+            </Card>
           )}
           <Space height={20} />
           {questionSession.question?.map((item, index) => {

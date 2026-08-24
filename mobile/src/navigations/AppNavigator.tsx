@@ -174,6 +174,9 @@ const AppNavigator = () => {
               ResetPasswordScreen: {
                 path: "reset-password/:token",
               },
+              ActivateAccountScreen: {
+                path: "auth/user/activate/:uuid",
+              },
               ForumDetailScreen: {
                 path: "mobile/forum/:id",
               },
@@ -185,13 +188,7 @@ const AppNavigator = () => {
   };
 
   const linking: any = {
-    prefixes: [
-      URL_SCHEME,
-      API_URL,
-      URL_CMS,
-      "https://staging.cms.wiwitan.62dev.com/",
-      "https://cms.wiwitanbaru.com",
-    ],
+    prefixes: [URL_SCHEME, API_URL, URL_CMS],
     config,
   };
 

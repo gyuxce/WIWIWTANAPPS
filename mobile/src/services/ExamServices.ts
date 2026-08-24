@@ -44,8 +44,9 @@ export const apiSubmitSchedule = (
     .put() as Promise<{ data: ExamScheduleType; message: string }>;
 };
 
-export const apiTrainingModuleProgress = (token: string) => {
-  return BaseService("/mobile/training/module/progress", token)
+export const apiTrainingModuleProgress = (token: string, search?: string) => {
+  const query = search ? `?search=${encodeURIComponent(search)}` : "";
+  return BaseService("/mobile/training/module/progress" + query, token)
     .headers({ Authorization: "Bearer " + token })
     .get() as Promise<{ data: TraningModuleProgressType[] }>;
 };

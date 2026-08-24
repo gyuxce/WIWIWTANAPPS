@@ -31,6 +31,7 @@ import { Method } from "axios";
 import CardPaymentPaid from "components/CardPaymentPaid";
 import DeviceInfo from "react-native-device-info";
 import QRCode from "react-native-qrcode-svg";
+import Clipboard from "@react-native-clipboard/clipboard";
 
 // import { Dimensions } from 'react-native';
 //import TextInput from "components/TextInput";
@@ -114,6 +115,7 @@ const PaymentScreen = ({ amount = null }: Props) => {
   const [isPaymentError, setIsPaymentError] = useState(false);
   const [isOngoingPayment, setIsOngoingPayment] = useState(false);
   const [, setIsInstallmentTime] = useState(false);
+  const [isVaCopied, setIsVaCopied] = useState(false);
 
   const webviewRef = useRef<WebView>(null);
 
@@ -180,17 +182,24 @@ const PaymentScreen = ({ amount = null }: Props) => {
 
     //send api
     setIsLoading(true);
-    let payment = await payTransaction(payload);
-    setIsLoading(false);
+    try {
+      let payment = await payTransaction(payload);
 
-    if (payment.status === "success") {
-      setPayment(payment.data);
-    } else {
+      if (payment.status === "success") {
+        setPayment(payment.data);
+      } else {
+        Toast.show(
+          "Error during processing, please contact the administrator",
+          toastConfig,
+        );
+      }
+    } catch (err) {
       Toast.show(
         "Error during processing, please contact the administrator",
         toastConfig,
       );
-      return;
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -1028,7 +1037,14 @@ const PaymentScreen = ({ amount = null }: Props) => {
                         >
                           {t("pivot_method_va_form_number")}
                         </Text>
-                        <View>
+                        <View
+                          style={{
+                            flex: 1,
+                            flexDirection: "row",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                          }}
+                        >
                           <Text
                             style={{
                               fontSize: 14,
@@ -1037,6 +1053,32 @@ const PaymentScreen = ({ amount = null }: Props) => {
                           >
                             {payment?.va_number}
                           </Text>
+                          <TouchableOpacity
+                            onPress={() => {
+                              if (payment?.va_number) {
+                                Clipboard.setString(payment.va_number);
+                                Toast.show(
+                                  t("nomor_va_disalin") ||
+                                    "Nomor VA disalin",
+                                  toastConfig,
+                                );
+                                setIsVaCopied(true);
+                                setTimeout(() => setIsVaCopied(false), 1500);
+                              }
+                            }}
+                          >
+                            <Text
+                              style={{
+                                fontSize: 12,
+                                fontWeight: "700",
+                                color: colors.accent,
+                              }}
+                            >
+                              {isVaCopied
+                                ? t("tersalin") || "Tersalin ✓"
+                                : t("salin") || "Salin"}
+                            </Text>
+                          </TouchableOpacity>
                         </View>
                       </View>
                       <View
@@ -1229,7 +1271,7 @@ const PaymentScreen = ({ amount = null }: Props) => {
                   </Text>
                 )}
                 {/* QRIS DETAILS */}
-                {method === "QR" && (
+                {method === "QRIS" && (
                   <View>
                     <Text
                       style={{

@@ -1,5 +1,5 @@
 import type { QueryType } from "types/QueryTypes";
-import type { CityType } from "types/UserTypes";
+import type { CityType, ProvinceType } from "types/UserTypes";
 import { convertToQuery } from "utils/Utils";
 
 import BaseService from "./BaseService";
@@ -11,6 +11,12 @@ export const apiGetCityData = (param?: QueryType) => {
   return BaseService(
     "/master/cities?" + convertToQuery(param),
   ).get() as Promise<{ data: CityType[] }>;
+};
+
+export const apiGetProvinceData = (param?: QueryType) => {
+  return BaseService(
+    "/master/provinces?" + convertToQuery(param),
+  ).get() as Promise<{ data: ProvinceType[] }>;
 };
 
 export const apiConstant = (type: string) => {

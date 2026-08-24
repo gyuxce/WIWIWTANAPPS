@@ -50,13 +50,18 @@ const ForumDraftScreen = () => {
 
   const getData = () => {
     setIsLoading(true);
-    getPostForumDraft([], querySearch).then(({ data }) => {
-      if (data) {
-        setIsLoading(false);
-      } else {
+    getPostForumDraft([], querySearch)
+      .then(({ data }) => {
+        if (!data) {
+          ErrorStatus(500, dispatch);
+        }
+      })
+      .catch(() => {
         ErrorStatus(500, dispatch);
-      }
-    });
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
   };
 
   const onPressTrash = (id: string) => {
@@ -68,17 +73,21 @@ const ForumDraftScreen = () => {
       leftText: t("hapus"),
       leftFunction: () => {
         setShowModal({ showModal: false, title: "" });
-        apiDeleteForumDetail(auth?.accessToken, id).then(({ success }) => {
-          if (success) {
-            setShowModal({
-              showModal: false,
-              title: "",
-            });
-            getData();
-          } else {
+        apiDeleteForumDetail(auth?.accessToken, id)
+          .then(({ success }) => {
+            if (success) {
+              setShowModal({
+                showModal: false,
+                title: "",
+              });
+              getData();
+            } else {
+              ErrorStatus(500, dispatch);
+            }
+          })
+          .catch(() => {
             ErrorStatus(500, dispatch);
-          }
-        });
+          });
       },
       rightText: t("cek_kembali_deh"),
       rightFunction: () => {
@@ -101,9 +110,13 @@ const ForumDraftScreen = () => {
         ...querySearch,
         page: metaDraft?.current_page + 1,
         limit: 20,
-      } as QueryType).then(() => {
-        setLoadingIndicators(false);
-      });
+      } as QueryType)
+        .catch(() => {
+          ErrorStatus(500, dispatch);
+        })
+        .finally(() => {
+          setLoadingIndicators(false);
+        });
     }
   };
   return (

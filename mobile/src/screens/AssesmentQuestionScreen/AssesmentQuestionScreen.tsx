@@ -1,6 +1,6 @@
 import Text from "components/Text";
 import React, { useCallback, useEffect, useState } from "react";
-import { View, ScrollView, Platform } from "react-native";
+import { View, ScrollView, Platform, KeyboardAvoidingView } from "react-native";
 import globalStyles from "utils/GlobalStyles";
 import {
   scaledFontSize,
@@ -382,6 +382,10 @@ const AssesmentQuestionScreen = ({ route }: Prop) => {
   }
 
   return (
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+    >
     <View style={globalStyles().topSafeArea}>
       <View style={{ marginHorizontal: scaledHorizontal(25) }}>
         <View
@@ -539,6 +543,7 @@ const AssesmentQuestionScreen = ({ route }: Prop) => {
         isCustomMessage={false}
       />
     </View>
+    </KeyboardAvoidingView>
   );
 };
 

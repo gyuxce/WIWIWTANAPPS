@@ -46,29 +46,39 @@ const PaymentAdministration = () => {
 
   const handleSubmit = async(payment_type: number) => {
     setIsLoading(true);
-    let transaction = await initiateTransaction({ 
-      price_type: 1,
-      payment_type: payment_type 
-    });
-    setIsLoading(false);
-    
-    if (transaction.status === 'failed') {
+    try {
+      let transaction = await initiateTransaction({
+        price_type: 1,
+        payment_type: payment_type
+      });
+
+      if (transaction.status === 'failed') {
+        Toast.show('Error during processing, please contact the administrator', toastConfig);
+      } else {
+        checkCurrentPaymentStatus(transaction.data);
+      }
+    } catch (error) {
       Toast.show('Error during processing, please contact the administrator', toastConfig);
-    } else {
-      checkCurrentPaymentStatus(transaction.data);
+    } finally {
+      setIsLoading(false);
     }
   }
 
   const initPage = async() => {
     setIsLoading(true);
-    await getDetailPrice(1);
-    let transaction = await getLatestTransaction({ price_type: 1 });
-    setIsLoading(false);
+    try {
+      await getDetailPrice(1);
+      let transaction = await getLatestTransaction({ price_type: 1 });
 
-    if (transaction.status === 'failed') {
+      if (transaction.status === 'failed') {
+        Toast.show('Error during processing, please contact the administrator', toastConfig);
+      } else {
+        checkCurrentPaymentStatus(transaction.data);
+      }
+    } catch (error) {
       Toast.show('Error during processing, please contact the administrator', toastConfig);
-    } else {
-      checkCurrentPaymentStatus(transaction.data);
+    } finally {
+      setIsLoading(false);
     }
   }
 

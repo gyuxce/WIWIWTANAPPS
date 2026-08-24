@@ -18,9 +18,9 @@ const BaseActionSheet = ({
       ref={actionSheetRef}
       snapPoints={snapPoints}
       enablePanDownToClose
+      enableContentPanningGesture={false}
       index={-1}
       bottomInset={0}
-      activeOffsetY={[-10, 10]}
       style={{
         backgroundColor: "transparent",
         borderTopLeftRadius: 25,

@@ -1,8 +1,13 @@
 import { useDispatch, useSelector } from "react-redux";
-import { apiGetCityData, apiGetUserDocs } from "services/UserService";
+import {
+  apiGetCityData,
+  apiGetProvinceData,
+  apiGetUserDocs,
+} from "services/UserService";
 import type { StoreStateType } from "stores";
 import {
   onGetCityData,
+  onGetProvinceData,
   onGetUserAdmin,
   onGetUserDocs,
 } from "stores/user/userSlice";
@@ -19,15 +24,32 @@ import { useAuth } from "./useAuth";
 export const useUser = () => {
   const dispatch = useDispatch();
   const { auth, user } = useAuth();
-  const { cityData, statusTest, userDocs, userAdmin } = useSelector(
-    (state: StoreStateType) => state.user,
-  );
+  const { cityData, provinceData, statusTest, userDocs, userAdmin } =
+    useSelector((state: StoreStateType) => state.user);
 
   const getCityData = async (param?: QueryType) => {
     try {
       const resp = await apiGetCityData(param);
       if (resp?.data) {
         dispatch(onGetCityData(resp?.data));
+      }
+      return {
+        status: "success",
+        message: "",
+      };
+    } catch (errors) {
+      return {
+        status: "failed",
+        message: errors,
+      };
+    }
+  };
+
+  const getProvinceData = async (param?: QueryType) => {
+    try {
+      const resp = await apiGetProvinceData(param);
+      if (resp?.data) {
+        dispatch(onGetProvinceData(resp?.data));
       }
       return {
         status: "success",
@@ -115,6 +137,8 @@ export const useUser = () => {
   return {
     cityData,
     getCityData,
+    provinceData,
+    getProvinceData,
     statusTest,
     userDocs,
     getUserDocs,

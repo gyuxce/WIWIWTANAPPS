@@ -68,6 +68,7 @@ const UploadCertificationScreen = () => {
     formState: { errors },
   } = useForm({ mode: "onChange" });
   const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const onSearch = (search: string) => {
     clearTimeout(timeout.current);
@@ -149,9 +150,25 @@ const UploadCertificationScreen = () => {
       cert_file_id: form?.document?.uuid,
     };
 
-    apiPostCertification(auth?.accessToken, body).then(() => {
-      NavigationService.navigate("CertificationSuccessScreen");
-    });
+    setIsSubmitting(true);
+    apiPostCertification(auth?.accessToken, body)
+      .then(() => {
+        NavigationService.navigate("CertificationSuccessScreen");
+      })
+      .catch(err => {
+        dispatch(
+          onErrorState({
+            visible: true,
+            text: err?.message || t("profil_gagal_diupdate"),
+            icon: icons.searchClose,
+            withCloseIcon: true,
+            withIcon: true,
+          }),
+        );
+      })
+      .finally(() => {
+        setIsSubmitting(false);
+      });
   };
 
   return (
@@ -485,7 +502,8 @@ const UploadCertificationScreen = () => {
       >
         <Button
           onPress={onPressUploadCertification}
-          disabled={!isValid()}
+          disabled={!isValid() || isSubmitting}
+          isLoading={isSubmitting}
           variant="CenturyGothicBold"
           textType="bold"
           title={t("unggah_hasil")}

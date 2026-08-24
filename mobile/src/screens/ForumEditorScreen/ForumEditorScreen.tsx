@@ -11,11 +11,16 @@ import fonts from "configs/fonts";
 import icons from "configs/icons";
 import { useForum } from "hooks/useForum";
 import React, { useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Platform, ScrollView, View } from "react-native";
+import {
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  View,
+} from "react-native";
 import WebView from "react-native-webview";
 import type { ModalAlertProps } from "types/AppTypes";
 import globalStyles from "utils/GlobalStyles";
-import { useKeyboardVisible } from "utils/KeyboardShowListeners";
 import NavigationService from "utils/NavigationService";
 import { scaledFontSize, scaledHorizontal } from "utils/ScaledService";
 import type { PostForumType } from "types/ForumTypes";
@@ -80,7 +85,7 @@ const ForumEditorScreen = ({ route }: Prop) => {
   const [isLoadingTopic, setIsLoadingTopic] = useState(false);
   const [showModal, setShowModal] = useState({} as ModalAlertProps);
   const webViewRef: WebView | null = null;
-  const isKeyboardVisible = useKeyboardVisible();
+  const scrollViewRef = useRef<ScrollView | null>(null);
   const [topic, setTopic] = useState(
     [] as {
       id: string;
@@ -516,160 +521,165 @@ const ForumEditorScreen = ({ route }: Prop) => {
   };
 
   return (
-    <View style={globalStyles().topSafeArea}>
-      <Space height={Platform.OS === "android" ? 15 : 0} />
-      <Header
-        withBell
-        totalNotification={4}
-        textJapan={`${
-          route?.params?.id
-            ? "ディスカッションを編集"
-            : "新しいディスカッション"
-        }`}
-        textTitle={`${route?.params?.id ? "Ubah Diskusi" : "Diskusi Baru"}`}
-        withTextTitle
-        withBackButton
-      />
-      <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1 }}>
-        <View style={{ marginHorizontal: scaledHorizontal(25) }}>
-          <Space height={25} />
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
+      <View style={globalStyles().topSafeArea}>
+        <Space height={Platform.OS === "android" ? 15 : 0} />
+        <Header
+          withBell
+          totalNotification={4}
+          textJapan={`${
+            route?.params?.id
+              ? "ディスカッションを編集"
+              : "新しいディスカッション"
+          }`}
+          textTitle={`${route?.params?.id ? "Ubah Diskusi" : "Diskusi Baru"}`}
+          withTextTitle
+          withBackButton
+        />
+        <ScrollView
+          ref={scrollViewRef}
+          showsVerticalScrollIndicator={false}
+          style={{ flex: 1 }}
+        >
+          <View style={{ marginHorizontal: scaledHorizontal(25) }}>
+            <Space height={25} />
 
-          {metaDraft?.total >= 1 && (
+            {metaDraft?.total >= 1 && (
+              <View>
+                <Button
+                  onPress={() => NavigationService.navigate("ForumDraftScreen")}
+                  variant="CenturyGothicBold"
+                  textType="bold"
+                  title={`${t("draft")} (${metaDraft?.total || 0})`}
+                  type="light"
+                  style={{ paddingVertical: 12, width: "35%" }}
+                  textStyle={{
+                    fontSize: scaledFontSize(20),
+                    lineHeight: 18,
+                  }}
+                />
+                <Space height={25} />
+              </View>
+            )}
+
+            <Text size={14}>{t("topik")}</Text>
+            <Space height={20} />
+          </View>
+          {isLoadingTopic ? (
             <View>
-              <Button
-                onPress={() => NavigationService.navigate("ForumDraftScreen")}
-                variant="CenturyGothicBold"
-                textType="bold"
-                title={`${t("draft")} (${metaDraft?.total || 0})`}
-                type="light"
-                style={{ paddingVertical: 12, width: "35%" }}
-                textStyle={{
-                  fontSize: scaledFontSize(20),
-                  lineHeight: 18,
-                }}
-              />
-              <Space height={25} />
+              <Space height={100} />
+              <ActivityIndicator size={"large"} color={colors.black} />
+            </View>
+          ) : (
+            <View>
+              {topic.map((item, index) => {
+                return (
+                  <Topic
+                    id={item.id}
+                    image={item.image}
+                    title={item.title}
+                    imageSelected={item.imageSelected}
+                    key={index}
+                    selectedTopic={form?.topic}
+                    form={form}
+                    setForm={setForm}
+                  />
+                );
+              })}
             </View>
           )}
+          <View style={{ marginHorizontal: scaledHorizontal(25) }}>
+            <Text size={14}>{t("judul")}</Text>
+            <Space height={10} />
+            <TextInput
+              value={form?.title}
+              onChange={(text: string) => {
+                setForm({ ...form, title: text });
+              }}
+              borderLess={false}
+              placeholder={t("masukan_judul_diskusi")}
+              placeholderColor={colors.stone400}
+              stylesBox={{ backgroundColor: colors.white }}
+              textStyle={{
+                height: 35,
+                textAlign: "left",
+                fontFamily: fonts.CenturyGothicBold,
+                fontSize: 13,
+              }}
+            />
+          </View>
+          <View style={{ marginHorizontal: scaledHorizontal(25) }}>
+            <Text size={14}>{t("deskripsi")}</Text>
+            <Space height={10} />
+          </View>
 
-          <Text size={14}>{t("judul")}</Text>
-          <Space height={10} />
-          <TextInput
-            value={form?.title}
-            onChange={(text: string) => {
-              setForm({ ...form, title: text });
-            }}
-            borderLess={false}
-            placeholder={t("masukan_judul_diskusi")}
-            placeholderColor={colors.stone400}
-            stylesBox={{ backgroundColor: colors.white }}
-            textStyle={{
-              height: 35,
-              textAlign: "left",
-              fontFamily: fonts.CenturyGothicBold,
-              fontSize: 13,
-            }}
-          />
-        </View>
-        <View style={{ marginHorizontal: scaledHorizontal(25) }}>
-          <Text size={14}>{t("deskripsi")}</Text>
-          <Space height={10} />
-        </View>
-
-        <View
-          style={{
-            height: 450,
-            //width: "100%",
-            marginHorizontal: scaledHorizontal(25),
-          }}
-        >
-          <WebView
-            nestedScrollEnabled
-            ref={webViewRef}
-            javaScriptEnabled={true}
-            scrollEnabled
+          <View
             style={{
-              borderRadius: 20,
-              borderWidth: 0,
               height: 450,
+              //width: "100%",
+              marginHorizontal: scaledHorizontal(25),
             }}
-            source={{
-              html:
-                editHtmls[0] +
-                (400).toString() +
-                editHtmls[1] +
-                //delta +
-                editHtmls[2],
-            }}
-            onMessage={(e: any) => {
-              const data = JSON.parse(e.nativeEvent.data);
-              if (data.type === "waiting") {
-                wait(500).then(() => {
-                  setIsLoadingModal(true);
-                });
-              } else if (data.type === "error") {
-                setIsLoadingModal(false);
-                wait(500).then(() => {
-                  dispatch(
-                    onErrorState({
-                      visible: true,
-                      text: data.message,
-                      icon: icons.searchClose,
-                      withCloseIcon: true,
-                      withIcon: true,
-                    }),
-                  );
-                });
-              } else if (data.type === "success") {
-                setIsLoadingModal(false);
-              } else {
-                let delt = e.nativeEvent.data,
-                  n,
-                  imgs = [];
-                const deltaParsed = JSON.parse(delt);
-                for (n = 0; n < deltaParsed.ops.length; n++) {
-                  const img = deltaParsed.ops[n].insert.image;
-                  if (img) {
-                    imgs.push({ path: img });
+          >
+            <WebView
+              nestedScrollEnabled
+              ref={webViewRef}
+              javaScriptEnabled={true}
+              scrollEnabled
+              style={{
+                borderRadius: 20,
+                borderWidth: 0,
+                height: 450,
+              }}
+              source={{
+                html:
+                  editHtmls[0] +
+                  (400).toString() +
+                  editHtmls[1] +
+                  //delta +
+                  editHtmls[2],
+              }}
+              onMessage={(e: any) => {
+                const data = JSON.parse(e.nativeEvent.data);
+                if (data.type === "waiting") {
+                  wait(500).then(() => {
+                    setIsLoadingModal(true);
+                  });
+                } else if (data.type === "error") {
+                  setIsLoadingModal(false);
+                  wait(500).then(() => {
+                    dispatch(
+                      onErrorState({
+                        visible: true,
+                        text: data.message,
+                        icon: icons.searchClose,
+                        withCloseIcon: true,
+                        withIcon: true,
+                      }),
+                    );
+                  });
+                } else if (data.type === "success") {
+                  setIsLoadingModal(false);
+                } else {
+                  let delt = e.nativeEvent.data,
+                    n,
+                    imgs = [];
+                  const deltaParsed = JSON.parse(delt);
+                  for (n = 0; n < deltaParsed.ops.length; n++) {
+                    const img = deltaParsed.ops[n].insert.image;
+                    if (img) {
+                      imgs.push({ path: img });
+                    }
                   }
+                  setDeltaText(delt);
                 }
-                setDeltaText(delt);
-              }
-            }}
-          />
-        </View>
-        <Space height={20} />
-        <View style={{ marginHorizontal: scaledHorizontal(25) }}>
-          <Text size={14}>{t("topik")}</Text>
-          <Space height={20} />
-        </View>
-        {isLoadingTopic ? (
-          <View>
-            <Space height={100} />
-            <ActivityIndicator size={"large"} color={colors.black} />
+              }}
+            />
           </View>
-        ) : (
-          <View>
-            {topic.map((item, index) => {
-              return (
-                <Topic
-                  id={item.id}
-                  image={item.image}
-                  title={item.title}
-                  imageSelected={item.imageSelected}
-                  key={index}
-                  selectedTopic={form?.topic}
-                  form={form}
-                  setForm={setForm}
-                />
-              );
-            })}
-          </View>
-        )}
-
-        <Space height={30} />
-      </ScrollView>
-      {!isKeyboardVisible ? (
+          <Space height={30} />
+        </ScrollView>
         <Card
           style={{
             borderWidth: 1,
@@ -735,28 +745,28 @@ const ForumEditorScreen = ({ route }: Prop) => {
             />
           )}
         </Card>
-      ) : null}
 
-      <ModalAlert
-        onHide={() => setShowModal({ showModal: false, title: "" })}
-        showModal={showModal?.showModal}
-        animation={"zoom"}
-        title={showModal?.title}
-        leftFunction={showModal.leftFunction}
-        rightFunction={showModal.rightFunction}
-        leftText={showModal.leftText}
-        rightText={showModal.rightText}
-        iconImage={showModal?.iconImage}
-        withIcon={showModal?.withIcon}
-        titleBig={showModal.titleBig}
-        withTime={showModal?.withTime}
-        time={showModal?.time}
-        listWorstText={showModal?.listWorstText}
-        titleBigJapan={showModal?.titleBigJapan}
-        subtitle={showModal?.subtitle}
-      />
-      <LoadingModal showModal={isLoadingModal} />
-    </View>
+        <ModalAlert
+          onHide={() => setShowModal({ showModal: false, title: "" })}
+          showModal={showModal?.showModal}
+          animation={"zoom"}
+          title={showModal?.title}
+          leftFunction={showModal.leftFunction}
+          rightFunction={showModal.rightFunction}
+          leftText={showModal.leftText}
+          rightText={showModal.rightText}
+          iconImage={showModal?.iconImage}
+          withIcon={showModal?.withIcon}
+          titleBig={showModal.titleBig}
+          withTime={showModal?.withTime}
+          time={showModal?.time}
+          listWorstText={showModal?.listWorstText}
+          titleBigJapan={showModal?.titleBigJapan}
+          subtitle={showModal?.subtitle}
+        />
+        <LoadingModal showModal={isLoadingModal} />
+      </View>
+    </KeyboardAvoidingView>
   );
 };
 

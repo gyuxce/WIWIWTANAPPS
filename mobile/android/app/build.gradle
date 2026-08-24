@@ -3,6 +3,7 @@ plugins {
     id "org.jetbrains.kotlin.android"
     id "com.facebook.react"
     id 'com.google.gms.google-services'
+    id 'com.google.firebase.crashlytics'
 }
 
 /**
@@ -126,7 +127,7 @@ android {
         applicationId "com.wiwitanbaru.wiwitan"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 29
+        versionCode 40
         versionName "1.2.3"
         vectorDrawables.useSupportLibrary = true
 

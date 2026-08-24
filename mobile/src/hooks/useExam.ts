@@ -144,6 +144,22 @@ export const useExam = () => {
     }
   };
 
+  const searchTrainingModule = async (keyword: string) => {
+    try {
+      const resp = await apiTrainingModuleProgress(auth?.accessToken, keyword);
+      return {
+        data: resp?.data || [],
+        status: "success",
+      };
+    } catch (errors) {
+      return {
+        status: "failed",
+        data: [],
+        message: errors,
+      };
+    }
+  };
+
   const getLessonClass = async (param?: any, isCalendar = false) => {
     try {
       const resp = await apiGetLessonClass(auth?.accessToken, param);
@@ -300,6 +316,7 @@ export const useExam = () => {
     examSchedule,
     checkExamProgress,
     getTrainingModuleProgress,
+    searchTrainingModule,
     trainingModuleProgress,
     getLessonClass,
     lessonClass,

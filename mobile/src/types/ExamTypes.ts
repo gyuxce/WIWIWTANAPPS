@@ -127,6 +127,7 @@ export type TraningModuleProgressType = {
   assesment_count: number;
   assesment_count_progress: number;
   cover: FileType;
+  matched_materi?: string[] | null;
 };
 
 export type QuestionSessionType = {

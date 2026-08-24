@@ -24,6 +24,7 @@ import {
 import { AccessToken, LoginManager } from "react-native-fbsdk-next";
 import type {
   CityType,
+  ProvinceType,
   UserSignupProcessTypes,
   UserSignupTypes,
 } from "types/UserTypes";
@@ -74,7 +75,7 @@ type Prop = {
 const SignupScreen = ({ route }: Prop) => {
   const actionSheetRef = useRef<BottomSheet>(null);
   const { postSignup } = useAuth();
-  const { cityData, getCityData } = useUser();
+  const { cityData, getCityData, provinceData, getProvinceData } = useUser();
   const {
     getBloodData,
     getLastEducationData,
@@ -112,6 +113,7 @@ const SignupScreen = ({ route }: Prop) => {
   const timeout: any = useRef(null);
   const dispatch = useDispatch();
   const [selectedCity, setSelectedCity] = useState({} as CityType);
+  const [selectedProvince, setSelectedProvince] = useState({} as ProvinceType);
   const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [prices, setPrices] = useState<any>([]);
@@ -123,7 +125,9 @@ const SignupScreen = ({ route }: Prop) => {
   const authInstance = getAuth();
 
   useEffect(() => {
-    getCityData(queryCityState);
+    if (selectedProvince?.id) {
+      getCityData(queryCityState);
+    }
   }, [queryCityState]);
 
   useEffect(() => {
@@ -132,6 +136,7 @@ const SignupScreen = ({ route }: Prop) => {
     getRegisterInformationData();
     getLastEducationData();
     getTrainingProgram();
+    getProvinceData({ type: "collection", options: [] } as QueryType);
   }, []);
 
   const onSearch = (search: string) => {
@@ -139,10 +144,23 @@ const SignupScreen = ({ route }: Prop) => {
     timeout.current = setTimeout(() => {
       setQueryCityState({
         ...queryCityState,
-        options: [["search", "name", search]],
+        options: [
+          ["search", "name", search],
+          ["filter", "province.uuid", "equal", selectedProvince?.id],
+        ],
       });
     }, 1000);
     setSearch(search);
+  };
+
+  const onSelectProvince = (province: ProvinceType) => {
+    setSelectedProvince(province);
+    setSelectedCity({} as CityType);
+    setSearch("");
+    setQueryCityState({
+      ...queryCityState,
+      options: [["filter", "province.uuid", "equal", province?.id]],
+    });
   };
 
   const getPriceData = async () => {
@@ -307,7 +325,7 @@ const SignupScreen = ({ route }: Prop) => {
     setValue,
   } = useForm({ mode: "onChange" });
 
-  const snapPoints = useMemo(() => [480], []);
+  const snapPoints = useMemo(() => [620], []);
 
   const onRegistration = () => {
     let password = form?.password;
@@ -477,7 +495,11 @@ const SignupScreen = ({ route }: Prop) => {
         behavior={"height"}
         contentContainerStyle={{ height: "100%" }}
       >
-        <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1 }}>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          style={{ flex: 1 }}
+        >
           <Section textJapan="新しいアカウント作成" textTitle="Daftar Baru" />
           <Space height={20} />
           <Steps step={steps} maxStep={5} />
@@ -620,8 +642,11 @@ const SignupScreen = ({ route }: Prop) => {
             actionSheetRef={actionSheetRef}
             snapPoints={snapPoints}
             data={cityData}
+            provinceData={provinceData}
             selectedCity={selectedCity}
             setSelectedCity={setSelectedCity}
+            selectedProvince={selectedProvince}
+            onSelectProvince={onSelectProvince}
             search={search}
             setSearch={onSearch}
           />

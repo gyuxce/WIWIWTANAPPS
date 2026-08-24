@@ -22,6 +22,7 @@ import type {
   UseFormWatch,
 } from "react-hook-form";
 import { Controller } from "react-hook-form";
+import { FACEBOOK_LOGIN_ENABLED } from "configs/featureFlags";
 
 interface Props {
   onPress?: () => void;
@@ -67,6 +68,7 @@ const FirstStep = ({
   return (
     <ScrollView
       showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled"
       contentContainerStyle={{
         justifyContent: "center",
         alignItems: "center",
@@ -266,33 +268,48 @@ const FirstStep = ({
 
       <Space height={scaledVertical(20)} />
 
-      <View
-        style={{
-          flexDirection: "row",
-          padding: 10,
-        }}
-      >
+      <View style={{ gap: 10 }}>
         <Button
           onPress={onPressGoogleLogin}
           icon={icons.google}
-          withBorder={false}
+          title="Daftar dengan Google"
+          type="light"
+          withBorder={true}
+          style={{ paddingVertical: 12, minWidth: "100%" }}
+          innerStyle={{ alignItems: "center", gap: 10 }}
+          textType="bold"
+          variant="CenturyGothicBold"
+          textStyle={{ fontSize: scaledFontSize(20), lineHeight: 18 }}
           iconStyle={{ height: 24, width: 24, resizeMode: "contain" }}
-          style={{ borderRadius: 0, paddingVertical: 5 }}
         />
-        <Button
-          onPress={onPressFacebookLogin}
-          icon={icons.facebook}
-          iconStyle={{ height: 24, width: 24, resizeMode: "contain" }}
-          withBorder={false}
-          style={{ borderRadius: 0, paddingVertical: 5, marginLeft: 10 }}
-        />
+        {FACEBOOK_LOGIN_ENABLED ? (
+          <Button
+            onPress={onPressFacebookLogin}
+            icon={icons.facebook}
+            title="Daftar dengan Facebook"
+            type="light"
+            withBorder={true}
+            style={{ paddingVertical: 12, minWidth: "100%" }}
+            innerStyle={{ alignItems: "center", gap: 10 }}
+            textType="bold"
+            variant="CenturyGothicBold"
+            textStyle={{ fontSize: scaledFontSize(20), lineHeight: 18 }}
+            iconStyle={{ height: 24, width: 24, resizeMode: "contain" }}
+          />
+        ) : null}
         {Platform.OS === "ios" ? (
           <Button
             onPress={onPressAppleLogin}
             icon={icons.apple}
+            title="Daftar dengan Apple"
+            type="light"
+            withBorder={true}
+            style={{ paddingVertical: 12, minWidth: "100%" }}
+            innerStyle={{ alignItems: "center", gap: 10 }}
+            textType="bold"
+            variant="CenturyGothicBold"
+            textStyle={{ fontSize: scaledFontSize(20), lineHeight: 18 }}
             iconStyle={{ height: 22, width: 22, resizeMode: "contain" }}
-            withBorder={false}
-            style={{ borderRadius: 0, marginLeft: 10 }}
           />
         ) : null}
       </View>

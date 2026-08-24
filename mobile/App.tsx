@@ -3,6 +3,12 @@ if (__DEV__) {
 }
 
 import React, { useEffect } from "react";
+import { initCrashReporting } from "utils/CrashReporting";
+import CrashReportingUser from "utils/CrashReportingUser";
+
+if (!__DEV__) {
+  initCrashReporting();
+}
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { RootSiblingParent } from "react-native-root-siblings";
 import { enableScreens } from "react-native-screens";
@@ -51,6 +57,7 @@ const App = () => {
                 <RootSiblingParent>
                   <ScreenUsage />
                   <FCMManager />
+                  <CrashReportingUser />
                   <AppNavigator />
                 </RootSiblingParent>
               </BottomSheetModalProvider>

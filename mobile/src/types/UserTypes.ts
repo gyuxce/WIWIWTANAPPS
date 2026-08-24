@@ -53,6 +53,12 @@ export type CityType = {
   code: string;
 };
 
+export type ProvinceType = {
+  id: string;
+  name: string;
+  code: string;
+};
+
 export type AuthType = {
   accessToken: string;
   refreshToken: string;

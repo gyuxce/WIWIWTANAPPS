@@ -12,6 +12,9 @@ import ForgotPasswordScreen from "screens/ForgotPasswordScreen/ForgotPasswordScr
 import VerifyChangePasswordScreen from "screens/ForgotPasswordScreen/VerifyChangePasswordScreen";
 import ResetPasswordScreen from "screens/ForgotPasswordScreen/ResetPasswordScreen";
 import SuccessResetPasswordScreen from "screens/ForgotPasswordScreen/SuccessResetPasswordScreen";
+import ActivateAccountScreen from "screens/ForgotPasswordScreen/ActivateAccountScreen";
+import PaymentHistoryScreen from "screens/PaymentHistoryScreen/PaymentHistoryScreen";
+import SearchMateriScreen from "screens/SearchMateriScreen/SearchMateriScreen";
 import SignupScreen from "screens/LoginScreen/SignupScreen";
 import LandingScreen from "screens/LoginScreen/LandingScreen";
 import PraTestScreen from "screens/PraTestScreen/PraTestScreen";
@@ -316,6 +319,31 @@ export const AppStackNavigator = () => {
         component={SuccessResetPasswordScreen}
         options={{
           gestureEnabled: false,
+          headerShown: false,
+          cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+        }}
+      />
+      <Main.Screen
+        name="ActivateAccountScreen"
+        component={ActivateAccountScreen}
+        options={{
+          gestureEnabled: false,
+          headerShown: false,
+          cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+        }}
+      />
+      <Main.Screen
+        name="PaymentHistoryScreen"
+        component={PaymentHistoryScreen}
+        options={{
+          headerShown: false,
+          cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+        }}
+      />
+      <Main.Screen
+        name="SearchMateriScreen"
+        component={SearchMateriScreen}
+        options={{
           headerShown: false,
           cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
         }}

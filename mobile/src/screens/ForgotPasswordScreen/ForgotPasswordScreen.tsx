@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Image } from "react-native";
+import { Image, Platform, KeyboardAvoidingView, ScrollView } from "react-native";
 import globalStyles from "utils/GlobalStyles";
 import Text from "components/Text";
 import images from "configs/images";
@@ -23,6 +23,7 @@ import icons from "configs/icons";
 const ForgotPasswordScreen = () => {
   const { postForgotPassword } = useAuth();
   const [form, setForm] = useState({ email: "" } as { email: string });
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const {
     control,
     formState: { errors, isValid },
@@ -30,38 +31,47 @@ const ForgotPasswordScreen = () => {
   const dispatch = useDispatch();
 
   const onPressForgotPassword = () => {
-    if (!isValid) return;
+    if (!isValid || isSubmitting) return;
 
-    postForgotPassword(form?.email).then(({ status }) => {
-      if (status === "success") {
-        NavigationService.replace("VerifyChangePasswordScreen", {
-          email: form?.email,
-        });
-      } else {
-        dispatch(
-          onErrorState({
-            visible: true,
-            text: "Permintaan reset belum dapat diproses. Pastikan email sudah terdaftar dan aktif.",
-            icon: icons.searchClose,
-            withCloseIcon: true,
-            withIcon: true,
-          }),
-        );
-      }
-    });
+    setIsSubmitting(true);
+    postForgotPassword(form?.email)
+      .then(({ status }) => {
+        if (status === "success") {
+          NavigationService.replace("VerifyChangePasswordScreen", {
+            email: form?.email,
+          });
+        } else {
+          dispatch(
+            onErrorState({
+              visible: true,
+              text: "Permintaan reset belum dapat diproses. Pastikan email sudah terdaftar dan aktif.",
+              icon: icons.searchClose,
+              withCloseIcon: true,
+              withIcon: true,
+            }),
+          );
+        }
+      })
+      .finally(() => {
+        setIsSubmitting(false);
+      });
   };
 
   return (
-    <View
-      style={[
-        globalStyles().container,
-        {
+    <KeyboardAvoidingView
+      style={globalStyles().container}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+    >
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={{
+          flexGrow: 1,
           justifyContent: "center",
           alignItems: "center",
           marginHorizontal: scaledHorizontal(25),
-        },
-      ]}
-    >
+        }}
+      >
       <Image
         source={images.logoLong2}
         style={{ height: 115, width: "80%", resizeMode: "cover" }}
@@ -123,10 +133,12 @@ const ForgotPasswordScreen = () => {
           lineHeight: 18,
         }}
         onPress={onPressForgotPassword}
-        disabled={!isValid}
+        disabled={!isValid || isSubmitting}
+        isLoading={isSubmitting}
         withBorder={isValid}
       />
-    </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 

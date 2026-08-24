@@ -48,13 +48,14 @@ type Prop = {
 const ContentDetailScreen = ({ route }: Prop) => {
   const video = useRef(null as any);
   const [param, _] = useState(route?.params);
-  const [durationMillis, setDurationMillis] = useState(0);
-  const [completeMillis, setCompleteMillis] = useState(0);
+  const durationMillisRef = useRef(0);
+  const completeMillisRef = useRef(0);
   const { width } = useWindowDimensions();
   const { auth } = useAuth();
   const webViewRef: any = useRef();
   const [isVideoLoading, setVideoLoading] = useState<boolean>(false);
   const [mediaError, setMediaError] = useState("");
+  const [shouldPlayVideo, setShouldPlayVideo] = useState(false);
 
   const fileUrl = param?.data?.file?.url || param?.data?.body_url || "";
   const fileName = String(param?.data?.file?.filename || fileUrl).toLowerCase();
@@ -69,10 +70,13 @@ const ContentDetailScreen = ({ route }: Prop) => {
   const backAction = () => {
     if (route?.params?.data?.body_type === 1) {
       if (param?.data?.progress?.status !== 1) {
-        if (completeMillis && completeMillis - durationMillis === 0) {
+        if (
+          completeMillisRef.current &&
+          completeMillisRef.current - durationMillisRef.current === 0
+        ) {
           apiPostStatusMateri(auth?.accessToken, {
             material_content_id: route?.params?.data?.id,
-            duration: String(completeMillis),
+            duration: String(completeMillisRef.current),
             status: 1,
           }).then(() => {
             NavigationService.navigate("ModulDetailScreen", {
@@ -84,7 +88,7 @@ const ContentDetailScreen = ({ route }: Prop) => {
         } else {
           apiPostStatusMateri(auth?.accessToken, {
             material_content_id: route?.params?.data?.id,
-            duration: String(durationMillis),
+            duration: String(durationMillisRef.current),
             status: 0,
           }).then(() => {
             NavigationService.navigate("ModulDetailScreen", {
@@ -127,7 +131,7 @@ const ContentDetailScreen = ({ route }: Prop) => {
     );
 
     return () => backHandler.remove();
-  }, [durationMillis, completeMillis, param]);
+  }, [param]);
 
   useEffect(() => {
     setMediaError("");
@@ -218,10 +222,9 @@ const ContentDetailScreen = ({ route }: Prop) => {
                   uri: param?.data?.file?.url,
                 }}
                 onLoad={(status: any) => {
-                  setCompleteMillis(status?.durationMillis);
-                  setDurationMillis(
-                    status?.durationMillis - status?.positionMillis,
-                  );
+                  completeMillisRef.current = status?.durationMillis;
+                  durationMillisRef.current =
+                    status?.durationMillis - status?.positionMillis;
                 }}
                 onLoadStart={() => setVideoLoading(true)}
                 onReadyForDisplay={() => setVideoLoading(false)}
@@ -231,17 +234,19 @@ const ContentDetailScreen = ({ route }: Prop) => {
                 }}
                 style={{ height: "100%", width: "100%" }}
                 useNativeControls
-                shouldPlay={false}
                 resizeMode={ResizeMode.CONTAIN}
                 isLooping={false}
+                shouldPlay={shouldPlayVideo}
                 positionMillis={
                   Number(route?.params?.data?.progress?.duration) || 0
                 }
                 volume={80}
                 onPlaybackStatusUpdate={(status: any) => {
-                  setCompleteMillis(status?.durationMillis);
-
-                  setDurationMillis(status?.positionMillis);
+                  if (status?.isLoaded) {
+                    setShouldPlayVideo(status?.isPlaying);
+                  }
+                  completeMillisRef.current = status?.durationMillis;
+                  durationMillisRef.current = status?.positionMillis;
                 }}
               />
               {mediaError !== "" && (

@@ -14,6 +14,7 @@ import {
   apiGetLatestPayment,
   apiGetLatestTransaction,
   apiConfirmPayment,
+  apiGetPaymentHistory,
 } from "services/PaymentServices";
 import { useSelector, useDispatch } from "react-redux";
 import type { StoreStateType } from "stores";
@@ -293,6 +294,28 @@ export const usePayment = () => {
     }
   };
 
+  const getPaymentHistory = async (): Promise<ResponseTemplate> => {
+    try {
+      const resp: any = await apiGetPaymentHistory(auth?.accessToken);
+      if (resp?.status !== "success") {
+        return {
+          status: "failed",
+          message: "",
+        };
+      }
+      return {
+        status: "success",
+        data: resp?.data,
+        message: "",
+      };
+    } catch (errors) {
+      return {
+        status: "failed",
+        message: errors,
+      };
+    }
+  };
+
   const postPayment = async (body: any) => {
     try {
       const resp: any = await apiPostPayment(auth?.accessToken, body);
@@ -421,5 +444,6 @@ export const usePayment = () => {
     paymentLatest,
     getLatestTransaction,
     confirmPayment,
+    getPaymentHistory,
   };
 };

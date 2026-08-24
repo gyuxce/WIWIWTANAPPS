@@ -84,17 +84,21 @@ const SignContract = ({ onSignPress }: SignContractProps) => {
     getUserDocs({
       type: "collection",
       relations: ["file"],
-    }).then(({ data }) => {
-      if (data) {
-        const docPelatihan = data?.find(
-          item => item?.slug === "SURAT PELATIHAN" && item?.type === 4,
-        );
-        if (docPelatihan) {
-          setFile(docPelatihan?.file);
+    })
+      .then(({ data }) => {
+        if (data) {
+          const docPelatihan = data?.find(
+            item => item?.slug === "SURAT PELATIHAN" && item?.type === 4,
+          );
+          if (docPelatihan) {
+            setFile(docPelatihan?.file);
+          }
+          checkPaymentDoc();
         }
-        checkPaymentDoc();
-      }
-    });
+      })
+      .catch(() => {
+        ErrorStatus(400, dispatch);
+      });
   };
 
   useEffect(() => {

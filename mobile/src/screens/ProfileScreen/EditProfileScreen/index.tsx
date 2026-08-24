@@ -18,7 +18,7 @@ import DomicileActionSheet from "components/DomicileActionSheet";
 import type BottomSheet from "@gorhom/bottom-sheet";
 import type { QueryType } from "types/QueryTypes";
 import { useUser } from "hooks/useUser";
-import type { CityType } from "types/UserTypes";
+import type { CityType, ProvinceType } from "types/UserTypes";
 import colors from "configs/colors";
 import { apiUpdateProfile, apiUploadImage } from "services/UserService";
 import { useDispatch } from "react-redux";
@@ -35,16 +35,23 @@ const EditProfileScreen = () => {
   const { auth, getMe } = useAuth();
   const [submitLoading, setSubmitLoading] = useState(false);
   const [uploadLoading, setUploadLoading] = useState(false);
-  const snapPoints = useMemo(() => [480], []);
+  const snapPoints = useMemo(() => [620], []);
   const { user } = useAuth();
   const initialized = useRef(false);
-  const { getCityData, cityData } = useUser();
+  const { getCityData, cityData, getProvinceData, provinceData } = useUser();
   const [queryCityState, setQueryCityState] = useState({
     type: "collection",
-    options: [],
+    options: user?.city?.province?.id
+      ? [["filter", "province.uuid", "equal", user?.city?.province?.id]]
+      : [],
   } as QueryType);
   const { t } = useTranslation();
   const [search, setSearch] = useState("");
+  const [selectedProvince, setSelectedProvince] = useState({
+    id: user?.city?.province?.id,
+    name: user?.city?.province?.name,
+    code: user?.city?.province?.code,
+  } as ProvinceType);
   const [form, setForm] = useState({
     name: user?.name,
     nameKatakana: user?.name_alias,
@@ -92,12 +99,34 @@ const EditProfileScreen = () => {
       .then(image => {
         setUploadLoading(true);
 
-        apiUploadImage(auth?.accessToken, createFormData(image), dispatch).then(
-          res => {
-            setForm({ ...form, profilePicture: res });
+        apiUploadImage(auth?.accessToken, createFormData(image), dispatch)
+          .then(res => {
+            if (res?.uuid && res?.url) {
+              setForm({ ...form, profilePicture: res });
+              dispatch(
+                onErrorState({
+                  visible: true,
+                  text: t("upload_foto_berhasil"),
+                  icon: icons.searchSuccess,
+                  withCloseIcon: true,
+                  withIcon: true,
+                }),
+              );
+            } else {
+              dispatch(
+                onErrorState({
+                  visible: true,
+                  text: t("upload_foto_gagal"),
+                  icon: icons.searchClose,
+                  withCloseIcon: true,
+                  withIcon: true,
+                }),
+              );
+            }
+          })
+          .finally(() => {
             setUploadLoading(false);
-          },
-        );
+          });
       })
       .catch(error => {
         window.console.log(error);
@@ -116,23 +145,23 @@ const EditProfileScreen = () => {
       form?.address,
       form?.profilePicture?.uuid,
       user?.join_reason,
-    ).then(({ success }) => {
-      if (success) {
-        getMe(auth?.accessToken, auth).then(({ status }) => {
-          if (status) {
-            dispatch(
-              onErrorState({
-                visible: true,
-                text: t("profil_berhasil_diupdate"),
-                icon: icons.searchSuccess,
-                withCloseIcon: true,
-                withIcon: true,
-              }),
-            );
-            setSubmitLoading(false);
-          }
-        });
-      } else {
+    )
+      .then(async ({ success }) => {
+        if (success) {
+          const { status } = await getMe(auth?.accessToken, auth);
+          dispatch(
+            onErrorState({
+              visible: true,
+              text: status
+                ? t("profil_berhasil_diupdate")
+                : t("profil_gagal_diupdate"),
+              icon: status ? icons.searchSuccess : icons.searchClose,
+              withCloseIcon: true,
+              withIcon: true,
+            }),
+          );
+          return;
+        }
         dispatch(
           onErrorState({
             visible: true,
@@ -142,25 +171,53 @@ const EditProfileScreen = () => {
             withIcon: true,
           }),
         );
-      }
-    });
+      })
+      .catch(error => {
+        window.console.log(error);
+        dispatch(
+          onErrorState({
+            visible: true,
+            text: t("profil_gagal_diupdate"),
+            icon: icons.searchClose,
+            withCloseIcon: true,
+            withIcon: true,
+          }),
+        );
+      })
+      .finally(() => {
+        setSubmitLoading(false);
+      });
   };
   const onSearch = (search: string) => {
     clearTimeout(timeout.current);
     timeout.current = setTimeout(() => {
       setQueryCityState({
         ...queryCityState,
-        options: [["search", "name", search]],
+        options: [
+          ["search", "name", search],
+          ["filter", "province.uuid", "equal", selectedProvince?.id],
+        ],
       });
     }, 1000);
     setSearch(search);
   };
 
+  const onSelectProvince = (province: ProvinceType) => {
+    setSelectedProvince(province);
+    setQueryCityState({
+      ...queryCityState,
+      options: [["filter", "province.uuid", "equal", province?.id]],
+    });
+  };
+
   useEffect(() => {
-    getCityData(queryCityState);
+    if (selectedProvince?.id) {
+      getCityData(queryCityState);
+    }
   }, [queryCityState]);
 
   useEffect(() => {
+    getProvinceData({ type: "collection", options: [] } as QueryType);
     if (!initialized.current) {
       initialized.current = true;
     }
@@ -418,8 +475,11 @@ const EditProfileScreen = () => {
         actionSheetRef={actionSheetRef}
         snapPoints={snapPoints}
         data={cityData}
+        provinceData={provinceData}
         selectedCity={form?.domicile}
         setSelectedCity={saveCity}
+        selectedProvince={selectedProvince}
+        onSelectProvince={onSelectProvince}
         search={search}
         setSearch={onSearch}
       />
