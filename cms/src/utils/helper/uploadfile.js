@@ -3,10 +3,42 @@ import { Notification, toast } from 'components/ui';
 import dayjs from 'dayjs';
 import { apiFile } from 'services/ApiBase';
 
+// Flattens transparent PNG/GIF/WebP images onto a white background before upload.
+// Sardine (the storage microservice) flattens transparency to black when it
+// resizes images server-side, so we pre-flatten to white on the client instead.
+const flattenTransparentImage = (file) => {
+  if (!['image/png', 'image/gif', 'image/webp'].includes(file.type)) {
+    return Promise.resolve(file);
+  }
+
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0);
+      canvas.toBlob((blob) => {
+        if (!blob) {
+          resolve(file);
+          return;
+        }
+        resolve(new File([blob], file.name, { type: 'image/jpeg' }));
+      }, 'image/jpeg', 0.92);
+    };
+    img.onerror = () => resolve(file);
+    img.src = URL.createObjectURL(file);
+  });
+};
+
 export const uploadFile = async (selectedFile) => {
   try {
+    const fileToUpload = await flattenTransparentImage(selectedFile);
     const formData = new FormData();
-    formData.append('file', selectedFile);
+    formData.append('file', fileToUpload);
     const ress = await apiFile(formData);
     return ress;
   } catch (error) {
