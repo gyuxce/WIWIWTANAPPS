@@ -153,6 +153,7 @@ Route::prefix("mobile")->group(function () {
             Route::get('/', [TransactionController::class, 'index']);
             Route::get('/detail', [TransactionController::class, 'getDetailPayment']);
             Route::get('/latest', [TransactionController::class, 'latest']);
+            Route::get('/history', [TransactionController::class, 'history']);
             Route::get('/test', [TransactionController::class, 'testInstallmentAmountLogic']);
             Route::get('/payment/latest', [PaymentController::class, 'latest']);
             Route::get('/{id}', [TransactionController::class, 'show']);

@@ -14,12 +14,15 @@ use App\Models\Finance\Installment;
 use App\Models\Finance\Payment;
 use App\Models\Finance\Transaction;
 use App\Models\Master\Cities;
+use App\Http\Controllers\Api\V1\Sailfish\HasNotifications;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class PivotPaymentService
 {
+    use HasNotifications;
+
     public $phone_country_codes;
 
     public function __construct() {
@@ -59,6 +62,13 @@ class PivotPaymentService
             case 'CANCELLED':
                 $payment->status = PaymentStatusConstant::FAILED;
                 $payment->save();
+
+                $priceType = $payment->transaction->price_type == PriceTypeConstant::TRAINING ? 'Pelatihan' : 'Administrasi';
+                $statusLabel = $status === 'EXPIRED' ? 'kadaluarsa' : 'dibatalkan';
+                $notifdata = ["title" => "Pembayaran Gagal", "body" => "Pembayaran [" . $priceType . "] kamu " . $statusLabel . " dan tidak berhasil diproses.", "data" => ["module" => "payment-proof", "payment_id" => $payment->uuid]];
+                $this->__pushNotification($payment->transaction->user, $notifdata);
+                $this->__sendEmailNotification($payment->transaction->user, 'email_payment_failed.html', 'Pembayaran Gagal - Wiwitan', ['priceType' => $priceType, 'statusLabel' => $statusLabel]);
+
                 return false;
             case 'REQUIRE_ACTION':
             case 'REQUIRE_CONFIRMATION':
@@ -112,6 +122,11 @@ class PivotPaymentService
                 $batch_user->transaction2_status = TransactionTrainingStatusConstant::PAID;
                 $batch_user->transaction2_due_at = null;
             }
+
+            $priceType = $payment->transaction->price_type == PriceTypeConstant::TRAINING ? 'Pelatihan' : 'Administrasi';
+            $notifdata = ["title" => "Pembayaran Berhasil", "body" => "Pembayaran [" . $priceType . "] kamu telah berhasil diproses. Terima kasih!", "data" => ["module" => "payment-proof", "payment_id" => $payment->uuid]];
+            $this->__pushNotification($payment->transaction->user, $notifdata, 1);
+            $this->__sendEmailNotification($payment->transaction->user, 'email_payment_success.html', 'Pembayaran Berhasil - Wiwitan', ['priceType' => $priceType, 'amount' => 'Rp' . number_format((float) $payment->total, 0, ',', '.')]);
         }
 
         //update user subscription status
@@ -149,6 +164,10 @@ class PivotPaymentService
             $payment->transaction->user->last_phase = PhaseSettingConstant::PHASE_TRAINING;
             $payment->transaction->user->join_date = $now;
             $payment->transaction->user->save();
+
+            $notifdata = ["title" => "Fase Pelatihan Terbuka", "body" => "Selamat! Pembayaran Administrasi & Pelatihan kamu sudah lunas. Fase Pelatihan sekarang sudah bisa diakses.", "data" => ["module" => "user", "user_id" => $payment->transaction->user->uuid]];
+            $this->__pushNotification($payment->transaction->user, $notifdata, 1);
+            $this->__sendEmailNotification($payment->transaction->user, 'email_phase_training.html', 'Fase Pelatihan Terbuka - Wiwitan');
         }
 
         return true;
@@ -256,16 +275,10 @@ class PivotPaymentService
                 throw new \Exception('Incomplete url');
             }
         }
-        //dd($url, $payload);
         $method = $this->getMethod($endpoint);
         $token = $this->getAccessToken();
-        
+
         $response = Http::withToken($token)->withHeaders($headers)->{$method}($url, $payload);
-        // dd($response);
-        if (!$response->successful()) {
-            dd($url, $payload, $headers, $response->body());
-        }
-        //dd($url, $payload, $headers, $response->body());
         $result = $this->handleResponse($response);
 
         return $result;
@@ -382,9 +395,9 @@ class PivotPaymentService
             ],
             'mode' => 'API',
             'redirectUrl' => [
-                "successReturnUrl" => "https://staging.cms.wiwitan.62dev.com/api/v1/pg/pivot/success",
-                "failureReturnUrl" => "https://staging.cms.wiwitan.62dev.com/api/v1/pg/pivot/fail",
-                "expirationReturnUrl" => "https://staging.cms.wiwitan.62dev.com/api/v1/pg/pivot/expired"
+                "successReturnUrl" => "https://api.wiwitanbaru.com/api/v1/pg/pivot/success",
+                "failureReturnUrl" => "https://api.wiwitanbaru.com/api/v1/pg/pivot/fail",
+                "expirationReturnUrl" => "https://api.wiwitanbaru.com/api/v1/pg/pivot/expired"
             ],
             'autoConfirm' => $method === 'CARD' ? false : true,
             'statementDescriptor' => config('pivot-payment.descriptor'),
@@ -473,7 +486,7 @@ class PivotPaymentService
                 // ]
             ];
         }
-        $city = Cities::find($user->city_id)->with(['province'])->first();
+        $city = Cities::with(['province'])->find($user->city_id);
         if ($with_address) {
             $addresses = str_split($user->address, 250);
             $result['addressLine1'] = $addresses[0] ?? null;

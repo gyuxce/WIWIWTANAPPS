@@ -18,5 +18,9 @@ Route::get('/', function () {
     return response()->json("API " . ENV('APP_NAME'));
 });
 
+Route::get('/about', function () {
+    return view('pages.about.index');
+});
+
 Route::get('logs', [\Rap2hpoutre\LaravelLogViewer\LogViewerController::class, 'index']);
 // Route::get('api/info', [DocInfoController::class, 'index']);

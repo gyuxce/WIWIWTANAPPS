@@ -100,6 +100,12 @@ class UserController extends BaseCrud
     {
         $user = User::getFirst($uuid);
         if (!$user) {
+            if (request()->wantsJson()) {
+                return response()->json([
+                    "status" => "error",
+                    "message" => __('messages.user_not_found'),
+                ], 404);
+            }
             abort(404, __('messages.user_not_found'));
         }
 
@@ -110,8 +116,15 @@ class UserController extends BaseCrud
         if (empty($user->email_verified_at)) {
             $data["email_verified_at"] = now();
         }
-        
+
         $user->update($data);
+
+        if (request()->wantsJson()) {
+            return response()->json([
+                "status" => "success",
+                "message" => "Account activated",
+            ]);
+        }
 
         return view('pages.activation.index');
     }

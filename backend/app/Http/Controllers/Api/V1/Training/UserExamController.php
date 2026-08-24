@@ -165,6 +165,16 @@ class UserExamController extends BaseCrud
                 User::where('id', $this->row->user_id)->update([
                     'last_phase' => PhaseSettingConstant::PHASE_PAYMENT
                 ]);
+
+                $user = User::find($this->row->user_id);
+                $notifdata = ["title" => "Pra-Tes Lulus", "body" => "Selamat! Kamu telah lulus Sesi Tanya Jawab. Silakan lanjut ke tahap pembayaran.", "data" => ["module" => "user", "user_id" => $user->uuid]];
+                $this->__pushNotification($user, $notifdata, 1);
+                $this->__sendEmailNotification($user, 'email_pratest_lulus.html', 'Pra-Tes Lulus - Wiwitan');
+            } elseif ($this->row->status == UserExamStatusConstant::TIDAKLULUS) {
+                $user = User::find($this->row->user_id);
+                $notifdata = ["title" => "Hasil Pra-Tes", "body" => "Mohon maaf, kamu belum lulus Sesi Tanya Jawab. Silakan hubungi admin untuk informasi lebih lanjut.", "data" => ["module" => "user", "user_id" => $user->uuid]];
+                $this->__pushNotification($user, $notifdata, 1);
+                $this->__sendEmailNotification($user, 'email_pratest_tidak_lulus.html', 'Hasil Pra-Tes - Wiwitan');
             }
         }
     }

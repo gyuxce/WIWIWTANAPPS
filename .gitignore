@@ -95,3 +95,19 @@ Thumbs.db
 /mobile/android/hs_err_pid*.log
 /commandlinetools-win-*_latest.zip
 /cmdline-tools-extract/
+
+# Ad-hoc device-testing screenshots, UI dumps, and build artifacts
+/screen*.png
+/prod*.png
+/loginresult*.png
+/loginretry*.png
+/loginstate*.png
+/dismiss*.png
+/home*.png
+/ui.xml
+/ui[0-9]*.xml
+/uilogin.xml
+/uiprod*.xml
+*.apks
+/mobile/android/replay_pid*.log
+mobile/package-lock.json

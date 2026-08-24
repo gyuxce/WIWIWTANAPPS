@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pembayaran Berhasil - Wiwitan</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope&family=Red+Hat+Display:wght@700&display=swap"
+    rel="stylesheet">
+  <style>
+
+    .email_container {
+      display: grid;
+      place-content: center;
+    }
+
+    .email_wrapper {
+      display: grid;
+      grid-auto-flow: row;
+      place-content: center;
+      max-width: 340px;
+      text-align: left;
+    }
+
+    .email_wrapper .logo {
+      display: flex;
+      gap: 16px;
+      align-content: center;
+      align-self: center;
+      justify-content: center;
+    }
+
+    .email_wrapper .logo .wiwitan {
+      height: 80px;
+    }
+
+    .email_wrapper .badge {
+      display: flex;
+      justify-content: center;
+      margin-top: 24px;
+      margin-bottom: 8px;
+    }
+
+    .email_wrapper .badge span {
+      font-family: "Manrope";
+      font-size: 12px;
+      font-weight: 600;
+      color: #1E7B45;
+      background-color: #E4F2E8;
+      padding: 4px 12px;
+      border-radius: 100px;
+    }
+
+    .email_wrapper .status {
+      font-family: "Manrope";
+      font-size: 20px;
+      line-height: 27px;
+      font-weight: 600;
+      letter-spacing: -0.07px;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    .email_wrapper .description {
+      font-family: "Manrope";
+      font-size: 14px;
+      line-height: 19px;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    .email_wrapper .detail_box {
+      font-family: "Manrope";
+      font-size: 13px;
+      line-height: 20px;
+      background-color: #F6F2EA;
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin-bottom: 24px;
+    }
+
+    .email_wrapper .detail_box .row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .email_wrapper .detail_box .label {
+      color: #6E6656;
+    }
+
+    .email_wrapper .detail_box .value {
+      font-weight: 700;
+      text-align: right;
+    }
+
+    .email_wrapper .footnote {
+      font-family: "Manrope";
+      font-size: 12px;
+      line-height: 18px;
+      color: #6E6656;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body class="email_container">
+  <main class="email_wrapper">
+    <div class="logo">
+      <img class="wiwitan"
+        src="https://api.wiwitanbaru.com/images/wiwitan-logo.png"
+        alt="Wiwitan Logo" width="64" height="80" />
+    </div>
+    <div class="badge"><span>Pembayaran Berhasil</span></div>
+    <div class="status">Terima kasih, {{.name}}!</div>
+    <div class="description">
+      Pembayaran kamu telah berhasil diproses.
+    </div>
+    <div class="detail_box">
+      <div class="row">
+        <span class="label">Jenis Pembayaran</span>
+        <span class="value">{{.priceType}}</span>
+      </div>
+      <div class="row">
+        <span class="label">Jumlah</span>
+        <span class="value">{{.amount}}</span>
+      </div>
+    </div>
+    <div class="footnote">
+      Silakan buka aplikasi Wiwitan untuk melihat status terbaru akun kamu.
+    </div>
+  </main>
+</body>
+
+</html>

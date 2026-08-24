@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 
 <head>
   <meta charset="UTF-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Reset Password - Wiwitan</title>
+  <title>Pra-Tes Lulus - Wiwitan</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope&family=Red+Hat+Display:wght@700&display=swap"
@@ -15,7 +15,6 @@
     .email_container {
       display: grid;
       place-content: center;
-      /* min-height: 100vh; */
     }
 
     .email_wrapper {
@@ -38,13 +37,29 @@
       height: 80px;
     }
 
+    .email_wrapper .badge {
+      display: flex;
+      justify-content: center;
+      margin-top: 24px;
+      margin-bottom: 8px;
+    }
+
+    .email_wrapper .badge span {
+      font-family: "Manrope";
+      font-size: 12px;
+      font-weight: 600;
+      color: #1E7B45;
+      background-color: #E4F2E8;
+      padding: 4px 12px;
+      border-radius: 100px;
+    }
+
     .email_wrapper .status {
       font-family: "Manrope";
       font-size: 20px;
       line-height: 27px;
       font-weight: 600;
       letter-spacing: -0.07px;
-      margin-top: 24px;
       margin-bottom: 16px;
       text-align: center;
     }
@@ -54,25 +69,7 @@
       font-size: 14px;
       line-height: 19px;
       margin-bottom: 24px;
-    }
-
-    .email_wrapper .button {
-      display: flex;
-      justify-content: center;
-      margin-bottom: 36px;
       text-align: center;
-    }
-
-    .email_wrapper a {
-      font-family: "Manrope";
-      width: 162px;
-      background-color: #0D3AA1;
-      padding: 8px 16px;
-      border-radius: 6px;
-      border: none;
-      color: white;
-      text-decoration: none;
-      margin-bottom: 8px;
     }
   </style>
 </head>
@@ -84,15 +81,10 @@
         src="https://api.wiwitanbaru.com/images/wiwitan-logo.png"
         alt="Wiwitan Logo" width="64" height="80" />
     </div>
-    <div class="status">Reset Your Password</div>
+    <div class="badge"><span>Pra-Tes Lulus</span></div>
+    <div class="status">Selamat, {{.name}}!</div>
     <div class="description">
-      We received a request to reset your password for your Wiwitan account associated with this email address.
-      <p>If you made this request, please follow the instructions below.
-      <p>If you did not request to have your password reset, you can
-        safely ignore this email; your account will remain secure.
-    </div>
-    <div class="button">
-      <a href="{{.url}}">Reset Password Here</a>
+      Kamu telah lulus Sesi Tanya Jawab. Silakan lanjut ke tahap pembayaran lewat aplikasi Wiwitan.
     </div>
   </main>
 </body>

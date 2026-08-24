@@ -1,0 +1,8 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.wiwitanbaru.wiwitan",
+    "sha256_cert_fingerprints": ["5B:56:62:5C:C5:D0:7F:DC:84:3A:98:B9:C1:B2:AE:43:D7:C9:81:61:FC:63:5F:E4:BD:E4:B0:B3:A1:95:C6:DB"]
+  }
+}]

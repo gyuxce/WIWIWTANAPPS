@@ -25,9 +25,9 @@ class FilesController extends BaseCrud
 
     public function store(Request $request)
     {
-        // max upload 15MB
+        // max upload 200MB
         $request->validate([
-            'file' => 'max:15360'
+            'file' => 'max:204800'
         ]);
 
 

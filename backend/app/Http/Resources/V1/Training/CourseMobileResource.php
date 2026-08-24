@@ -33,6 +33,7 @@ class CourseMobileResource extends JsonResource
             "assesment_count_progress" => $this->assesment_count_progress,
             "percent" => $this->materi_count > 0 ? number_format(($this->materi_count_progress / $this->materi_count) * 100, 2) : 0,
             "cover" => new FileResource($this->whenLoaded("cover")),
+            "matched_materi" => $this->matched_materi ?? null,
         ];
     }
 }

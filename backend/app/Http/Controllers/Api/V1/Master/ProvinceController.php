@@ -13,7 +13,7 @@ class ProvinceController extends BaseCrud
     public $resource = ProvinceResource::class;
     // public $storeValidator = ApiSparepartRequest::class;
     // public $updateValidator = ApiSparepartRequest::class;
-    public $defaultOrder = "id";
+    public $defaultOrder = "name";
     public $modelKey = "uuid";
     public $cacheInMinute = 10;
 

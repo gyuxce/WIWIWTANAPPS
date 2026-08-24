@@ -224,7 +224,7 @@ class AuthController extends Controller
             'template_params' => [
                 'name' => $userData->name,
                 'subject' => 'Activate Account - Wiwitan',
-                'url' => env('APP_URL') . "/auth/user/activate/" . $userData->uuid
+                'url' => config('app.url') . "/api/v1/auth/user/activate/" . $userData->uuid
             ]
         ];
         $sailfish = $this->sailfish->push($bodySailfish);
@@ -245,7 +245,7 @@ class AuthController extends Controller
             'template_params' => [
                 'name' => $user->name,
                 'subject' => 'Activate Account - Wiwitan',
-                'url' => env('APP_URL') . "/auth/user/activate/" . $user->uuid
+                'url' => config('app.url') . "/api/v1/auth/user/activate/" . $user->uuid
             ]
         ];
         $sailfish = $this->sailfish->push($bodySailfish);

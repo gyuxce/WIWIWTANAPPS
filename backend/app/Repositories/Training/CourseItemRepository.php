@@ -12,11 +12,27 @@ use Illuminate\Support\Facades\Auth;
 
 class CourseItemRepository extends BaseRepository
 {
-    public function getMobileModuleProgress()
+    public function getMobileModuleProgress($search = null)
     {
-        $datas = Course::withCount(['articles as materi_count', 'articles as materi_count_progress' => function ($q) {
+        $query = Course::withCount(['articles as materi_count', 'articles as materi_count_progress' => function ($q) {
             $q->whereHas('userArticle');
-        }])->with('cover')->get();
+        }])->with('cover');
+
+        if (!empty($search)) {
+            $query->whereHas('articles', function ($q) use ($search) {
+                $q->where('title', 'LIKE', '%' . $search . '%');
+            });
+        }
+
+        $datas = $query->get();
+
+        if (!empty($search)) {
+            foreach ($datas as $course) {
+                $course->matched_materi = $course->articles()
+                    ->where('title', 'LIKE', '%' . $search . '%')
+                    ->pluck('title');
+            }
+        }
 
         foreach ($datas as $course) {
             $course->virtual_count = 0;

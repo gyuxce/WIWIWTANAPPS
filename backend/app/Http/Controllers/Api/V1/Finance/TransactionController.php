@@ -246,6 +246,21 @@ $ids = [
         ], Response::HTTP_OK);
     }
 
+    public function history(Request $request)
+    {
+        $user = Auth::user();
+
+        $transactions = Transaction::with(['payments', 'installment'])
+            ->where('user_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'status' => 'success',
+            'data' => TransactionMobileResource::collection($transactions),
+        ], Response::HTTP_OK);
+    }
+
     public function initiate(Request $request)
     {
         $err = null;

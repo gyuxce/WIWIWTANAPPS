@@ -266,9 +266,9 @@ class CourseItemController extends BaseCrud
         }
     }
 
-    public function mobileGetModuleProgress()
+    public function mobileGetModuleProgress(Request $request)
     {
-        $data = $this->courseItemRepo->getMobileModuleProgress();
+        $data = $this->courseItemRepo->getMobileModuleProgress($request->query('search'));
         return response()->json([
             'message' => 'Data Category',
             'data' => CourseMobileResource::collection($data)

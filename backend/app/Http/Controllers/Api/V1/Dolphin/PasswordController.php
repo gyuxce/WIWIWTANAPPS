@@ -70,7 +70,14 @@ class PasswordController extends Controller
         ];
 
         $data = $this->dolphin->forgotPassword($body);
-        $token = $data->original['data'];
+        $token = $data->original['data'] ?? null;
+
+        if (empty($token['reset_token'])) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $data->original['message'] ?? __('messages.reset_password_unavailable'),
+            ], $data->getStatusCode() >= 400 ? $data->getStatusCode() : Response::HTTP_BAD_GATEWAY);
+        }
 
         $bodySailfish = [
             'type' => 'email',
