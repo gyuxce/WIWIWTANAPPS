@@ -317,7 +317,12 @@ class PivotPaymentService
     }
 
     public function getPaymentExpiryDate() {
-        return now()->addMinutes(config('pivot-payment.payment_expiration'))->toIso8601String();
+        // pivot-payment.payment_expiration is stored in SECONDS (see its "15 minutes
+        // in seconds" comment). Using addMinutes() here was a unit mismatch that made
+        // every session expire in 900 minutes (15 hours) instead of 900 seconds (15
+        // minutes) -- harmless for VA/Card (30-day cap) but rejected by Pivot for QRIS,
+        // which caps QR session expiry at 7 hours.
+        return now()->addSeconds(config('pivot-payment.payment_expiration'))->toIso8601String();
     }
 
     public function generatePaymentConfirmationData(Payment $payment, Array $data = []):Array {

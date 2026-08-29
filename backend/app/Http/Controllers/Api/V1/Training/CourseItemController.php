@@ -585,6 +585,10 @@ class CourseItemController extends BaseCrud
             $question = ExamTemplateItem::with(['question.file', 'question.question_items', 'file'])
                 ->where('course_item_id', $data->id)->inRandomOrder()->first();
 
+            if (empty($question)) {
+                throw new \Exception('Soal untuk asesmen ini belum tersedia, silakan hubungi admin.');
+            }
+
             $userExam = UserExam::create([
                 'template_id' => ExamTemplateConstant::ASSESMENT_QUESTION,
                 'user_id' => Auth::id(),

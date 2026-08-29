@@ -385,12 +385,14 @@ class AuthController extends Controller
                     return $this->verifyWithDolphinAndRespond($checkUser, $token, $adapterField);
                 } else {
                     $user = User::where('email', $userEmail)->first(); // check social account but the email is registerd, the account id isn't registered
-                    // if($user) {
-                    //     $user->update([
-                    //         $adapterField => $adapter_id,
-                    //     ]);
-                    //     return $this->verifyWithDolphinAndRespond($user, $token, $adapterField);
-                    // }
+                    if ($user) {
+                        // The email came from a Firebase-verified ID token, so it's
+                        // safe to trust and link this provider to the existing account.
+                        $user->update([
+                            $adapterField => $adapter_id,
+                        ]);
+                        return $this->verifyWithDolphinAndRespond($user, $token, $adapterField);
+                    }
 
                     return response()->json([
                         'exist' => false,

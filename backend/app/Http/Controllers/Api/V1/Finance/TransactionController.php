@@ -224,6 +224,52 @@ $ids = [
         ], Response::HTTP_OK);
     }
 
+    /**
+     * Voids the current unpaid payment session for a transaction so the user can
+     * pick a different method/provider (e.g. switch from VA Bank BCA to QRIS).
+     * Only a fully-untouched UNPAID session may be cancelled this way -- an
+     * installment payment that is already PARTIALLY_PAID or PAID is left alone.
+     */
+    public function cancelPayment(Request $request)
+    {
+        $user = Auth::user();
+
+        $data = $request->validate([
+            'price_type' => ['required', 'numeric', Rule::in([PriceTypeConstant::ADMINSTRATION, PriceTypeConstant::TRAINING])],
+        ]);
+
+        $transaction = Transaction::with(['payments'])->where('price_type', $data['price_type'])->where('user_id', $user->id)->orderBy('updated_at', 'desc')->first();
+        if (empty($transaction)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Transaksi tidak ditemukan'
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        $payment = $transaction->payments->sortByDesc('updated_at')->where('status', PaymentStatusConstant::UNPAID)->first();
+        if (empty($payment)) {
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Tidak ada pembayaran yang perlu dibatalkan'
+            ], Response::HTTP_OK);
+        }
+
+        $service = new PivotPaymentService;
+        try {
+            $service->access('cancel_payment', ['cancellationReason' => 'Nasabah mengganti metode pembayaran'], ['Content-Type' => 'application/json'], ['payment_id' => $payment->number_ref]);
+        } catch (\Exception $e) {
+            //ignore -- the gateway may already consider this session expired/invalid;
+            //we still void it locally below so the user can pick a new method
+        }
+
+        $payment->status = PaymentStatusConstant::FAILED;
+        $payment->save();
+
+        return response()->json([
+            'status' => 'success',
+        ], Response::HTTP_OK);
+    }
+
     public function latest(Request $request)
     {
         $user = Auth::user();

@@ -104,6 +104,7 @@ Thumbs.db
 /loginstate*.png
 /dismiss*.png
 /home*.png
+/emulator-screenshot.png
 /ui.xml
 /ui[0-9]*.xml
 /uilogin.xml

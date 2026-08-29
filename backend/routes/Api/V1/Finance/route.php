@@ -162,6 +162,7 @@ Route::prefix("mobile")->group(function () {
             Route::post('/initiate', [TransactionController::class, 'initiate']);
             Route::post('/pay', [TransactionController::class, 'pay']);
             Route::post('/payment/confirm', [PaymentController::class, 'confirm']);
+            Route::post('/payment/cancel', [TransactionController::class, 'cancelPayment']);
 
             Route::put('/{id}', [TransactionController::class, 'update']);
         });
