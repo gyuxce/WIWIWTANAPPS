@@ -5,14 +5,12 @@ import Space from "components/Space";
 import Text from "components/Text";
 import colors from "configs/colors";
 import icons from "configs/icons";
-import { ResizeMode, Video } from "expo-av";
 import { t } from "i18next";
-import React, { memo, useEffect, useState } from "react";
+import React, { memo } from "react";
 import { Image, TouchableOpacity, View } from "react-native";
 import type { MaterialContentType } from "types/TrainingTypes";
 import NavigationService from "utils/NavigationService";
 import { scaledHorizontal } from "utils/ScaledService";
-import { millisToTime } from "utils/Utils";
 
 interface MateriProps {
   params: any;
@@ -43,24 +41,19 @@ const Materi = ({
 }: MateriProps) => {
   const Content = memo(
     ({ item, index }: { item: MaterialContentType; index: number }) => {
-      const [durationMillis, setDurationMillis] = useState(0);
-      const [shouldProbeDuration, setShouldProbeDuration] = useState(false);
-
-      // Every video row used to mount an invisible <Video> the instant this
-      // list rendered, just to read its duration for the "sisa xx:xx"
-      // progress text/bar. With many videos in one module, that meant
-      // spinning up that many native video decoders all at once, which is
-      // what made opening this list feel heavy/laggy. Staggering the probes
-      // instead (capped so later rows don't wait too long) spreads that load
-      // out over a couple of seconds instead of all at once.
-      useEffect(() => {
-        if (item?.body_type !== 1) {
-          return;
-        }
-        const delay = Math.min(index, 20) * 150;
-        const timer = setTimeout(() => setShouldProbeDuration(true), delay);
-        return () => clearTimeout(timer);
-      }, [item?.body_type, index]);
+      // Each video row used to mount a hidden zero-sized <Video> purely to
+      // read durationMillis for a "sisa 01:35" label. In a module like Guntai
+      // 1 that is nine simultaneous native decoders -- device logs showed nine
+      // live AudioTrack sessions and ~150MB of video buffer pools -- and they
+      // stayed alive even after navigating away, because the list screen stays
+      // mounted underneath. That starved the PDF reader of memory and network
+      // and made documents fail to download.
+      //
+      // Staggering their start (the previous attempt) only delayed the pile-up
+      // rather than bounding it. The label was never worth that cost: it also
+      // required item.progress.duration to be set, so most rows showed nothing
+      // anyway. The real fix is to store each video's duration on upload so
+      // this can be read from the API instead of decoded on the device.
 
       // A PDF document has nothing useful on the intermediate detail screen
       // (title + filename only, descriptions are rarely filled in), so send
@@ -104,46 +97,48 @@ const Materi = ({
             });
           }}
         >
+          {/*
+           * Compact single-row layout. The card used to be a 100px block on
+           * the left with badge+title beside it, then description, then a
+           * status row spanning the full width -- which left an obvious dead
+           * zone on the right once descriptions turned out to be mostly empty.
+           * Folding everything into the right-hand column removes that gap and
+           * fits noticeably more materials on screen.
+           */}
           <Card style={{ marginBottom: 10 }}>
-            <View style={{ flexDirection: "row", gap: 15 }}>
+            <View
+              style={{ flexDirection: "row", gap: 12, alignItems: "center" }}
+            >
               {/*
-               * Covers are optional content that in practice is almost never
-               * uploaded, so this used to be a meaningless grey placeholder
-               * occupying the most prominent spot on the card. Falling back to
-               * the material's type icon fills that space with something the
-               * student can actually read at a glance, and makes uploading a
-               * cover an enhancement rather than a requirement.
+               * Covers are never going to be uploaded -- there is no designer
+               * on the team -- so a 72px box for them was a container
+               * pretending to hold an image. Worse, its fixed height forced a
+               * visible gap whenever the description was empty. The type icon
+               * now sits inline with the badge at 20px (see below), so the
+               * card's height follows its actual content. A cover is still
+               * honoured if one ever exists.
                */}
-              {item?.cover ? (
+              {item?.cover && (
                 <Image
                   source={{ uri: item?.cover.url }}
                   style={{
-                    height: 100,
-                    width: 100,
+                    height: 72,
+                    width: 72,
                     resizeMode: "cover",
                     borderRadius: 8,
                   }}
                 />
-              ) : (
-                <View
-                  style={{
-                    height: 100,
-                    width: 100,
-                    borderRadius: 8,
-                    backgroundColor: colors.stone100,
-                    justifyContent: "center",
-                    alignItems: "center",
-                  }}
-                >
-                  <Image
-                    source={typeIcon}
-                    style={{ height: 44, width: 44, resizeMode: "contain" }}
-                  />
-                </View>
               )}
               <View style={{ flex: 1 }}>
+                {/*
+                 * Type icon inline with its label: enough of a shape to scan
+                 * a long list by, without a container that has to be filled.
+                 */}
                 <View
                   style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: 6,
                     paddingVertical: 5,
                     paddingHorizontal: 10,
                     backgroundColor: colors.stone100,
@@ -151,6 +146,10 @@ const Materi = ({
                     alignSelf: "flex-start",
                   }}
                 >
+                  <Image
+                    source={typeIcon}
+                    style={{ height: 20, width: 20, resizeMode: "contain" }}
+                  />
                   <Text
                     size={10}
                     color={colors.red}
@@ -166,125 +165,72 @@ const Materi = ({
                 <Text type="bold" variant="CenturyGothicBold" numberOfLines={3}>
                   {item?.title}
                 </Text>
-                {item?.body_type === 1 && shouldProbeDuration && (
-                  <Video
-                    source={{
-                      uri: item.file?.url,
-                    }}
-                    onLoad={(status: any) => {
-                      setDurationMillis(status?.durationMillis);
-                    }}
-                    style={{ height: 0, width: 0 }}
-                    useNativeControls
-                    shouldPlay={false}
-                    resizeMode={ResizeMode.CONTAIN}
-                    isLooping={false}
-                  />
+                {/* Empty descriptions used to render as a stray "-" line. */}
+                {hasDescription && (
+                  <>
+                    <Space height={4} />
+                    <Text size={12} numberOfLines={2}>
+                      {description}
+                    </Text>
+                  </>
                 )}
-              </View>
-            </View>
-            {/* Empty descriptions used to render as a stray "-" line. */}
-            {hasDescription && (
-              <>
-                <Space height={10} />
-                <Text size={12} numberOfLines={3} style={{ flex: 1 }}>
-                  {description}
-                </Text>
-              </>
-            )}
-            <Space height={10} />
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
-              {item?.progress?.status !== 1 && item?.body_type === 1 ? (
+                <Space height={6} />
                 <View
                   style={{
                     flexDirection: "row",
+                    justifyContent: "space-between",
                     alignItems: "center",
-                    gap: 10,
                   }}
                 >
-                  <Text size={12}>
-                    {durationMillis !== 0 &&
-                      item?.progress?.duration &&
-                      `${t("sisa")} ${millisToTime(
-                        durationMillis - Number(item?.progress?.duration),
-                      )}`}
-                    {durationMillis !== 0 && !item?.progress && "sisa 00:00"}
-                  </Text>
-                  <View>
+                  {/*
+                   * "Sisa xx:xx" and its progress bar both needed the video's
+                   * total length, which was only obtainable by decoding the
+                   * file on the device -- see the note at the top of this
+                   * component for why that had to go. A started-but-unfinished
+                   * video now simply says so.
+                   */}
+                  {item?.progress?.status !== 1 &&
+                  item?.body_type === 1 &&
+                  item?.progress?.duration ? (
+                    <Text size={12} color={colors.stone500}>
+                      {t("sedang_berjalan")}
+                    </Text>
+                  ) : (
+                    <View />
+                  )}
+
+                  {item?.progress && item?.progress?.status === 1 && (
                     <View
                       style={{
-                        height: 8,
-                        width: 120,
-                        backgroundColor: colors.stone200,
-                        borderRadius: 8,
+                        flexDirection: "row",
+                        gap: 10,
+                        alignItems: "center",
                       }}
-                    />
-
-                    {durationMillis !== 0 && (
-                      <View
-                        style={{
-                          height: 8,
-                          width:
-                            ((Number(item?.progress?.duration || 0) /
-                              durationMillis) *
-                              100 *
-                              120) /
-                            100,
-                          backgroundColor: colors.red,
-                          borderRadius: 8,
-                          position: "absolute",
-                        }}
+                    >
+                      <Text
+                        color={colors.accent}
+                        size={16}
+                        type="bold"
+                        variant="CenturyGothicBold"
+                      >
+                        {t("selesai")}
+                      </Text>
+                      <Image
+                        source={icons.materiSuccess}
+                        style={{ height: 28, width: 28, resizeMode: "contain" }}
                       />
-                    )}
-                  </View>
-                </View>
-              ) : (
-                !item?.progress && <View />
-              )}
+                    </View>
+                  )}
 
-              {item?.progress && item?.progress?.status === 1 && (
-                <View
-                  style={{
-                    flexDirection: "row",
-                    gap: 10,
-                    alignItems: "center",
-                  }}
-                >
-                  <Text
-                    color={colors.accent}
-                    size={16}
-                    type="bold"
-                    variant="CenturyGothicBold"
-                  >
-                    {t("selesai")}
-                  </Text>
-                  <Image
-                    source={icons.materiSuccess}
-                    style={{ height: 28, width: 28, resizeMode: "contain" }}
-                  />
+                  {/*
+                   * The trailing type icon that used to sit here is gone: the
+                   * card leads with a type block on the left now, so repeating
+                   * it here was redundant -- and because it looked like a
+                   * button (download arrow) next to no other controls,
+                   * students read it as an action that doesn't exist.
+                   */}
                 </View>
-              )}
-
-              {/*
-               * The trailing type icon that used to sit here is gone: the
-               * card now leads with a type block on the left, so repeating it
-               * at bottom-right was redundant -- and because it looked like a
-               * button (download arrow) next to no other controls, students
-               * read it as an action that doesn't exist.
-               */}
-              {/*
-               * A trailing icon used to render here for completed items (a
-               * download-arrow, later a reload-arrow). Both read as an action
-               * button that doesn't exist -- nothing downloads, and the whole
-               * card is already tappable to reopen. Completed rows now just
-               * say "Selesai ✓" on the left and nothing on the right.
-               */}
+              </View>
             </View>
           </Card>
         </TouchableOpacity>

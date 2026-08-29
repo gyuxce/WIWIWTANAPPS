@@ -75,71 +75,62 @@ const ContentDetailScreen = ({ route }: Prop) => {
   // PdfViewerScreen -- see the document row below.
 
   const backAction = () => {
+    // Going back used to wait for apiPostStatusMateri to answer before
+    // navigating, so the back button felt frozen for as long as the network
+    // took -- seconds on a weak connection. The student gains nothing from
+    // that wait: the list re-fetches its progress on focus anyway. Report in
+    // the background and leave immediately.
+    const goBackToModule = (progressDelta: number) => {
+      NavigationService.navigate("ModulDetailScreen", {
+        ...param,
+        materiProgress:
+          Number(route?.params?.materiProgress || 0) + progressDelta,
+      });
+    };
+
+    const reportProgress = (durationValue: string, status: number) => {
+      apiPostStatusMateri(auth?.accessToken, {
+        material_content_id: route?.params?.data?.id || "",
+        duration: durationValue,
+        status,
+      });
+    };
+
     // The media never actually loaded (mediaError is set) -- don't report any
     // progress at all. Previously this still posted status: 1 ("selesai") for
     // documents/materi just from opening-then-leaving the screen, and status: 0
     // for videos, even though nothing was actually viewed.
     if (mediaError !== "") {
-      NavigationService.navigate("ModulDetailScreen", {
-        ...param,
-        materiProgress: route?.params?.materiProgress,
-      });
+      goBackToModule(0);
       return true;
     }
+
+    const alreadyComplete = param?.data?.progress?.status === 1;
+
     if (route?.params?.data?.body_type === 1) {
-      if (param?.data?.progress?.status !== 1) {
-        if (
-          completeMillisRef.current &&
-          completeMillisRef.current - durationMillisRef.current === 0
-        ) {
-          apiPostStatusMateri(auth?.accessToken, {
-            material_content_id: route?.params?.data?.id,
-            duration: String(completeMillisRef.current),
-            status: 1,
-          }).then(() => {
-            NavigationService.navigate("ModulDetailScreen", {
-              ...param,
-              materiProgress: route?.params?.materiProgress + 1,
-            });
-          });
-          return true;
-        } else {
-          apiPostStatusMateri(auth?.accessToken, {
-            material_content_id: route?.params?.data?.id,
-            duration: String(durationMillisRef.current),
-            status: 0,
-          }).then(() => {
-            NavigationService.navigate("ModulDetailScreen", {
-              ...param,
-              materiProgress: route?.params?.materiProgress,
-            });
-          });
-          return true;
-        }
-      } else {
-        NavigationService.navigate("ModulDetailScreen", {
-          ...param,
-          materiProgress: route?.params?.materiProgress,
-        });
+      if (alreadyComplete) {
+        goBackToModule(0);
         return true;
       }
-    } else {
-      if (param?.data?.progress?.status !== 1) {
-        apiPostStatusMateri(auth?.accessToken, {
-          material_content_id: route?.params?.data?.id || "",
-          duration: "0",
-          status: 1,
-        });
+      const watchedToEnd =
+        completeMillisRef.current &&
+        completeMillisRef.current - durationMillisRef.current === 0;
+
+      if (watchedToEnd) {
+        reportProgress(String(completeMillisRef.current), 1);
+        goBackToModule(1);
+      } else {
+        reportProgress(String(durationMillisRef.current), 0);
+        goBackToModule(0);
       }
-      NavigationService.navigate("ModulDetailScreen", {
-        ...param,
-        materiProgress:
-          route?.params?.data?.progress?.status !== 1
-            ? route?.params?.materiProgress + 1
-            : route?.params?.materiProgress,
-      });
       return true;
     }
+
+    if (!alreadyComplete) {
+      reportProgress("0", 1);
+    }
+    goBackToModule(alreadyComplete ? 0 : 1);
+    return true;
   };
 
   useEffect(() => {
