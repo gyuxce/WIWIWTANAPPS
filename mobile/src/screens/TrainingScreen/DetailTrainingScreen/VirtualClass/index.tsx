@@ -1,11 +1,14 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { ActivityIndicator, ScrollView, View } from "react-native";
+import { ActivityIndicator, View } from "react-native";
 import Text from "components/Text";
 import Dropdown from "components/Dropdown/Dropdown";
-import { VirtualClassModuleType, VirtualClassType } from "types/TrainingTypes";
+import type {
+  VirtualClassModuleType,
+  VirtualClassType,
+} from "types/TrainingTypes";
 import SearchAndSort from "components/SearchAndSort";
 import { scaledHorizontal } from "utils/ScaledService";
-import { BottomSheetModal } from "@gorhom/bottom-sheet";
+import type { BottomSheetModal } from "@gorhom/bottom-sheet";
 import Space from "components/Space";
 import VirtualClassActionSheet from "components/VirtualClassActionSheet";
 import dayjs from "dayjs";
@@ -35,14 +38,14 @@ const VirtualClass = ({ virtualClassList, categoryId }: Props) => {
       end_date: "",
     },
     {
-      id: `30-day`,
+      id: "30-day",
       title: t("30_hari_terakhir"),
       type: "button",
       start_date: dayjs(new Date()).subtract(30, "day").format("YYYY-MM-DD"),
       end_date: dayjs(new Date()).format("YYYY-MM-DD"),
     },
     {
-      id: `90-day`,
+      id: "90-day",
       title: t("90_hari_terakhir"),
       type: "button",
       start_date: dayjs(new Date()).subtract(90, "day").format("YYYY-MM-DD"),
@@ -139,7 +142,14 @@ const VirtualClass = ({ virtualClassList, categoryId }: Props) => {
         marginHorizontal={scaledHorizontal(0)}
       />
       <Space height={10} />
-      <ScrollView showsVerticalScrollIndicator={false}>
+      {/*
+       * Was its own <ScrollView> here, but the parent screen
+       * (DetailTrainingScreen) already wraps the whole tab in one -- nesting
+       * a second ScrollView inside it was creating a gesture-handling
+       * conflict that blocked VirtualClassActionSheet's BottomSheetModal
+       * from presenting at all (the "Filter" button did nothing).
+       */}
+      <View>
         {isLoading ? (
           <ActivityIndicator
             size="small"
@@ -183,7 +193,7 @@ const VirtualClass = ({ virtualClassList, categoryId }: Props) => {
             Tidak ada kelas virtual
           </Text>
         )}
-      </ScrollView>
+      </View>
       <VirtualClassActionSheet
         actionSheetRef={actionSheetRef}
         snapPoints={snapPoints}

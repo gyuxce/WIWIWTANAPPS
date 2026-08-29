@@ -2,6 +2,7 @@ import type { RouteProp } from "@react-navigation/core";
 import type { StackNavigationProp } from "@react-navigation/stack";
 import Card from "components/Card";
 import Header from "components/Header";
+import MediaPlayerControls from "components/MediaPlayerControls";
 import Space from "components/Space";
 import Text from "components/Text";
 import colors from "configs/colors";
@@ -50,12 +51,15 @@ const ContentDetailScreen = ({ route }: Prop) => {
   const [param, _] = useState(route?.params);
   const durationMillisRef = useRef(0);
   const completeMillisRef = useRef(0);
+  const hasSeekedToResumeRef = useRef(false);
   const { width } = useWindowDimensions();
   const { auth } = useAuth();
   const webViewRef: any = useRef();
   const [isVideoLoading, setVideoLoading] = useState<boolean>(false);
   const [mediaError, setMediaError] = useState("");
   const [shouldPlayVideo, setShouldPlayVideo] = useState(false);
+  const [videoMillis, setVideoMillis] = useState(0);
+  const [videoDuration, setVideoDuration] = useState(0);
 
   const fileUrl = param?.data?.file?.url || param?.data?.body_url || "";
   const fileName = String(param?.data?.file?.filename || fileUrl).toLowerCase();
@@ -66,8 +70,22 @@ const ContentDetailScreen = ({ route }: Prop) => {
   const isVideoFile = videoExtensions.some(ext =>
     normalizedFileName.endsWith("." + ext),
   );
+  const isPdfFile = normalizedFileName.endsWith(".pdf");
+  // PDF rendering (plus its retry/fallback handling) now lives in
+  // PdfViewerScreen -- see the document row below.
 
   const backAction = () => {
+    // The media never actually loaded (mediaError is set) -- don't report any
+    // progress at all. Previously this still posted status: 1 ("selesai") for
+    // documents/materi just from opening-then-leaving the screen, and status: 0
+    // for videos, even though nothing was actually viewed.
+    if (mediaError !== "") {
+      NavigationService.navigate("ModulDetailScreen", {
+        ...param,
+        materiProgress: route?.params?.materiProgress,
+      });
+      return true;
+    }
     if (route?.params?.data?.body_type === 1) {
       if (param?.data?.progress?.status !== 1) {
         if (
@@ -131,7 +149,7 @@ const ContentDetailScreen = ({ route }: Prop) => {
     );
 
     return () => backHandler.remove();
-  }, [param]);
+  }, [param, mediaError]);
 
   useEffect(() => {
     setMediaError("");
@@ -139,6 +157,32 @@ const ContentDetailScreen = ({ route }: Prop) => {
 
   const docUrl = encodeURIComponent(fileUrl);
   const googleViewerUrl = `https://docs.google.com/viewer?url=${docUrl}&embedded=true`;
+
+  const toggleVideoPlayback = async () => {
+    if (shouldPlayVideo) {
+      setShouldPlayVideo(false);
+      if (video?.current?.pauseAsync) {
+        await video.current.pauseAsync();
+      }
+      return;
+    }
+    // Update state AND explicitly call playAsync() -- the `shouldPlay` prop
+    // alone isn't reliably picked up by expo-av once the component has
+    // already mounted/loaded, which left the overlay hidden with nothing
+    // actually playing.
+    setShouldPlayVideo(true);
+    if (video?.current?.playAsync) {
+      await video.current.playAsync();
+    }
+  };
+
+  const seekVideo = async (millis: number) => {
+    if (!video?.current?.setPositionAsync) {
+      return;
+    }
+    await video.current.setPositionAsync(millis);
+    setVideoMillis(millis);
+  };
 
   return (
     <View style={globalStyles().topSafeArea}>
@@ -209,45 +253,89 @@ const ContentDetailScreen = ({ route }: Prop) => {
           />
           <Space height={5} />
           {param?.data?.body_type === 1 && param?.data?.file && isVideoFile && (
-            <View
-              style={{ width: "100%", height: 200, minHeight: 200 }}
-              //ref={targetViewRef}
-            >
-              {isVideoLoading && (
-                <ActivityIndicator size="small" color={colors.accent} />
-              )}
-              <Video
-                ref={video}
-                source={{
-                  uri: param?.data?.file?.url,
+            <View>
+              <View
+                style={{
+                  width: "100%",
+                  height: 200,
+                  minHeight: 200,
+                  backgroundColor: colors.black,
                 }}
-                onLoad={(status: any) => {
-                  completeMillisRef.current = status?.durationMillis;
-                  durationMillisRef.current =
-                    status?.durationMillis - status?.positionMillis;
-                }}
-                onLoadStart={() => setVideoLoading(true)}
-                onReadyForDisplay={() => setVideoLoading(false)}
-                onError={() => {
-                  setVideoLoading(false);
-                  setMediaError("Media belum bisa diakses.");
-                }}
-                style={{ height: "100%", width: "100%" }}
-                useNativeControls
-                resizeMode={ResizeMode.CONTAIN}
-                isLooping={false}
-                shouldPlay={shouldPlayVideo}
-                positionMillis={
-                  Number(route?.params?.data?.progress?.duration) || 0
-                }
-                volume={80}
-                onPlaybackStatusUpdate={(status: any) => {
-                  if (status?.isLoaded) {
-                    setShouldPlayVideo(status?.isPlaying);
-                  }
-                  completeMillisRef.current = status?.durationMillis;
-                  durationMillisRef.current = status?.positionMillis;
-                }}
+              >
+                {isVideoLoading && (
+                  <ActivityIndicator size="small" color={colors.accent} />
+                )}
+                <Video
+                  ref={video}
+                  source={{
+                    uri: param?.data?.file?.url,
+                  }}
+                  onLoad={(status: any) => {
+                    completeMillisRef.current = status?.durationMillis;
+                    durationMillisRef.current =
+                      status?.durationMillis - status?.positionMillis;
+                    // Resume from where the student left off, but only ONCE on
+                    // initial load. Passing `positionMillis` as a prop instead
+                    // re-seeks to that same fixed value on every re-render --
+                    // including the one triggered by tapping play after a pause
+                    // -- which was forcing the video back to the start instead
+                    // of resuming.
+                    const resumeMillis =
+                      Number(route?.params?.data?.progress?.duration) || 0;
+                    if (resumeMillis > 0 && !hasSeekedToResumeRef.current) {
+                      hasSeekedToResumeRef.current = true;
+                      video?.current?.setPositionAsync?.(resumeMillis);
+                    }
+                  }}
+                  onLoadStart={() => setVideoLoading(true)}
+                  onReadyForDisplay={() => setVideoLoading(false)}
+                  onError={() => {
+                    setVideoLoading(false);
+                    setMediaError("Media belum bisa diakses.");
+                  }}
+                  style={{ height: "100%", width: "100%" }}
+                  useNativeControls={false}
+                  resizeMode={ResizeMode.CONTAIN}
+                  isLooping={false}
+                  shouldPlay={shouldPlayVideo}
+                  volume={80}
+                  onPlaybackStatusUpdate={(status: any) => {
+                    if (!status?.isLoaded) {
+                      return;
+                    }
+                    setVideoMillis(status?.positionMillis);
+                    setVideoDuration(status?.durationMillis || 0);
+                    completeMillisRef.current = status?.durationMillis;
+                    durationMillisRef.current = status?.positionMillis;
+                  }}
+                />
+                {!shouldPlayVideo && (
+                  <TouchableOpacity
+                    style={{
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      justifyContent: "center",
+                      alignItems: "center",
+                      position: "absolute",
+                    }}
+                    activeOpacity={0.8}
+                    onPress={toggleVideoPlayback}
+                  >
+                    <Image
+                      source={icons.playButton}
+                      style={{ height: 60, width: 60, resizeMode: "contain" }}
+                    />
+                  </TouchableOpacity>
+                )}
+              </View>
+              <MediaPlayerControls
+                isPlaying={shouldPlayVideo}
+                positionMillis={videoMillis}
+                durationMillis={videoDuration}
+                onTogglePlay={toggleVideoPlayback}
+                onSeek={seekVideo}
               />
               {mediaError !== "" && (
                 <Text size={12} textAlign="center" color={colors.red}>
@@ -305,7 +393,25 @@ const ContentDetailScreen = ({ route }: Prop) => {
                   }}
                 />
               </TouchableOpacity> */}
-              <View
+              {/*
+               * For PDFs the whole row is a button into the full-screen
+               * reader (PdfViewerScreen). Rendering the document inline here
+               * meant it sat inside this screen's ScrollView, which swallowed
+               * every vertical drag -- the PDF showed page one and refused to
+               * scroll. Non-PDF documents keep the reload button, since they
+               * still render inline via the Google viewer below.
+               */}
+              <TouchableOpacity
+                activeOpacity={isPdfFile ? 0.7 : 1}
+                onPress={() => {
+                  if (!isPdfFile) {
+                    return;
+                  }
+                  NavigationService.navigate("PdfViewerScreen", {
+                    title: param?.data?.file?.filename || "Dokumen",
+                    url: fileUrl,
+                  });
+                }}
                 style={{
                   backgroundColor: colors.stone50,
                   paddingHorizontal: scaledHorizontal(15),
@@ -338,23 +444,46 @@ const ContentDetailScreen = ({ route }: Prop) => {
                     {param?.data?.file?.filename}
                   </Text>
                 </View>
-                <TouchableOpacity
-                  onPress={() => {
-                    if (webViewRef?.current) {
-                      webViewRef.current.reload();
-                    }
-                  }}
-                >
+                {isPdfFile ? (
                   <Image
-                    source={icons.materiRepeat}
+                    source={icons.materi}
                     style={{
                       height: 24,
                       width: 24,
                       resizeMode: "contain",
                     }}
                   />
-                </TouchableOpacity>
-              </View>
+                ) : (
+                  <TouchableOpacity
+                    onPress={() => {
+                      setMediaError("");
+                      if (webViewRef?.current) {
+                        webViewRef.current.reload();
+                      }
+                    }}
+                  >
+                    <Image
+                      source={icons.materiRepeat}
+                      style={{
+                        height: 24,
+                        width: 24,
+                        resizeMode: "contain",
+                      }}
+                    />
+                  </TouchableOpacity>
+                )}
+              </TouchableOpacity>
+
+              {isPdfFile && (
+                <Text
+                  size={12}
+                  textAlign="center"
+                  color={colors.stone500}
+                  style={{ marginBottom: 10 }}
+                >
+                  {"Ketuk dokumen di atas untuk membaca"}
+                </Text>
+              )}
 
               {mediaError !== "" && (
                 <Text size={12} textAlign="center" color={colors.red}>
@@ -370,7 +499,9 @@ const ContentDetailScreen = ({ route }: Prop) => {
                 />
               )}
 
-              {!isImageFile && googleViewerUrl && (
+              {/* PDFs open in PdfViewerScreen (tap the row above); only
+                  non-PDF documents still render inline via Google's viewer. */}
+              {!isImageFile && !isPdfFile && googleViewerUrl && (
                 <View
                   style={{
                     height: 500,

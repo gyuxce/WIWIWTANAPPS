@@ -69,6 +69,7 @@ import AssesmentTimerStart from "screens/AssesmentTimerStart/AssesmentTimerStart
 import FinishAssesment from "screens/FinishAssesment/FinishAssesment";
 import ManagementScreen from "screens/ManagementScreen/ManagementScreen";
 import AssesmentReviewScreen from "screens/AssesmentReviewScreen/AssesmentReviewScreen";
+import PdfViewerScreen from "screens/PdfViewerScreen/PdfViewerScreen";
 
 const Main = createStackNavigator<RootStackParamList>();
 const DrawerStack = createDrawerNavigator<RootStackParamList>();
@@ -711,6 +712,16 @@ export const AppStackNavigator = () => {
       <Main.Screen
         name="AssesmentReviewScreen"
         component={AssesmentReviewScreen}
+        options={{
+          gestureEnabled: true,
+          headerShown: false,
+          cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+          animationEnabled: true,
+        }}
+      />
+      <Main.Screen
+        name="PdfViewerScreen"
+        component={PdfViewerScreen}
         options={{
           gestureEnabled: true,
           headerShown: false,

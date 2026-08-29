@@ -16,7 +16,7 @@ import PaymentTab from "components/PaymentTab";
 import icons from "configs/icons";
 import Text from "components/Text";
 import { usePayment } from "hooks/usePayment";
-import { numberToRupiah } from "utils/Utils";
+import { numberToRupiah, parseServerTimestamp } from "utils/Utils";
 import CardPaymentPaid from "components/CardPaymentPaid";
 import { t } from "i18next";
 import { Payment } from "types/PaymentTypes";
@@ -72,7 +72,7 @@ const InstallmentPaymentDetailScreen = () => {
       });
 
       paid_payments.forEach((p: Payment) => {
-        const paid_at = new Date(p.updated_at);
+        const paid_at = parseServerTimestamp(p.updated_at);
         const paid_formatted = paid_at.toLocaleString("ja-JP", {
           year: "numeric",
           month: "2-digit",

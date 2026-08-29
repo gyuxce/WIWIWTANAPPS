@@ -1,3 +1,4 @@
+import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import type { BottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
 import BaseActionSheetModal from "components/BaseActionSheetModal";
 import Button from "components/Button";
@@ -39,77 +40,89 @@ const SortActionSheet = ({
       actionSheetRef={actionSheetRef}
       snapPoints={snapPoints}
     >
-      <View
-        style={{
-          paddingTop: scaledVertical(20),
-          paddingBottom: scaledVertical(-20),
-          paddingHorizontal: scaledHorizontal(25),
-          height: 400,
-          width: "100%",
-          backgroundColor: colors.white,
-          zIndex: 9999,
-          marginBottom:
-            Platform.OS === "ios" ? -bottom - scaledVertical(20) : 0,
-        }}
+      {/*
+       * Content must be wrapped in BottomSheetScrollView (the library's own
+       * component) rather than a plain View -- that's what lets the sheet
+       * measure and lay out its content. AssesmentActionSheet already does
+       * this and its filter works; this one and VirtualClassActionSheet used
+       * a bare View with a hardcoded height: 400 instead, which is why their
+       * "Filter" buttons appeared to do nothing at all when tapped.
+       */}
+      <BottomSheetScrollView
+        showsVerticalScrollIndicator={false}
+        nestedScrollEnabled
       >
-        <Text textAlign="center" type="bold" variant="CenturyGothicBold">
-          {t("urutkan")}
-        </Text>
-        <Space height={20} />
         <View
           style={{
-            flexDirection: "row",
-            gap: 3,
-            marginTop: 10,
-            marginHorizontal: scaledHorizontal(25),
-            justifyContent: "center",
+            paddingTop: scaledVertical(20),
+            paddingBottom: scaledVertical(-20),
+            paddingHorizontal: scaledHorizontal(25),
+            width: "100%",
+            backgroundColor: colors.white,
+            zIndex: 9999,
+            marginBottom:
+              Platform.OS === "ios" ? -bottom - scaledVertical(20) : 0,
           }}
         >
-          {dataSort &&
-            dataSort?.map((item, index) => {
-              return (
-                <Button
-                  key={index}
-                  onPress={() => {
-                    setSort(item);
-                  }}
-                  title={item.title}
-                  style={{
-                    borderWidth: item.id === sort.id ? 1 : 0,
-                    paddingHorizontal: 5,
-                    borderRadius: 6,
-                    paddingVertical: 6,
-                    backgroundColor:
-                      item.id === sort.id ? colors.white : colors.white,
-                  }}
-                  textType="bold"
-                  variant="CenturyGothicBold"
-                  textStyle={{
-                    fontWeight: "600",
-                    fontSize: 12,
-                    textAlign: "center",
-                  }}
-                  withBorder={false}
-                />
-              );
-            })}
+          <Text textAlign="center" type="bold" variant="CenturyGothicBold">
+            {t("urutkan")}
+          </Text>
+          <Space height={20} />
+          <View
+            style={{
+              flexDirection: "row",
+              gap: 3,
+              marginTop: 10,
+              marginHorizontal: scaledHorizontal(25),
+              justifyContent: "center",
+            }}
+          >
+            {dataSort &&
+              dataSort?.map((item, index) => {
+                return (
+                  <Button
+                    key={index}
+                    onPress={() => {
+                      setSort(item);
+                    }}
+                    title={item.title}
+                    style={{
+                      borderWidth: item.id === sort.id ? 1 : 0,
+                      paddingHorizontal: 5,
+                      borderRadius: 6,
+                      paddingVertical: 6,
+                      backgroundColor:
+                        item.id === sort.id ? colors.white : colors.white,
+                    }}
+                    textType="bold"
+                    variant="CenturyGothicBold"
+                    textStyle={{
+                      fontWeight: "600",
+                      fontSize: 12,
+                      textAlign: "center",
+                    }}
+                    withBorder={false}
+                  />
+                );
+              })}
+          </View>
+          {children && children}
+          <Space height={30} />
+          <Button
+            onPress={() => {
+              setSelectedSort(sort);
+              setSort(sort);
+              actionSheetRef?.current?.forceClose();
+            }}
+            title={t("terapkan_filter")}
+            style={{ paddingVertical: scaledHorizontal(15) }}
+            textStyle={{
+              fontWeight: "bold",
+              fontFamily: fonts.CenturyGothicBold,
+            }}
+          />
         </View>
-        {children && children}
-        <Space height={30} />
-        <Button
-          onPress={() => {
-            setSelectedSort(sort);
-            setSort(sort);
-            actionSheetRef?.current?.forceClose();
-          }}
-          title={t("terapkan_filter")}
-          style={{ paddingVertical: scaledHorizontal(15) }}
-          textStyle={{
-            fontWeight: "bold",
-            fontFamily: fonts.CenturyGothicBold,
-          }}
-        />
-      </View>
+      </BottomSheetScrollView>
     </BaseActionSheetModal>
   );
 };

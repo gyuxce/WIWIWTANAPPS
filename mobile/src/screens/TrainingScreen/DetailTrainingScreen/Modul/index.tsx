@@ -1,11 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
-import {
-  View,
-  TouchableOpacity,
-  Image,
-  ScrollView,
-  RefreshControl,
-} from "react-native";
+import { View, TouchableOpacity, Image } from "react-native";
 import icons from "configs/icons";
 import { useExam } from "hooks/useExam";
 import SortActionSheet from "components/SortActionSheet";
@@ -13,12 +7,13 @@ import { scaledHorizontal } from "utils/ScaledService";
 import Space from "components/Space";
 import Button from "components/Button";
 import SearchAndSort from "components/SearchAndSort";
-import styles from "./style";
-import { BottomSheetModal } from "@gorhom/bottom-sheet";
+import type { BottomSheetModal } from "@gorhom/bottom-sheet";
 import Text from "components/Text";
 import NavigationService from "utils/NavigationService";
 import { useIsFocused } from "@react-navigation/core";
 import { t } from "i18next";
+
+import styles from "./style";
 
 const getDisplayTitle = (item?: { title?: string; title_japan?: string }) =>
   item?.title_japan || item?.title || "";
@@ -78,13 +73,15 @@ const Module = ({ categoryId, title, image }: Props) => {
     fetchData(sort, keyword);
   };
   return (
+    // This used to be its own <ScrollView>, but the parent screen
+    // (DetailTrainingScreen) already wraps the whole tab in one -- nesting a
+    // second ScrollView inside it was creating a gesture-handling conflict
+    // that blocked SortActionSheet's BottomSheetModal from presenting at all
+    // (the "Filter" button did nothing). Data already refreshes on focus
+    // (see the isFocused effect above), so pull-to-refresh isn't lost, just
+    // no longer available from this inner list specifically.
     <View>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl refreshing={false} onRefresh={fetchData} />
-        }
-      >
+      <View>
         <SearchAndSort
           search={q}
           setSearch={val => {
@@ -241,7 +238,7 @@ const Module = ({ categoryId, title, image }: Props) => {
             Tidak ada course
           </Text>
         )}
-      </ScrollView>
+      </View>
 
       <SortActionSheet
         actionSheetRef={actionSheetRef}

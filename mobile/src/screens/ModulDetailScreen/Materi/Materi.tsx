@@ -5,12 +5,11 @@ import Space from "components/Space";
 import Text from "components/Text";
 import colors from "configs/colors";
 import icons from "configs/icons";
-import images from "configs/images";
 import { ResizeMode, Video } from "expo-av";
 import { t } from "i18next";
-import React, { memo, useState } from "react";
+import React, { memo, useEffect, useState } from "react";
 import { Image, TouchableOpacity, View } from "react-native";
-import { MaterialContentType } from "types/TrainingTypes";
+import type { MaterialContentType } from "types/TrainingTypes";
 import NavigationService from "utils/NavigationService";
 import { scaledHorizontal } from "utils/ScaledService";
 import { millisToTime } from "utils/Utils";
@@ -45,10 +44,60 @@ const Materi = ({
   const Content = memo(
     ({ item, index }: { item: MaterialContentType; index: number }) => {
       const [durationMillis, setDurationMillis] = useState(0);
+      const [shouldProbeDuration, setShouldProbeDuration] = useState(false);
+
+      // Every video row used to mount an invisible <Video> the instant this
+      // list rendered, just to read its duration for the "sisa xx:xx"
+      // progress text/bar. With many videos in one module, that meant
+      // spinning up that many native video decoders all at once, which is
+      // what made opening this list feel heavy/laggy. Staggering the probes
+      // instead (capped so later rows don't wait too long) spreads that load
+      // out over a couple of seconds instead of all at once.
+      useEffect(() => {
+        if (item?.body_type !== 1) {
+          return;
+        }
+        const delay = Math.min(index, 20) * 150;
+        const timer = setTimeout(() => setShouldProbeDuration(true), delay);
+        return () => clearTimeout(timer);
+      }, [item?.body_type, index]);
+
+      // A PDF document has nothing useful on the intermediate detail screen
+      // (title + filename only, descriptions are rarely filled in), so send
+      // the student straight to the reader. Everything else still goes
+      // through ContentDetailScreen, which is where video playback and
+      // rich-text material actually live.
+      const documentUrl = item?.file?.url || "";
+      const [documentName] = String(item?.file?.filename || documentUrl)
+        .toLowerCase()
+        .split("?");
+      const isPdfDocument =
+        item?.body_type === 2 &&
+        !!documentUrl &&
+        (documentName || "").endsWith(".pdf");
+
+      const typeIcon =
+        item?.body_type === 1
+          ? icons.materiVideo
+          : item?.body_type === 2
+          ? icons.document
+          : icons.materi;
+
+      const description = String(item?.description || "").trim();
+      const hasDescription = description !== "" && description !== "-";
+
       return (
         <TouchableOpacity
           key={index}
           onPress={() => {
+            if (isPdfDocument) {
+              NavigationService.navigate("PdfViewerScreen", {
+                title: item?.title || item?.file?.filename || "Dokumen",
+                url: documentUrl,
+                materialContentId: item?.id,
+              });
+              return;
+            }
             NavigationService.navigate("ContentDetailScreen", {
               ...params,
               data: item,
@@ -57,17 +106,41 @@ const Materi = ({
         >
           <Card style={{ marginBottom: 10 }}>
             <View style={{ flexDirection: "row", gap: 15 }}>
-              <Image
-                source={
-                  item?.cover ? { uri: item?.cover.url } : images.placeholder
-                }
-                style={{
-                  height: 100,
-                  width: 100,
-                  resizeMode: "cover",
-                  borderRadius: 8,
-                }}
-              />
+              {/*
+               * Covers are optional content that in practice is almost never
+               * uploaded, so this used to be a meaningless grey placeholder
+               * occupying the most prominent spot on the card. Falling back to
+               * the material's type icon fills that space with something the
+               * student can actually read at a glance, and makes uploading a
+               * cover an enhancement rather than a requirement.
+               */}
+              {item?.cover ? (
+                <Image
+                  source={{ uri: item?.cover.url }}
+                  style={{
+                    height: 100,
+                    width: 100,
+                    resizeMode: "cover",
+                    borderRadius: 8,
+                  }}
+                />
+              ) : (
+                <View
+                  style={{
+                    height: 100,
+                    width: 100,
+                    borderRadius: 8,
+                    backgroundColor: colors.stone100,
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  <Image
+                    source={typeIcon}
+                    style={{ height: 44, width: 44, resizeMode: "contain" }}
+                  />
+                </View>
+              )}
               <View style={{ flex: 1 }}>
                 <View
                   style={{
@@ -93,7 +166,7 @@ const Materi = ({
                 <Text type="bold" variant="CenturyGothicBold" numberOfLines={3}>
                   {item?.title}
                 </Text>
-                {item?.body_type === 1 && (
+                {item?.body_type === 1 && shouldProbeDuration && (
                   <Video
                     source={{
                       uri: item.file?.url,
@@ -110,10 +183,15 @@ const Materi = ({
                 )}
               </View>
             </View>
-            <Space height={10} />
-            <Text size={12} numberOfLines={3} style={{ flex: 1 }}>
-              {item?.description}
-            </Text>
+            {/* Empty descriptions used to render as a stray "-" line. */}
+            {hasDescription && (
+              <>
+                <Space height={10} />
+                <Text size={12} numberOfLines={3} style={{ flex: 1 }}>
+                  {description}
+                </Text>
+              </>
+            )}
             <Space height={10} />
             <View
               style={{
@@ -136,7 +214,7 @@ const Materi = ({
                       `${t("sisa")} ${millisToTime(
                         durationMillis - Number(item?.progress?.duration),
                       )}`}
-                    {durationMillis !== 0 && !item?.progress && `sisa 00:00`}
+                    {durationMillis !== 0 && !item?.progress && "sisa 00:00"}
                   </Text>
                   <View>
                     <View
@@ -167,7 +245,7 @@ const Materi = ({
                   </View>
                 </View>
               ) : (
-                !item?.progress && <View></View>
+                !item?.progress && <View />
               )}
 
               {item?.progress && item?.progress?.status === 1 && (
@@ -193,36 +271,20 @@ const Materi = ({
                 </View>
               )}
 
-              {item?.progress?.status !== 1 && (
-                <Image
-                  source={
-                    item?.body_type === 2
-                      ? icons.materiDokumen
-                      : item?.body_type === 3
-                      ? icons.materi
-                      : icons.materiVideo
-                  }
-                  style={{
-                    height: 48,
-                    width: 48,
-                    resizeMode: "contain",
-                  }}
-                />
-              )}
-              {item?.progress?.status === 1 && (
-                <Image
-                  source={
-                    item.body_type === 2
-                      ? icons.materiDokumenOutline
-                      : icons.materiRepeat
-                  }
-                  style={{
-                    height: 48,
-                    width: 48,
-                    resizeMode: "contain",
-                  }}
-                />
-              )}
+              {/*
+               * The trailing type icon that used to sit here is gone: the
+               * card now leads with a type block on the left, so repeating it
+               * at bottom-right was redundant -- and because it looked like a
+               * button (download arrow) next to no other controls, students
+               * read it as an action that doesn't exist.
+               */}
+              {/*
+               * A trailing icon used to render here for completed items (a
+               * download-arrow, later a reload-arrow). Both read as an action
+               * button that doesn't exist -- nothing downloads, and the whole
+               * card is already tappable to reopen. Completed rows now just
+               * say "Selesai ✓" on the left and nothing on the right.
+               */}
             </View>
           </Card>
         </TouchableOpacity>

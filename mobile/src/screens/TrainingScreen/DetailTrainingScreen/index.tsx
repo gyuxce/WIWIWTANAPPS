@@ -6,14 +6,10 @@ import images from "configs/images";
 import colors from "configs/colors";
 import Space from "components/Space";
 import CardProgressProfile from "components/CardProgressProfile";
-import TabItem from "./TabItem";
-import styles from "./styles";
-import VirtualClass from "./VirtualClass";
-import Asesmen from "./Asesmen";
-import Module from "./Modul";
-import { RouteProp, useNavigation } from "@react-navigation/core";
+import type { RouteProp } from "@react-navigation/core";
+import { useNavigation } from "@react-navigation/core";
 import type { RootStackParamList } from "types/NavigatorTypes";
-import { StackNavigationProp } from "@react-navigation/stack";
+import type { StackNavigationProp } from "@react-navigation/stack";
 import { useAuth } from "hooks/useAuth";
 import { getCourseImageAndColor } from "utils/Utils";
 import { useTraining } from "hooks/useTraining";
@@ -22,6 +18,12 @@ import NavigationService from "utils/NavigationService";
 import { useExam } from "hooks/useExam";
 import { t } from "i18next";
 import Section from "components/Section";
+
+import Module from "./Modul";
+import Asesmen from "./Asesmen";
+import VirtualClass from "./VirtualClass";
+import styles from "./styles";
+import TabItem from "./TabItem";
 
 type VerifyURLRouteType = RouteProp<RootStackParamList, "DetailTrainingScreen">;
 

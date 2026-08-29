@@ -446,5 +446,8 @@
   "pivot_method_card_form_name": "Nama",
   "pivot_button_pay": "Bayar",
   "pivot_button_status": "Cek Status",
-  "pivot_button_simulation": "Simulasi pembayaran"
+  "pivot_button_simulation": "Simulasi pembayaran",
+  "pivot_button_change_method": "Ganti Metode Pembayaran",
+  "pivot_change_method_confirm": "Batalkan pembayaran ini dan pilih metode lain?",
+  "pivot_change_method_error": "Gagal mengganti metode pembayaran, silakan coba lagi"
 }

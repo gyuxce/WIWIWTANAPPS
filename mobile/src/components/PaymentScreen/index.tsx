@@ -11,6 +11,8 @@ import {
 import type { ImageSourcePropType } from "react-native";
 import React, { useState, useEffect, useRef } from "react";
 import Card from "components/Card";
+import ModalAlert from "components/ModalAlert";
+import icons from "configs/icons";
 import images from "configs/images";
 import { scaledHorizontal, scaledVertical } from "utils/ScaledService";
 import {
@@ -101,6 +103,7 @@ const PaymentScreen = ({ amount = null }: Props) => {
     transaction,
     getLatestPayment,
     payTransaction,
+    cancelPayment,
     getLatestTransaction,
     confirmPayment,
   } = usePayment();
@@ -116,6 +119,7 @@ const PaymentScreen = ({ amount = null }: Props) => {
   const [isOngoingPayment, setIsOngoingPayment] = useState(false);
   const [, setIsInstallmentTime] = useState(false);
   const [isVaCopied, setIsVaCopied] = useState(false);
+  const [showChangeMethodModal, setShowChangeMethodModal] = useState(false);
 
   const webviewRef = useRef<WebView>(null);
 
@@ -198,6 +202,33 @@ const PaymentScreen = ({ amount = null }: Props) => {
         "Error during processing, please contact the administrator",
         toastConfig,
       );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleChangeMethod = () => {
+    setShowChangeMethodModal(true);
+  };
+
+  const confirmChangeMethod = async () => {
+    setShowChangeMethodModal(false);
+    setIsLoading(true);
+    try {
+      const result = await cancelPayment({
+        price_type: transaction.price_type,
+      });
+      if (result.status === "success") {
+        setPayment(null);
+        setMethod(null);
+        resetForm();
+        setIsOngoingPayment(false);
+        setCanCreatePayment(true);
+      } else {
+        Toast.show(t("pivot_change_method_error"), toastConfig);
+      }
+    } catch (err) {
+      Toast.show(t("pivot_change_method_error"), toastConfig);
     } finally {
       setIsLoading(false);
     }
@@ -1271,7 +1302,10 @@ const PaymentScreen = ({ amount = null }: Props) => {
                   </Text>
                 )}
                 {/* QRIS DETAILS */}
-                {method === "QRIS" && (
+                {/* Pivot's API uses "QR" as the method name (see mapMethod()),
+                    so the created payment echoes back method: "QR", not "QRIS"
+                    like the selection button uses. Accept both. */}
+                {(method === "QRIS" || method === "QR") && (
                   <View>
                     <Text
                       style={{
@@ -1370,6 +1404,25 @@ const PaymentScreen = ({ amount = null }: Props) => {
                       }}
                     />
                   )}
+                  {payment?.status === 1 && (
+                    <Button
+                      style={{
+                        paddingVertical: scaledVertical(25),
+                        backgroundColor: "transparent",
+                        borderWidth: 1,
+                        borderColor: colors.grey500,
+                      }}
+                      title={t("pivot_button_change_method")}
+                      textStyle={{
+                        fontFamily: fonts.CenturyGothicBold,
+                        fontSize: 12,
+                        color: colors.grey500,
+                      }}
+                      onPress={() => {
+                        handleChangeMethod();
+                      }}
+                    />
+                  )}
                 </View>
               </View>
             )}
@@ -1394,6 +1447,18 @@ const PaymentScreen = ({ amount = null }: Props) => {
           </Card>
         </View>
       )}
+      <ModalAlert
+        showModal={showChangeMethodModal}
+        animation="zoom"
+        withIcon
+        iconImage={icons.warningRed}
+        title={t("pivot_change_method_confirm")}
+        onHide={() => setShowChangeMethodModal(false)}
+        leftText={t("lanjutkan")}
+        leftFunction={confirmChangeMethod}
+        rightText={t("batal")}
+        rightFunction={() => setShowChangeMethodModal(false)}
+      />
     </View>
   );
 };

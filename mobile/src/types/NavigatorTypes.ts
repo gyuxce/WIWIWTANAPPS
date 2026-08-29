@@ -1,11 +1,11 @@
-import { QuestionResponse, UserExamType } from "./AssesmentTypes";
-import { CertificationListType } from "./CertificationTypes";
+import type { QuestionResponse, UserExamType } from "./AssesmentTypes";
+import type { CertificationListType } from "./CertificationTypes";
 import type {
   FileType,
   QuestionSessionType,
   TraningModuleProgressType,
 } from "./ExamTypes";
-import { MaterialContentType } from "./TrainingTypes";
+import type { MaterialContentType } from "./TrainingTypes";
 import type { UserType } from "./UserTypes";
 
 export type RootStackParamList = {
@@ -129,6 +129,11 @@ export type RootStackParamList = {
   FinishAssesment: undefined;
   ManagementScreen: { title: string; path: string };
   AssesmentReviewScreen: { title: string; file: FileType };
+  PdfViewerScreen: {
+    title: string;
+    url: string;
+    materialContentId?: string;
+  };
 };
 
 export type RootType =
@@ -198,4 +203,5 @@ export type RootType =
   | "AssesmentTimerStart"
   | "FinishAssesment"
   | "ManagementScreen"
-  | "AssesmentReviewScreen";
+  | "AssesmentReviewScreen"
+  | "PdfViewerScreen";

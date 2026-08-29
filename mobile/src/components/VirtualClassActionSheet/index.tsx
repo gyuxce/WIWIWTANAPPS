@@ -1,4 +1,5 @@
-import { BottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
+import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
+import type { BottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
 import RNDateTimePicker from "@react-native-community/datetimepicker";
 import BaseActionSheetModal from "components/BaseActionSheetModal";
 import Button from "components/Button";
@@ -99,334 +100,350 @@ const VirtualClassActionSheet = ({
         setDate(selectedDate);
       }}
     >
-      <View
-        style={{
-          paddingTop: scaledVertical(20),
-          paddingBottom: scaledVertical(-20),
-          paddingHorizontal: scaledHorizontal(25),
-          height: 400,
-          width: "100%",
-          backgroundColor: colors.white,
-          zIndex: 9999,
-          marginBottom:
-            Platform.OS === "ios" ? -bottom - scaledVertical(20) : 0,
-        }}
+      {/*
+       * Content must be wrapped in BottomSheetScrollView (the library's own
+       * component) rather than a plain View -- that's what lets the sheet
+       * measure and lay out its content. AssesmentActionSheet already does
+       * this and its filter works; this one and SortActionSheet used a bare
+       * View with a hardcoded height: 400 instead, which is why their
+       * "Filter" buttons appeared to do nothing at all when tapped.
+       */}
+      <BottomSheetScrollView
+        showsVerticalScrollIndicator={false}
+        nestedScrollEnabled
       >
-        <Text textAlign="center" type="bold" variant="CenturyGothicBold">
-          {t("urutkan")}
-        </Text>
-        <Space height={10} />
         <View
           style={{
-            flexDirection: "row",
-            gap: 3,
-            marginTop: 5,
-            marginHorizontal: scaledHorizontal(25),
-            justifyContent: "center",
-            flexWrap: "wrap",
+            paddingTop: scaledVertical(20),
+            paddingBottom: scaledVertical(-20),
+            paddingHorizontal: scaledHorizontal(25),
+            width: "100%",
+            backgroundColor: colors.white,
+            zIndex: 9999,
+            marginBottom:
+              Platform.OS === "ios" ? -bottom - scaledVertical(20) : 0,
           }}
         >
-          {dataSort &&
-            dataSort?.map((item, index) => {
-              return (
-                <Button
-                  key={index}
-                  onPress={() => {
-                    setSort(item);
-                  }}
-                  title={item.title}
-                  style={{
-                    borderWidth: item.id === sort.id ? 1 : 0,
-                    paddingHorizontal: 5,
-                    borderRadius: 6,
-                    paddingVertical: 6,
-                    backgroundColor:
-                      item.id === sort.id ? colors.white : colors.white,
-                    marginTop: 3,
-                  }}
-                  textType="bold"
-                  variant="CenturyGothicBold"
-                  textStyle={{
-                    fontWeight: "600",
-                    fontSize: 12,
-                    textAlign: "center",
-                  }}
-                  withBorder={false}
-                />
-              );
-            })}
-        </View>
-        <Space height={20} />
-        <Text textAlign="center" type="bold" variant="CenturyGothicBold">
-          {t("filter")}
-        </Text>
-        <Space height={10} />
-        <View
-          style={{
-            flexDirection: "row",
-            gap: 3,
-            marginTop: 5,
-            marginHorizontal: scaledHorizontal(25),
-            justifyContent: "center",
-            flexWrap: "wrap",
-          }}
-        >
-          {dataFilter &&
-            dataFilter?.map((item, index) => {
-              return (
-                <Button
-                  key={index}
-                  onPress={() => {
-                    if (
-                      filter?.length > 0 &&
-                      filter.some(itm => itm.id === item.id)
-                    ) {
-                      let data = filter.filter(itm => itm.id !== item.id);
-                      setFilter(data);
-                    } else {
-                      setFilter([...filter, item]);
-                    }
-                  }}
-                  title={item.title}
-                  style={{
-                    borderWidth:
-                      filter?.length > 0 &&
-                      filter?.some(itm => itm.id === item.id)
-                        ? 1
-                        : 0,
-                    paddingHorizontal: 5,
-                    borderRadius: 6,
-                    paddingVertical: 6,
-                    backgroundColor:
-                      filter?.length > 0 &&
-                      filter?.some(itm => itm.id === item.id)
-                        ? colors.white
-                        : colors.white,
-                    marginTop: 3,
-                  }}
-                  textType="bold"
-                  variant="CenturyGothicBold"
-                  textStyle={{
-                    fontWeight: "600",
-                    fontSize: 12,
-                    textAlign: "center",
-                  }}
-                  withBorder={false}
-                />
-              );
-            })}
-        </View>
-        <Space height={20} />
-        <Text textAlign="center" type="bold" variant="CenturyGothicBold">
-          {t("tanggal")}
-        </Text>
-        <Space height={10} />
-        <View
-          style={{
-            //flexDirection: "row",
-            gap: 3,
-            marginTop: 5,
-            marginHorizontal: scaledHorizontal(10),
-            //justifyContent: "center",
-            //flexWrap: "wrap",
-          }}
-        >
-          {dataDate &&
-            dataDate?.map((item, index) => {
-              return (
-                <View key={index}>
-                  <TouchableOpacity
-                    onPress={() => {
-                      setDate(item);
-                    }}
+          <Text textAlign="center" type="bold" variant="CenturyGothicBold">
+            {t("urutkan")}
+          </Text>
+          <Space height={10} />
+          <View
+            style={{
+              flexDirection: "row",
+              gap: 3,
+              marginTop: 5,
+              marginHorizontal: scaledHorizontal(25),
+              justifyContent: "center",
+              flexWrap: "wrap",
+            }}
+          >
+            {dataSort &&
+              dataSort?.map((item, index) => {
+                return (
+                  <Button
                     key={index}
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      borderTopColor: colors.grey300,
-                      borderTopWidth: 1,
-                      paddingVertical: scaledVertical(15),
+                    onPress={() => {
+                      setSort(item);
                     }}
-                  >
-                    <Text size={12} type="bold" variant="CenturyGothicBold">
-                      {item.title}
-                    </Text>
-                    <Image
-                      source={
-                        item?.title === date?.title
-                          ? icons.toggleSelected
-                          : icons?.toggle
+                    title={item.title}
+                    style={{
+                      borderWidth: item.id === sort.id ? 1 : 0,
+                      paddingHorizontal: 5,
+                      borderRadius: 6,
+                      paddingVertical: 6,
+                      backgroundColor:
+                        item.id === sort.id ? colors.white : colors.white,
+                      marginTop: 3,
+                    }}
+                    textType="bold"
+                    variant="CenturyGothicBold"
+                    textStyle={{
+                      fontWeight: "600",
+                      fontSize: 12,
+                      textAlign: "center",
+                    }}
+                    withBorder={false}
+                  />
+                );
+              })}
+          </View>
+          <Space height={20} />
+          <Text textAlign="center" type="bold" variant="CenturyGothicBold">
+            {t("filter")}
+          </Text>
+          <Space height={10} />
+          <View
+            style={{
+              flexDirection: "row",
+              gap: 3,
+              marginTop: 5,
+              marginHorizontal: scaledHorizontal(25),
+              justifyContent: "center",
+              flexWrap: "wrap",
+            }}
+          >
+            {dataFilter &&
+              dataFilter?.map((item, index) => {
+                return (
+                  <Button
+                    key={index}
+                    onPress={() => {
+                      if (
+                        filter?.length > 0 &&
+                        filter.some(itm => itm.id === item.id)
+                      ) {
+                        const data = filter.filter(itm => itm.id !== item.id);
+                        setFilter(data);
+                      } else {
+                        setFilter([...filter, item]);
                       }
-                      style={{ height: 20, width: 20, resizeMode: "contain" }}
-                    />
-                  </TouchableOpacity>
-                  {item.type === "custom" && (
-                    <View
+                    }}
+                    title={item.title}
+                    style={{
+                      borderWidth:
+                        filter?.length > 0 &&
+                        filter?.some(itm => itm.id === item.id)
+                          ? 1
+                          : 0,
+                      paddingHorizontal: 5,
+                      borderRadius: 6,
+                      paddingVertical: 6,
+                      backgroundColor:
+                        filter?.length > 0 &&
+                        filter?.some(itm => itm.id === item.id)
+                          ? colors.white
+                          : colors.white,
+                      marginTop: 3,
+                    }}
+                    textType="bold"
+                    variant="CenturyGothicBold"
+                    textStyle={{
+                      fontWeight: "600",
+                      fontSize: 12,
+                      textAlign: "center",
+                    }}
+                    withBorder={false}
+                  />
+                );
+              })}
+          </View>
+          <Space height={20} />
+          <Text textAlign="center" type="bold" variant="CenturyGothicBold">
+            {t("tanggal")}
+          </Text>
+          <Space height={10} />
+          <View
+            style={{
+              //flexDirection: "row",
+              gap: 3,
+              marginTop: 5,
+              marginHorizontal: scaledHorizontal(10),
+              //justifyContent: "center",
+              //flexWrap: "wrap",
+            }}
+          >
+            {dataDate &&
+              dataDate?.map((item, index) => {
+                return (
+                  <View key={index}>
+                    <TouchableOpacity
+                      onPress={() => {
+                        setDate(item);
+                      }}
+                      key={index}
                       style={{
-                        backgroundColor: colors.stone100,
-                        borderRadius: 12,
                         flexDirection: "row",
-                        //justifyContent: "space-between",
-                        gap: 10,
-                        marginTop: scaledVertical(15),
-                        paddingVertical: scaledVertical(20),
-                        paddingHorizontal: scaledHorizontal(20),
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        borderTopColor: colors.grey300,
+                        borderTopWidth: 1,
+                        paddingVertical: scaledVertical(15),
                       }}
                     >
-                      <View style={{ flex: 1 }}>
-                        <Text size={12} textAlign="center">
-                          {t("dari_tanggal")}
-                        </Text>
-                        <Space height={10} />
-                        {isShowPickerStartDate ? (
-                          <RNDateTimePicker
-                            value={
-                              date.start_date === ""
-                                ? new Date()
-                                : new Date(date?.start_date)
-                            }
-                            mode="date"
-                            onChange={(_, selectedDate) => {
-                              setIsShowPickerStartDate(false);
+                      <Text size={12} type="bold" variant="CenturyGothicBold">
+                        {item.title}
+                      </Text>
+                      <Image
+                        source={
+                          item?.title === date?.title
+                            ? icons.toggleSelected
+                            : icons?.toggle
+                        }
+                        style={{ height: 20, width: 20, resizeMode: "contain" }}
+                      />
+                    </TouchableOpacity>
+                    {item.type === "custom" && (
+                      <View
+                        style={{
+                          backgroundColor: colors.stone100,
+                          borderRadius: 12,
+                          flexDirection: "row",
+                          //justifyContent: "space-between",
+                          gap: 10,
+                          marginTop: scaledVertical(15),
+                          paddingVertical: scaledVertical(20),
+                          paddingHorizontal: scaledHorizontal(20),
+                        }}
+                      >
+                        <View style={{ flex: 1 }}>
+                          <Text size={12} textAlign="center">
+                            {t("dari_tanggal")}
+                          </Text>
+                          <Space height={10} />
+                          {isShowPickerStartDate ? (
+                            <RNDateTimePicker
+                              value={
+                                date.start_date === ""
+                                  ? new Date()
+                                  : new Date(date?.start_date)
+                              }
+                              mode="date"
+                              onChange={(_, selectedDate) => {
+                                setIsShowPickerStartDate(false);
 
-                              setDate({
-                                ...date,
-                                start_date: selectedDate?.toDateString() || "",
-                              });
-                            }}
-                            style={{
-                              marginRight: 10,
-                              alignSelf: "center",
-                            }}
-                          />
-                        ) : (
-                          <TouchableOpacity
-                            disabled={date?.type !== "custom"}
-                            onPress={() => setIsShowPickerStartDate(true)}
-                            style={{
-                              borderRadius: 6,
-                              backgroundColor: colors.white,
-                              paddingVertical: scaledVertical(20),
-                            }}
-                          >
-                            <Text
-                              size={12}
-                              textAlign="center"
-                              variant="CenturyGothicBold"
-                              type="bold"
+                                setDate({
+                                  ...date,
+                                  start_date:
+                                    selectedDate?.toDateString() || "",
+                                });
+                              }}
+                              style={{
+                                marginRight: 10,
+                                alignSelf: "center",
+                              }}
+                            />
+                          ) : (
+                            <TouchableOpacity
+                              disabled={date?.type !== "custom"}
+                              onPress={() => setIsShowPickerStartDate(true)}
+                              style={{
+                                borderRadius: 6,
+                                backgroundColor: colors.white,
+                                paddingVertical: scaledVertical(20),
+                              }}
                             >
-                              {date?.type === "custom" &&
-                              date?.start_date !== ""
-                                ? moment(date?.start_date).format(
-                                    "D[ ]MMM[ ]YYYY",
-                                  )
-                                : "-"}
-                            </Text>
-                          </TouchableOpacity>
-                        )}
-                      </View>
-                      <View style={{ flex: 1 }}>
-                        <Text size={12} textAlign="center">
-                          {t("sampai_tanggal")}
-                        </Text>
-                        <Space height={10} />
-                        {isShowPickerEndDate ? (
-                          <RNDateTimePicker
-                            disabled={date?.start_date === ""}
-                            value={
-                              date.end_date === ""
-                                ? new Date()
-                                : new Date(date?.end_date)
-                            }
-                            minimumDate={
-                              date?.start_date !== ""
-                                ? moment(date?.start_date).toDate()
-                                : moment(new Date())
-                                    .subtract(2, "year")
-                                    .toDate()
-                            }
-                            mode="date"
-                            onChange={(_, selectedDate) => {
-                              setIsShowPickerEndDate(false);
-                              setDate({
-                                ...date,
-                                end_date: selectedDate?.toDateString() || "",
-                              });
-                            }}
-                            style={{
-                              marginRight: 10,
-                              alignSelf: "center",
-                            }}
-                          />
-                        ) : (
-                          <TouchableOpacity
-                            disabled={date?.type !== "custom"}
-                            onPress={() => {
-                              date?.start_date !== "" &&
-                                setIsShowPickerEndDate(true);
-                            }}
-                            style={{
-                              borderRadius: 6,
-                              backgroundColor: colors.white,
-                              paddingVertical: scaledVertical(20),
-                            }}
-                          >
-                            <Text
-                              size={12}
-                              textAlign="center"
-                              variant="CenturyGothicBold"
-                              type="bold"
+                              <Text
+                                size={12}
+                                textAlign="center"
+                                variant="CenturyGothicBold"
+                                type="bold"
+                              >
+                                {date?.type === "custom" &&
+                                date?.start_date !== ""
+                                  ? moment(date?.start_date).format(
+                                      "D[ ]MMM[ ]YYYY",
+                                    )
+                                  : "-"}
+                              </Text>
+                            </TouchableOpacity>
+                          )}
+                        </View>
+                        <View style={{ flex: 1 }}>
+                          <Text size={12} textAlign="center">
+                            {t("sampai_tanggal")}
+                          </Text>
+                          <Space height={10} />
+                          {isShowPickerEndDate ? (
+                            <RNDateTimePicker
+                              disabled={date?.start_date === ""}
+                              value={
+                                date.end_date === ""
+                                  ? new Date()
+                                  : new Date(date?.end_date)
+                              }
+                              minimumDate={
+                                date?.start_date !== ""
+                                  ? moment(date?.start_date).toDate()
+                                  : moment(new Date())
+                                      .subtract(2, "year")
+                                      .toDate()
+                              }
+                              mode="date"
+                              onChange={(_, selectedDate) => {
+                                setIsShowPickerEndDate(false);
+                                setDate({
+                                  ...date,
+                                  end_date: selectedDate?.toDateString() || "",
+                                });
+                              }}
+                              style={{
+                                marginRight: 10,
+                                alignSelf: "center",
+                              }}
+                            />
+                          ) : (
+                            <TouchableOpacity
+                              disabled={date?.type !== "custom"}
+                              onPress={() => {
+                                date?.start_date !== "" &&
+                                  setIsShowPickerEndDate(true);
+                              }}
+                              style={{
+                                borderRadius: 6,
+                                backgroundColor: colors.white,
+                                paddingVertical: scaledVertical(20),
+                              }}
                             >
-                              {date?.type === "custom" && date?.end_date !== ""
-                                ? moment(date?.end_date).format(
-                                    "D[ ]MMM[ ]YYYY",
-                                  )
-                                : "-"}
-                            </Text>
-                          </TouchableOpacity>
-                        )}
+                              <Text
+                                size={12}
+                                textAlign="center"
+                                variant="CenturyGothicBold"
+                                type="bold"
+                              >
+                                {date?.type === "custom" &&
+                                date?.end_date !== ""
+                                  ? moment(date?.end_date).format(
+                                      "D[ ]MMM[ ]YYYY",
+                                    )
+                                  : "-"}
+                              </Text>
+                            </TouchableOpacity>
+                          )}
+                        </View>
                       </View>
-                    </View>
-                  )}
-                </View>
-              );
-            })}
+                    )}
+                  </View>
+                );
+              })}
+          </View>
+
+          <Space height={30} />
+          <Button
+            onPress={() => {
+              setSelectedSort(sort);
+              setSort(sort);
+              setSelectedFilter(filter);
+              setFilter(filter);
+              if (date?.type === "custom") {
+                setSelectedDate({
+                  ...selectedDate,
+                  id: "custom",
+                  title: t("pilih_tanggal"),
+                  type: "custom",
+                  start_date: dayjs(date?.start_date).format("YYYY-MM-DD"),
+                  end_date: dayjs(date?.end_date).isValid()
+                    ? dayjs(date?.end_date).format("YYYY-MM-DD")
+                    : dayjs(date?.start_date)
+                        .add(1, "day")
+                        .format("YYYY-MM-DD"),
+                });
+              } else {
+                setSelectedDate(date);
+              }
+
+              setDate(date);
+              actionSheetRef?.current?.forceClose();
+            }}
+            title={t("terapkan_filter")}
+            style={{ paddingVertical: scaledHorizontal(15) }}
+            textStyle={{
+              fontWeight: "bold",
+              fontFamily: fonts.CenturyGothicBold,
+            }}
+          />
         </View>
-
-        <Space height={30} />
-        <Button
-          onPress={() => {
-            setSelectedSort(sort);
-            setSort(sort);
-            setSelectedFilter(filter);
-            setFilter(filter);
-            if (date?.type === "custom") {
-              setSelectedDate({
-                ...selectedDate,
-                id: "custom",
-                title: t("pilih_tanggal"),
-                type: "custom",
-                start_date: dayjs(date?.start_date).format("YYYY-MM-DD"),
-                end_date: dayjs(date?.end_date).isValid()
-                  ? dayjs(date?.end_date).format("YYYY-MM-DD")
-                  : dayjs(date?.start_date).add(1, "day").format("YYYY-MM-DD"),
-              });
-            } else {
-              setSelectedDate(date);
-            }
-
-            setDate(date);
-            actionSheetRef?.current?.forceClose();
-          }}
-          title={t("terapkan_filter")}
-          style={{ paddingVertical: scaledHorizontal(15) }}
-          textStyle={{
-            fontWeight: "bold",
-            fontFamily: fonts.CenturyGothicBold,
-          }}
-        />
-      </View>
+      </BottomSheetScrollView>
     </BaseActionSheetModal>
   );
 };

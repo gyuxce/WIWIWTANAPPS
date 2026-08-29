@@ -443,5 +443,8 @@
   "pivot_method_card_form_name": "名義",
   "pivot_button_pay": "支払う",
   "pivot_button_status": "ステータスを確認",
-  "pivot_button_simulation": "支払いシミュレーション"  
+  "pivot_button_simulation": "支払いシミュレーション",
+  "pivot_button_change_method": "支払い方法を変更",
+  "pivot_change_method_confirm": "この支払いをキャンセルして、別の方法を選択しますか？",
+  "pivot_change_method_error": "支払い方法の変更に失敗しました。もう一度お試しください"
 }

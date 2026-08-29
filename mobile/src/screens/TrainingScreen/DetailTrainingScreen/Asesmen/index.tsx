@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
-import { BottomSheetModal } from "@gorhom/bottom-sheet";
+import type { BottomSheetModal } from "@gorhom/bottom-sheet";
 import dayjs from "dayjs";
 import AssesmentActionSheet from "components/AssesmentActionSheet";
 import { scaledHorizontal } from "utils/ScaledService";
@@ -9,7 +9,7 @@ import { useTraining } from "hooks/useTraining";
 import Space from "components/Space";
 import DropdownAssesment from "components/DropdownAssesment";
 import { useIsFocused } from "@react-navigation/core";
-import { AssesmentTypeResponse } from "types/TrainingTypes";
+import type { AssesmentTypeResponse } from "types/TrainingTypes";
 import { t } from "i18next";
 import Text from "components/Text";
 import colors from "configs/colors";
@@ -37,14 +37,14 @@ const Asesmen = ({ categoryId, icon }: AsesmenProps) => {
       end_date: "",
     },
     {
-      id: `30-day`,
+      id: "30-day",
       title: t("30_hari_terakhir"),
       type: "button",
       start_date: dayjs(new Date()).subtract(30, "day").format("YYYY-MM-DD"),
       end_date: dayjs(new Date()).format("YYYY-MM-DD"),
     },
     {
-      id: `90-day`,
+      id: "90-day",
       title: t("90_hari_terakhir"),
       type: "button",
       start_date: dayjs(new Date()).subtract(90, "day").format("YYYY-MM-DD"),

@@ -8,7 +8,7 @@ import images from "configs/images";
 import { useAuth } from "hooks/useAuth";
 import { t } from "i18next";
 import React, { useEffect, useState } from "react";
-import { View, Image, Platform } from "react-native";
+import { View, Image, Platform, Alert } from "react-native";
 import { apiGetAssesment } from "services/ExamServices";
 import { QuestionResponse, UserExamType } from "types/AssesmentTypes";
 import { RootStackParamList } from "types/NavigatorTypes";
@@ -38,6 +38,7 @@ const AssesmentTimerStart = ({ route }: Prop) => {
   let intervalId: any = null;
   const [assesment, setAssesment] = useState({} as QuestionResponse);
   const [userExam, setUserExam] = useState({} as UserExamType);
+  const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
     runningTime();
@@ -66,10 +67,20 @@ const AssesmentTimerStart = ({ route }: Prop) => {
   };
 
   const getAssesment = () => {
-    apiGetAssesment(auth?.accessToken, route?.params?.id).then(({ data }) => {
-      setAssesment(data?.question);
-      setUserExam(data?.userExam);
-    });
+    apiGetAssesment(auth?.accessToken, route?.params?.id)
+      .then(({ data }) => {
+        setAssesment(data?.question);
+        setUserExam(data?.userExam);
+      })
+      .catch(error => {
+        setLoadError(true);
+        Alert.alert(
+          "Asesmen belum bisa dimulai",
+          error?.response?.data?.message ||
+            "Soal untuk asesmen ini belum tersedia, silakan hubungi admin.",
+          [{ text: "OK", onPress: () => NavigationService.back() }],
+        );
+      });
   };
 
   return (
@@ -126,7 +137,7 @@ const AssesmentTimerStart = ({ route }: Prop) => {
       </View>
 
       <PopUpScreeen
-        showModal={openModal}
+        showModal={openModal && !loadError}
         onClose={() => {
           setOpenModal(false);
           NavigationService.replace("AssesmentQuestionScreen", {

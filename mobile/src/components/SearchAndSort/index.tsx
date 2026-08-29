@@ -70,7 +70,22 @@ const SearchAndSort = ({
       <Button
         onPress={() => {
           setIsOpen && setIsOpen(true);
-          actionSheetRef?.current?.present();
+          // The BottomSheetModal this opens is only mounted while its tab is
+          // selected, so on a tab that's active from first render (index 0)
+          // its ref can still be null for a beat while @gorhom/bottom-sheet
+          // finishes registering it with BottomSheetModalProvider -- tapping
+          // Filter right away raced ahead of that and silently did nothing.
+          // Retry briefly instead of giving up after a single null check.
+          let attemptsLeft = 10;
+          const tryPresent = () => {
+            if (actionSheetRef?.current) {
+              actionSheetRef.current.present();
+            } else if (attemptsLeft > 0) {
+              attemptsLeft -= 1;
+              setTimeout(tryPresent, 50);
+            }
+          };
+          tryPresent();
         }}
         icon={icons.sort}
         iconStyle={{

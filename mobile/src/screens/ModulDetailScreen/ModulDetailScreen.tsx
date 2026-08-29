@@ -15,15 +15,17 @@ import { Image, ScrollView, View } from "react-native";
 import TabItem from "screens/TrainingScreen/DetailTrainingScreen/TabItem";
 import globalStyles from "utils/GlobalStyles";
 import { scaledHorizontal, scaledVertical } from "utils/ScaledService";
-import Materi from "./Materi/Materi";
-import { RouteProp, useIsFocused, useNavigation } from "@react-navigation/core";
-import { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParamList } from "types/NavigatorTypes";
-import { BottomSheetModal } from "@gorhom/bottom-sheet";
+import type { RouteProp } from "@react-navigation/core";
+import { useIsFocused, useNavigation } from "@react-navigation/core";
+import type { StackNavigationProp } from "@react-navigation/stack";
+import type { RootStackParamList } from "types/NavigatorTypes";
+import type { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { useTraining } from "hooks/useTraining";
-import Assesment from "./Assesment/Assesment";
-import { AssesmentTypeResponse } from "types/TrainingTypes";
+import type { AssesmentTypeResponse } from "types/TrainingTypes";
 import { t } from "i18next";
+
+import Assesment from "./Assesment/Assesment";
+import Materi from "./Materi/Materi";
 
 type ModulDetailRouteType = RouteProp<RootStackParamList, "ModulDetailScreen">;
 
@@ -131,11 +133,27 @@ const ModulDetailScreen = ({ route }: Prop) => {
       }, 0);
   };
 
+  // Derive the materi counter from the freshly-fetched list rather than the
+  // navigation param it was passed in with. The param only ever changed when
+  // ContentDetailScreen incremented it on the way back, so anything that
+  // completes a material another way -- reading a PDF in PdfViewerScreen, for
+  // instance -- left the header showing a stale count even though the card
+  // below it already said "Selesai". Falls back to the param while the list
+  // is still loading.
+  const materiCompleted = materiDetail?.filter(
+    item => item?.progress?.status === 1,
+  ).length;
+  const hasMateriData = (materiDetail?.length || 0) > 0;
+
   const tabList = [
     {
       title: t("materi"),
-      progress: Number(route?.params?.materiProgress),
-      total: Number(route?.params?.materiTotal),
+      progress: hasMateriData
+        ? Number(materiCompleted || 0)
+        : Number(route?.params?.materiProgress),
+      total: hasMateriData
+        ? Number(materiDetail?.length || 0)
+        : Number(route?.params?.materiTotal),
     },
     {
       title: t("asesmen"),
@@ -149,6 +167,15 @@ const ModulDetailScreen = ({ route }: Prop) => {
       ),
     },
   ];
+
+  const overallProgress = tabList.reduce(
+    (sum, tab) => sum + (Number(tab.progress) || 0),
+    0,
+  );
+  const overallTotal = tabList.reduce(
+    (sum, tab) => sum + (Number(tab.total) || 0),
+    0,
+  );
 
   return (
     <View style={globalStyles().topSafeArea}>
@@ -180,24 +207,16 @@ const ModulDetailScreen = ({ route }: Prop) => {
           }}
         >
           <Text size={16} type="reguler" variant="OpificioNeueRegular">
-            {(
-              (Number(
-                route?.params?.materiProgress +
-                  Number(checkActiveAssesmentList() || 0),
-              ) /
-                Number(
-                  route?.params?.materiTotal +
-                    Number(
-                      assesmentListNoFilter?.filter(
-                        item =>
-                          item?.title === route?.params?.title &&
-                          item?.level_module_label ===
-                            route?.params?.type_label,
-                      )[0]?.assesment.length || 0,
-                    ),
-                )) *
-              100
-            ).toFixed()}
+            {/*
+             * Reuses the same numbers the tabs show, so header and tabs can
+             * never disagree. The previous version added `materiProgress`
+             * (typed as a string) to a number, which is string concatenation
+             * in JS -- "1" + 2 becomes "12", not 3 -- so the percentage could
+             * be wildly wrong depending on what the params happened to hold.
+             */}
+            {overallTotal > 0
+              ? ((overallProgress / overallTotal) * 100).toFixed()
+              : "0"}
             <Text size={10} variant="CenturyGothicRegular">
               %
             </Text>

@@ -59,6 +59,12 @@ export const apiConfirmPayment = async (token: string, body: any) => {
     .post(body) as Promise<any>;
 };
 
+export const apiCancelPayment = async (token: string, body: any) => {
+  return BaseService("/mobile/finance/transactions/payment/cancel", token)
+    .headers({ Authorization: `Bearer ${token}` })
+    .post(body) as Promise<any>;
+};
+
 export const apiGetLatestTransaction = async (token: string, param?: any) => {
   let url = "/mobile/finance/transactions/latest?" + convertToQuery(param);
   return BaseService(url, token)

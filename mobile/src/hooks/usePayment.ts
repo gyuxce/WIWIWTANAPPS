@@ -11,6 +11,7 @@ import {
   apiPostPaymentProof,
   apiPgPaymentMethod,
   apiPayTransaction,
+  apiCancelPayment,
   apiGetLatestPayment,
   apiGetLatestTransaction,
   apiConfirmPayment,
@@ -242,6 +243,28 @@ export const usePayment = () => {
     }
   };
 
+  const cancelPayment = async (body: { price_type: number }) => {
+    try {
+      const resp: any = await apiCancelPayment(auth?.accessToken, body);
+      if (resp?.status !== "success") {
+        return {
+          status: "failed",
+          message: "",
+        };
+      }
+      return {
+        status: "success",
+        data: resp?.data,
+        message: "",
+      };
+    } catch (errors) {
+      return {
+        status: "failed",
+        message: errors,
+      };
+    }
+  };
+
   const getLatestTransaction = async (param: { price_type: number }) => {
     try {
       const resp: any = await apiGetLatestTransaction(auth?.accessToken, param);
@@ -439,6 +462,7 @@ export const usePayment = () => {
     getPaymentMethods,
     initiateTransaction,
     payTransaction,
+    cancelPayment,
     getLatestPayment,
     transaction,
     paymentLatest,

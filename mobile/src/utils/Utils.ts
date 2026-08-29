@@ -41,8 +41,21 @@ export const formatDate = (date: any | number, format: string) => {
   return moment(date).format(format);
 };
 
+// The backend converts timestamps to WIB-equivalent wall-clock time before
+// sending them (see convertToTimezone() in helpers.php), but sends them
+// WITHOUT a timezone marker (e.g. "2026-08-28 16:50:13"). Parsing that string
+// with the native `Date` constructor is ambiguous and engine-dependent --
+// Hermes (React Native's JS engine) can interpret it as UTC and re-shift it
+// again on display, throwing the shown time off by hours. `moment()` parses
+// this exact non-ISO format as literal local wall-clock values instead,
+// which is what we actually want here. Use this wherever a raw timestamp
+// from the API needs to become a native Date for display.
+export const parseServerTimestamp = (inputTimestamp: string | any): Date => {
+  return moment(inputTimestamp).toDate();
+};
+
 export const formatTimestamp = (inputTimestamp: string | any) => {
-  const timestamp = new Date(inputTimestamp);
+  const timestamp = parseServerTimestamp(inputTimestamp);
 
   const currentDate = new Date();
 
