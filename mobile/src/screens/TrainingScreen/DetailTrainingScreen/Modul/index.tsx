@@ -27,7 +27,7 @@ const Module = ({ categoryId, title, image }: Props) => {
   const [q, setQ] = useState("");
   const [data, setData] = useState([] as any);
   const actionSheetRef = useRef<BottomSheetModal>(null);
-  const snapPoints = useMemo(() => [320], []);
+  const snapPoints = useMemo(() => [400], []);
   const dataSort = [
     { id: "asc", title: t("level_tertinggi") },
     { id: "desc", title: t("level_terendah") },

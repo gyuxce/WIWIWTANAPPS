@@ -112,7 +112,11 @@ const AssesmentActionSheet = ({
         <View
           style={{
             paddingTop: scaledVertical(20),
-            paddingBottom: scaledVertical(-20),
+            // A negative bottom padding pulled the last control -- the
+            // "Terapkan Filter" button -- past the sheet's own edge, where
+            // Android's gesture bar then clipped it. Real padding plus the
+            // safe-area inset keeps it clear of the system bar on every device.
+            paddingBottom: scaledVertical(20) + bottom,
             paddingHorizontal: scaledHorizontal(25),
             //height: 400,
             width: "100%",

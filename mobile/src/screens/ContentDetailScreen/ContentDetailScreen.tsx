@@ -8,7 +8,6 @@ import Text from "components/Text";
 import colors from "configs/colors";
 import fonts from "configs/fonts";
 import icons from "configs/icons";
-import images from "configs/images";
 import { ResizeMode, Video } from "expo-av";
 import { useAuth } from "hooks/useAuth";
 import { t } from "i18next";
@@ -71,6 +70,12 @@ const ContentDetailScreen = ({ route }: Prop) => {
     normalizedFileName.endsWith("." + ext),
   );
   const isPdfFile = normalizedFileName.endsWith(".pdf");
+  // Most materials have no description filled in on the CMS, and the field
+  // comes back as "-" rather than empty, so it rendered as a stray dash under
+  // the title.
+  const contentDescription = String(param?.data?.description || "").trim();
+  const hasDescription =
+    contentDescription !== "" && contentDescription !== "-";
   // PDF rendering (plus its retry/fallback handling) now lives in
   // PdfViewerScreen -- see the document row below.
 
@@ -192,23 +197,33 @@ const ContentDetailScreen = ({ route }: Prop) => {
         style={{ marginHorizontal: scaledHorizontal(25) }}
       >
         <Card style={{ marginBottom: 10 }}>
+          {/*
+           * The list card dropped its cover placeholder for the same reason
+           * this one does: covers are never uploaded -- there is no designer
+           * on the team -- so a 100px grey box with a picture glyph was a
+           * container advertising something that is never coming. The type
+           * icon now sits inline with the badge at 20px, matching the list,
+           * so the header keeps a shape to scan without the empty frame. A
+           * real cover is still shown if one ever exists.
+           */}
           <View style={{ flexDirection: "row", gap: 15 }}>
-            <Image
-              source={
-                param?.data?.cover
-                  ? { uri: param?.data?.cover.url }
-                  : images.placeholder
-              }
-              style={{
-                height: 100,
-                width: 100,
-                resizeMode: "cover",
-                borderRadius: 8,
-              }}
-            />
+            {param?.data?.cover && (
+              <Image
+                source={{ uri: param?.data?.cover.url }}
+                style={{
+                  height: 100,
+                  width: 100,
+                  resizeMode: "cover",
+                  borderRadius: 8,
+                }}
+              />
+            )}
             <View style={{ flex: 1 }}>
               <View
                 style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 6,
                   paddingVertical: 5,
                   paddingHorizontal: 10,
                   backgroundColor: colors.stone100,
@@ -216,6 +231,16 @@ const ContentDetailScreen = ({ route }: Prop) => {
                   alignSelf: "flex-start",
                 }}
               >
+                <Image
+                  source={
+                    param?.data?.body_type === 1
+                      ? icons.materiVideo
+                      : param?.data?.body_type === 2
+                      ? icons.document
+                      : icons.materi
+                  }
+                  style={{ height: 20, width: 20, resizeMode: "contain" }}
+                />
                 <Text
                   size={10}
                   color={colors.red}
@@ -233,10 +258,15 @@ const ContentDetailScreen = ({ route }: Prop) => {
               </Text>
             </View>
           </View>
-          <Space height={10} />
-          <Text size={12} numberOfLines={3} style={{ flex: 1 }}>
-            {param?.data?.description}
-          </Text>
+          {/* An unfilled description used to render as a stray "-" line. */}
+          {hasDescription && (
+            <>
+              <Space height={10} />
+              <Text size={12} numberOfLines={3} style={{ flex: 1 }}>
+                {contentDescription}
+              </Text>
+            </>
+          )}
           <Space height={10} />
           <Image
             source={icons.divider}
