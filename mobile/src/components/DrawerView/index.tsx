@@ -184,6 +184,11 @@ const DrawerView = ({}: DrawerViewProps) => {
       ) {
         return colors.green50;
       }
+      // See isFinalPhaseCompleted: the last stage has no phase above it to be
+      // measured against, so it needs its own way of reading as done.
+      if (isFinalPhaseCompleted(index)) {
+        return colors.green50;
+      }
       if (route === routeName) {
         return colors.white;
       } else if (index + 1 > user?.last_phase) {
@@ -209,6 +214,24 @@ const DrawerView = ({}: DrawerViewProps) => {
     return data?.every(item => item === true);
   };
 
+  /**
+   * The last stage could never be marked done.
+   *
+   * A stage shows its green tick once it has been *passed*, which the checks
+   * below express as `index + 1 < last_phase`. For Wawancara Final that would
+   * need a phase 6, and phases stop at 5 -- so a student who had finished
+   * everything still saw the final step sitting there unmarked, with no way to
+   * ever complete it.
+   *
+   * The interview verdict already lives on `interview_status`, and the home
+   * screen ticks its own "Wawancara Kerja" and "Keberangkatan" rows from that
+   * same flag. Reading it here keeps the drawer telling the same story as the
+   * screen it links to.
+   */
+  // Phase 5 is Wawancara Final; interview_status 1 is "Lulus".
+  const isFinalPhaseCompleted = (index: number) =>
+    index + 1 === 5 && Number(user?.interview_status) === 1;
+
   const showIcon = (index: number, route: string) => {
     if (index === 1 && user?.last_phase === 2) {
       if (user?.join_reason === null) {
@@ -229,6 +252,9 @@ const DrawerView = ({}: DrawerViewProps) => {
         paymentStatusType?.is_training_payment_completed &&
         isAllAssesmentCompleted()
       ) {
+        return { icon: icons.successGreen, isShow: true };
+      }
+      if (isFinalPhaseCompleted(index)) {
         return { icon: icons.successGreen, isShow: true };
       }
       if (route === routeName) {
