@@ -131,10 +131,28 @@ if [ "$USE_TELEGRAM" -eq 1 ]; then
   fi
 
   # Telegram caps a message at 4096 characters and rejects anything longer
-  # outright, so a bad morning would otherwise deliver nothing at all. Trimmed
-  # with room to spare, and the count in the subject still says how much was
-  # left out.
-  MESSAGE="$(printf '%s\n\n%s' "$SUBJECT" "$BODY" | cut -c1-3800)"
+  # outright, so a bad morning would otherwise deliver nothing at all.
+  #
+  # `cut -c` was the wrong tool here and looked right: it trims each *line* to
+  # the width given, leaving a message of any total length. head -c bounds the
+  # whole thing. Because that can land mid-character in UTF-8, iconv drops any
+  # broken sequence left at the tail -- Telegram rejects malformed text too.
+  #
+  # Only the busiest faults are worth a phone notification; the count in the
+  # header still says how many kinds there were in total, and the full list is
+  # a --dry-run away.
+  MESSAGE="$(
+    {
+      printf '%s\n\n' "$SUBJECT"
+      printf 'Sejak %s.\n\n' "$SINCE"
+      printf '%s\n' "$FOUND" | head -n 15
+      printf '\nSelengkapnya: error-digest.sh --dry-run\n'
+    } | head -c 3500
+  )"
+
+  if command -v iconv > /dev/null 2>&1; then
+    MESSAGE="$(printf '%s' "$MESSAGE" | iconv -f utf-8 -t utf-8 -c)"
+  fi
 
   HTTP="$(
     curl -sS -o /tmp/wiwitan-telegram-response -w '%{http_code}' \
