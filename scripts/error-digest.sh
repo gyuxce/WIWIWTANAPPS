@@ -141,18 +141,24 @@ if [ "$USE_TELEGRAM" -eq 1 ]; then
   # Only the busiest faults are worth a phone notification; the count in the
   # header still says how many kinds there were in total, and the full list is
   # a --dry-run away.
+  # Deliberately no `head` anywhere in here. Under `set -o pipefail`, head
+  # closing the pipe once it has read enough makes the command upstream of it
+  # fail with SIGPIPE, which fails the whole substitution, which -- under
+  # `set -e` -- exits the script. Silently, because the failure happens inside
+  # an assignment. That is exactly what happened: the digest stopped just
+  # before sending and printed nothing at all, which looks far more like
+  # "nothing to report" than like a crash.
+  #
+  # sed reads its input to the end, and bash slices the result itself, so
+  # nothing gets a closed pipe. Slicing in bash also counts characters rather
+  # than bytes, which is the same unit Telegram's 4096 limit is measured in.
   MESSAGE="$(
-    {
-      printf '%s\n\n' "$SUBJECT"
-      printf 'Sejak %s.\n\n' "$SINCE"
-      printf '%s\n' "$FOUND" | head -n 15
-      printf '\nSelengkapnya: error-digest.sh --dry-run\n'
-    } | head -c 3500
+    printf '%s\n\n' "$SUBJECT"
+    printf 'Sejak %s.\n\n' "$SINCE"
+    printf '%s\n' "$FOUND" | sed -n '1,15p'
+    printf '\nSelengkapnya: error-digest.sh --dry-run\n'
   )"
-
-  if command -v iconv > /dev/null 2>&1; then
-    MESSAGE="$(printf '%s' "$MESSAGE" | iconv -f utf-8 -t utf-8 -c)"
-  fi
+  MESSAGE="${MESSAGE:0:3500}"
 
   HTTP="$(
     curl -sS -o /tmp/wiwitan-telegram-response -w '%{http_code}' \
