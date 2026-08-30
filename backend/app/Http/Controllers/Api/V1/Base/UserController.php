@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1\Base;
 
 use App\Constants\Training\InterviewStatusConstant;
+use App\Http\Controllers\Api\V1\Sailfish\HasNotifications;
 use App\Constants\Training\TrainingProgramConstant;
 use App\Constants\Training\UserExamTypeConstant;
 use App\Constants\UserAccountAdapterConstant;
@@ -30,6 +31,8 @@ use Symfony\Component\HttpFoundation\Response;
 
 class UserController extends BaseCrud
 {
+    use HasNotifications;
+
     use HasLogHelper;
     public $model = User::class;
     public $resource = UserResource::class;
@@ -81,6 +84,52 @@ class UserController extends BaseCrud
         # insert to log
         $dataLog = ["uuid" => $this->row->uuid, "label" => $this->row->name];
         $this->__insertLog($dataLog, "updated", $this->logChange);
+
+        $this->__announceInterviewResult();
+    }
+
+    /**
+     * Tell the student when their interview has been decided.
+     *
+     * The verdict is an admin editing interview_status on the user record --
+     * there is no status column on `interviews`, which only holds the
+     * schedule. Nothing announced that edit, so a student could be passed or
+     * failed and simply never find out; the result sat on a screen they had
+     * no reason to revisit. Pra-Tes has announced its own result since the
+     * beginning (UserExamController), and certification now does too.
+     *
+     * Driven off the recorded change rather than the current value, so an
+     * admin saving the same user again for an unrelated edit does not send
+     * the news a second time.
+     */
+    private function __announceInterviewResult(): void
+    {
+        $old = $this->logChange["old"]["interview_status"] ?? null;
+        $new = $this->logChange["new"]["interview_status"] ?? null;
+
+        if ($new === null || (int) $old === (int) $new) {
+            return;
+        }
+
+        $status = (int) $new;
+
+        if ($status === InterviewStatusConstant::FINISHED) {
+            $notifdata = [
+                "title" => "Wawancara Lulus",
+                "body" => "Selamat! Kamu telah lolos seleksi wawancara kerja. Silakan hubungi admin untuk proses selanjutnya.",
+                "data" => ["module" => "user", "user_id" => $this->row->uuid],
+            ];
+        } elseif ($status === InterviewStatusConstant::TIDAKLULUS) {
+            $notifdata = [
+                "title" => "Hasil Wawancara",
+                "body" => "Mohon maaf, kamu belum lolos seleksi wawancara kerja. Silakan hubungi admin untuk informasi lebih lanjut.",
+                "data" => ["module" => "user", "user_id" => $this->row->uuid],
+            ];
+        } else {
+            return;
+        }
+
+        $this->__pushNotification($this->row, $notifdata, 1);
     }
 
     public function __beforeDestroy()
