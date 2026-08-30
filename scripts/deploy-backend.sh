@@ -90,14 +90,23 @@ for path in "${FILES[@]}"; do
   mkdir -p "$BACKUP_DIR/$(dirname "$path")"
   cp -p "$path" "$BACKUP_DIR/$path"
 
-  # Write as whoever owns the file. This is the failure that bit us twice:
-  # ownership is mixed across the tree, so one fixed user is wrong somewhere.
+  # Write as whoever owns the file. This is the failure that bit us twice by
+  # hand: ownership is mixed across the tree, so one fixed user is wrong
+  # somewhere.
   owner="$(stat -c '%U' "$path")"
 
   if [ "$owner" = "$(id -un)" ]; then
     cp "$STAGING/$path" "$path"
   else
-    sudo -u "$owner" cp "$STAGING/$path" "$path"
+    # Redirect rather than `sudo -u "$owner" cp`. mktemp -d creates the staging
+    # directory 0700 owned by whoever runs this, so the other user cannot read
+    # from it and the copy fails -- the same class of ownership trap this script
+    # exists to prevent, which it duly walked into on its first real use.
+    #
+    # The redirection is opened by this shell, which can read staging; only the
+    # write runs as the owner. Nothing has to be loosened, and tee writes
+    # through the existing file so its ownership and mode survive.
+    sudo -u "$owner" tee "$path" < "$STAGING/$path" > /dev/null
   fi
 
   echo "  ok     $path  (pemilik: $owner)"
@@ -131,7 +140,9 @@ find . -name '*.php' | sed 's|^\./||' | while read -r path; do
   if [ "$owner" = "$(id -un)" ]; then
     cp "$HERE/$path" "$target"
   else
-    sudo -u "$owner" cp "$HERE/$path" "$target"
+    # Redirected for the same reason as the deploy path: only the write needs
+    # to run as the owner, so nothing has to be made readable to them.
+    sudo -u "$owner" tee "$target" < "$HERE/$path" > /dev/null
   fi
   echo "dikembalikan: $path"
 done
