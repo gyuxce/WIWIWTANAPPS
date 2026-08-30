@@ -14,11 +14,14 @@ use App\Models\Base\User;
 use App\Models\Master\Certification;
 use App\Models\Master\CertificationStudent;
 use App\Services\BaseCrud\BaseCrud;
+use App\Http\Controllers\Api\V1\Sailfish\HasNotifications;
 use App\Services\BaseCrud\Traits\HasLogHelper;
 use Illuminate\Http\Request;
 
 class CertificationStudentController extends BaseCrud
 {
+    use HasNotifications;
+
     use HasLogHelper;
     public $model = CertificationStudent::class;
     public $resource = CertificationStudentResource::class;
@@ -99,6 +102,61 @@ class CertificationStudentController extends BaseCrud
         # insert to log
         $dataLog = ["uuid" => $this->row->uuid, "label" => $this->row->user->name . "-" . $this->row->certification->name];
         $this->__insertLog($dataLog, "updated", $this->logChange);
+
+        $this->__reactToCertificationVerdict();
+
+        return null;
+    }
+
+    /**
+     * React to the admin's verdict on a submitted certificate.
+     *
+     * changeStatus only ever wrote the row's own status. Two things that
+     * should have followed from it did not: the student was never moved on to
+     * the interview stage -- leaving them passed but with the next menu still
+     * locked, exactly the dead end phase 3 had -- and they were never told.
+     * Pra-Tes has announced its result since the beginning (see
+     * UserExamController); certification never grew the same courtesy.
+     *
+     * The phase is only ever raised, never lowered: an admin correcting a
+     * mistaken pass should not silently strip access a student already has.
+     */
+    private function __reactToCertificationVerdict(): void
+    {
+        $user = User::find($this->row->user_id);
+
+        if (!$user) {
+            return;
+        }
+
+        $status = (int) $this->row->status;
+
+        if ($status === CertificationStudentStatusConstant::SUCCESS) {
+            if ((int) $user->last_phase < PhaseSettingConstant::PHASE_INTERVIEW) {
+                $user->last_phase = PhaseSettingConstant::PHASE_INTERVIEW;
+                $user->save();
+            }
+
+            $this->__pushNotification(
+                $user,
+                [
+                    "title" => "Sertifikasi Lulus",
+                    "body" => "Selamat! Sertifikasi bahasa Jepang kamu telah diverifikasi. Tahap Wawancara Final sudah terbuka.",
+                    "data" => ["module" => "user", "user_id" => $user->uuid],
+                ],
+                1
+            );
+        } elseif ($status === CertificationStudentStatusConstant::FAIL) {
+            $this->__pushNotification(
+                $user,
+                [
+                    "title" => "Hasil Sertifikasi",
+                    "body" => "Mohon maaf, sertifikat yang kamu kirim belum dapat diverifikasi. Silakan hubungi admin untuk informasi lebih lanjut.",
+                    "data" => ["module" => "user", "user_id" => $user->uuid],
+                ],
+                1
+            );
+        }
     }
 
     public function changeStatus(Request $request, $id)
