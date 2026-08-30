@@ -14,11 +14,21 @@
 #
 # Usage:
 #   ./error-digest.sh --dry-run          print the digest, send nothing
-#   ./error-digest.sh --to a@b.com       send to a specific address
-#   ./error-digest.sh                    send to DIGEST_TO
+#   ./error-digest.sh --telegram         send to the configured Telegram chat
+#   ./error-digest.sh --to a@b.com       send as email instead
+#
+# Telegram is the default worth reaching for: it needs no SMTP, arrives
+# instantly, and gets read -- where an alert mail lands in an inbox beside
+# everything else. Put the credentials in ~/.wiwitan-telegram (chmod 600):
+#
+#   BOT_TOKEN=123456:ABC...
+#   CHAT_ID=987654321
+#
+# Keeping them in a file rather than on the command line keeps the token out
+# of crontab and out of `ps` for anyone else on the box.
 #
 # Meant for cron, once a day:
-#   0 8 * * *  /home/deploy/bin/error-digest.sh --to you@example.com
+#   0 8 * * *  /home/deploy/bin/error-digest.sh --telegram
 #
 # Note the failure mode worth knowing about: it only writes when something is
 # wrong, so silence means either "no errors" or "this script stopped running".
@@ -33,15 +43,26 @@ DIGEST_TO="${DIGEST_TO:-}"
 DIGEST_FROM="${DIGEST_FROM:-}"
 MAX_LINES="${MAX_LINES:-40}"
 
+TELEGRAM_CONF="${TELEGRAM_CONF:-$HOME/.wiwitan-telegram}"
+BOT_TOKEN="${BOT_TOKEN:-}"
+CHAT_ID="${CHAT_ID:-}"
+
 DRY_RUN=0
+USE_TELEGRAM=0
 while [ "$#" -gt 0 ]; do
   case "$1" in
     --dry-run) DRY_RUN=1; shift ;;
+    --telegram) USE_TELEGRAM=1; shift ;;
     --to) DIGEST_TO="${2:-}"; shift 2 ;;
     --from) DIGEST_FROM="${2:-}"; shift 2 ;;
     *) echo "Opsi tidak dikenal: $1"; exit 1 ;;
   esac
 done
+
+if [ "$USE_TELEGRAM" -eq 1 ] && [ -f "$TELEGRAM_CONF" ]; then
+  # shellcheck disable=SC1090
+  . "$TELEGRAM_CONF"
+fi
 
 if [ ! -d "$LOG_DIR" ]; then
   echo "Folder log tidak ditemukan: $LOG_DIR" >&2
@@ -103,8 +124,39 @@ if [ "$DRY_RUN" -eq 1 ]; then
   exit 0
 fi
 
+if [ "$USE_TELEGRAM" -eq 1 ]; then
+  if [ -z "$BOT_TOKEN" ] || [ -z "$CHAT_ID" ]; then
+    echo "BOT_TOKEN / CHAT_ID belum diisi di $TELEGRAM_CONF" >&2
+    exit 1
+  fi
+
+  # Telegram caps a message at 4096 characters and rejects anything longer
+  # outright, so a bad morning would otherwise deliver nothing at all. Trimmed
+  # with room to spare, and the count in the subject still says how much was
+  # left out.
+  MESSAGE="$(printf '%s\n\n%s' "$SUBJECT" "$BODY" | cut -c1-3800)"
+
+  HTTP="$(
+    curl -sS -o /tmp/wiwitan-telegram-response -w '%{http_code}' \
+      -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
+      --data-urlencode "chat_id=${CHAT_ID}" \
+      --data-urlencode "text=${MESSAGE}" \
+      --data-urlencode "disable_web_page_preview=true"
+  )"
+
+  if [ "$HTTP" = "200" ]; then
+    echo "terkirim ke Telegram (chat $CHAT_ID)"
+    exit 0
+  fi
+
+  echo "GAGAL kirim ke Telegram (HTTP $HTTP):" >&2
+  cat /tmp/wiwitan-telegram-response >&2
+  echo >&2
+  exit 1
+fi
+
 if [ -z "$DIGEST_TO" ]; then
-  echo "Tidak ada tujuan. Pakai --to alamat@email, atau set DIGEST_TO." >&2
+  echo "Tidak ada tujuan. Pakai --telegram, atau --to alamat@email." >&2
   exit 1
 fi
 
