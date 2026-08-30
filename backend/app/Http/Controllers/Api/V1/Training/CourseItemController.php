@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api\V1\Training;
 
 use App\Constants\Training\CourseItemGroupConstant;
 use App\Constants\Training\ExamTemplateConstant;
+use App\Constants\PhaseSettingConstant;
+use App\Http\Controllers\Api\V1\Sailfish\HasNotifications;
 use App\Models\Training\CourseItem;
 use App\Models\Training\Course;
 use App\Http\Resources\V1\Training\CourseItemResource;
@@ -41,6 +43,8 @@ use Illuminate\Support\Facades\Auth;
 
 class CourseItemController extends BaseCrud
 {
+    use HasNotifications;
+
     public $model = CourseItem::class;
     public $resource = CourseItemResource::class;
     public $searchAble = ["title", "title_japan", "materialContent.title", "materialContent.description"];
@@ -255,6 +259,9 @@ class CourseItemController extends BaseCrud
                 $materialContent->update(['deleted_at' => date('Y-m-d H:i:s')]);
             }
             DB::commit();
+
+            $this->__advancePhaseWhenTrainingComplete();
+
             return response()->json(
                 ['message' => 'Seccess submit data']
             );
@@ -306,6 +313,55 @@ class CourseItemController extends BaseCrud
                 'message' => $th->getMessage(),
             ], 500);
         }
+    }
+
+    /**
+     * Open the certification stage as soon as the training is genuinely done.
+     *
+     * Nothing used to do this. Phases 1->2 and 2->3 have triggers (the pra-test
+     * result, and both payments clearing), but 3->4 was only ever set when a
+     * certification registration was submitted -- and the menu that submits one
+     * stays disabled until the phase is already 4. A student who finished every
+     * module simply stopped there: next step locked, no explanation, and nothing
+     * they could do about it.
+     *
+     * "Finished" reuses the very counts the app prints on its own progress
+     * cards, so what a student is shown and what actually advances them cannot
+     * drift apart. Virtual classes are excluded on purpose: their progress is a
+     * function of the scheduled date passing rather than of anything a student
+     * does, so counting them would hold back anyone whose class is still ahead
+     * of them.
+     */
+    private function __advancePhaseWhenTrainingComplete(): void
+    {
+        $user = User::find(Auth::id());
+
+        if (!$user || (int) $user->last_phase !== PhaseSettingConstant::PHASE_TRAINING) {
+            return;
+        }
+
+        foreach ($this->courseItemRepo->getMobileModuleProgress() as $course) {
+            if ((int) $course->materi_count_progress < (int) $course->materi_count) {
+                return;
+            }
+
+            if ((int) $course->assesment_count_progress < (int) $course->assesment_count) {
+                return;
+            }
+        }
+
+        $user->last_phase = PhaseSettingConstant::PHASE_JAPANESE_CERTIFICATION;
+        $user->save();
+
+        $this->__pushNotification(
+            $user,
+            [
+                "title" => "Pelatihan Selesai",
+                "body" => "Selamat! Kamu telah menyelesaikan seluruh pelatihan. Tahap Sertifikasi Bahasa Jepang sudah terbuka.",
+                "data" => ["module" => "user", "user_id" => $user->uuid],
+            ],
+            1
+        );
     }
 
     public function mobileGetModuleContentMateri(Request $request)
