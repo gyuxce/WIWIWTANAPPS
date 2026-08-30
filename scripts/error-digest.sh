@@ -30,6 +30,7 @@ BACKEND_DIR="${BACKEND_DIR:-/srv/wiwitan-prod/backend}"
 LOG_DIR="$BACKEND_DIR/storage/logs"
 STATE_FILE="${STATE_FILE:-$HOME/.wiwitan-error-digest-state}"
 DIGEST_TO="${DIGEST_TO:-}"
+DIGEST_FROM="${DIGEST_FROM:-}"
 MAX_LINES="${MAX_LINES:-40}"
 
 DRY_RUN=0
@@ -37,6 +38,7 @@ while [ "$#" -gt 0 ]; do
   case "$1" in
     --dry-run) DRY_RUN=1; shift ;;
     --to) DIGEST_TO="${2:-}"; shift 2 ;;
+    --from) DIGEST_FROM="${2:-}"; shift 2 ;;
     *) echo "Opsi tidak dikenal: $1"; exit 1 ;;
   esac
 done
@@ -109,12 +111,20 @@ fi
 # Send through the application's own mailer rather than a system MTA, which may
 # not be installed or configured -- this is the transport already proven to
 # work by the pra-test result emails.
+# The sender has to be set explicitly. Laravel's mail.from.address is empty on
+# this server -- the application's own emails set their sender themselves -- so
+# leaving it to the config throws "An email must have a From or a Sender
+# header". Falls back to sending from the recipient, which every provider
+# accepts for mail addressed to that same account.
 cd "$BACKEND_DIR"
-SUBJECT="$SUBJECT" BODY="$BODY" TO="$DIGEST_TO" \
-  sudo -u www-data --preserve-env=SUBJECT,BODY,TO env HOME=/tmp \
+SUBJECT="$SUBJECT" BODY="$BODY" TO="$DIGEST_TO" FROM="${DIGEST_FROM:-$DIGEST_TO}" \
+  sudo -u www-data --preserve-env=SUBJECT,BODY,TO,FROM env HOME=/tmp \
   php artisan tinker --execute='
-    Illuminate\Support\Facades\Mail::raw(getenv("BODY"), function ($m) {
-        $m->to(getenv("TO"))->subject(getenv("SUBJECT"));
+    $from = getenv("FROM") ?: config("mail.from.address");
+    Illuminate\Support\Facades\Mail::raw(getenv("BODY"), function ($m) use ($from) {
+        $m->from($from, "Wiwitan Monitor")
+          ->to(getenv("TO"))
+          ->subject(getenv("SUBJECT"));
     });
     echo "terkirim\n";
   '
