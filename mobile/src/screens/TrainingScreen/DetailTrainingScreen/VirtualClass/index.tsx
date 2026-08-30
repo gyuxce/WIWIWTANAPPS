@@ -85,29 +85,40 @@ const VirtualClass = ({ virtualClassList, categoryId }: Props) => {
     },
   );
 
+  // The delay below is a search debounce: firing on every keystroke would
+  // hammer the API. Opening the tab is not a keystroke, but it paid the same
+  // one-second wait -- the tab sat blank, then raised a spinner over content
+  // that had only just arrived, which reads as the screen refreshing itself
+  // for no reason. The first run is immediate; every later one still waits.
+  const hasFetchedRef = useRef(false);
+
   useEffect(() => {
     clearTimeout(timeout.current);
-    timeout.current = setTimeout(() => {
-      if (!categoryId) {
-        return;
-      }
-
-      setIsLoading(true);
-      setErrorMessage("");
-      getVirtualClassList(
-        categoryId,
-        query?.q || "",
-        selectedDate?.start_date,
-        selectedDate?.end_date,
-        selectedFilter,
-        selectedSort,
-      ).then(result => {
-        setIsLoading(false);
-        if (result?.status !== "success") {
-          setErrorMessage("Kelas virtual belum bisa dimuat.");
+    timeout.current = setTimeout(
+      () => {
+        if (!categoryId) {
+          return;
         }
-      });
-    }, 1000);
+
+        hasFetchedRef.current = true;
+        setIsLoading(true);
+        setErrorMessage("");
+        getVirtualClassList(
+          categoryId,
+          query?.q || "",
+          selectedDate?.start_date,
+          selectedDate?.end_date,
+          selectedFilter,
+          selectedSort,
+        ).then(result => {
+          setIsLoading(false);
+          if (result?.status !== "success") {
+            setErrorMessage("Kelas virtual belum bisa dimuat.");
+          }
+        });
+      },
+      hasFetchedRef.current ? 1000 : 0,
+    );
     return () => clearTimeout(timeout.current);
   }, [categoryId, query?.q, selectedDate, selectedFilter, selectedSort]);
 

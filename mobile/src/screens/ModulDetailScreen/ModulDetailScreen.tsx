@@ -4,19 +4,13 @@ import Space from "components/Space";
 import Text from "components/Text";
 import colors from "configs/colors";
 import icons from "configs/icons";
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import { Image, ScrollView, View } from "react-native";
 import TabItem from "screens/TrainingScreen/DetailTrainingScreen/TabItem";
 import globalStyles from "utils/GlobalStyles";
 import { scaledHorizontal, scaledVertical } from "utils/ScaledService";
 import type { RouteProp } from "@react-navigation/core";
-import { useIsFocused, useNavigation } from "@react-navigation/core";
+import { useFocusEffect } from "@react-navigation/core";
 import type { StackNavigationProp } from "@react-navigation/stack";
 import type { RootStackParamList } from "types/NavigatorTypes";
 import type { BottomSheetModal } from "@gorhom/bottom-sheet";
@@ -49,8 +43,6 @@ const ModulDetailScreen = ({ route }: Prop) => {
     getAssesmentListNoFilter,
   } = useTraining();
 
-  const isFocused = useIsFocused();
-
   const [query, setQuery] = useState({
     search: "",
     sort: { id: 2, title: t("belum_selesai") },
@@ -82,19 +74,8 @@ const ModulDetailScreen = ({ route }: Prop) => {
     { id: 3, title: t("materi") },
   ];
   const actionSheetRef = useRef<BottomSheetModal>(null);
-  const snapPoints = useMemo(() => [370], []);
+  const snapPoints = useMemo(() => [440], []);
   const [isOpen, setIsOpen] = useState(false);
-  const navigation = useNavigation();
-
-  useEffect(() => {
-    initData();
-  }, []);
-
-  useEffect(() => {
-    navigation.addListener("focus", e => {
-      initData();
-    });
-  }, []);
 
   const initData = useCallback(() => {
     getMateriDetail({
@@ -116,7 +97,21 @@ const ModulDetailScreen = ({ route }: Prop) => {
       ],
     });
     getAssesmentListNoFilter(route?.params?.categoryId);
-  }, [isFocused]);
+    // Keyed to the module being shown, not to focus. The search term is
+    // deliberately absent: Materi already filters the loaded list by title on
+    // the device, so refetching per keystroke bought nothing.
+  }, [route?.params?.materiId, route?.params?.categoryId]);
+
+  // One fetch per visit. This screen previously ran initData() from a mount
+  // effect *and* from a "focus" listener, and focus fires on the first display
+  // too -- so every entry issued both requests twice over. The listener was
+  // also never unsubscribed, so remounts stacked more of them. useFocusEffect
+  // covers the first focus and every return, and cleans itself up.
+  useFocusEffect(
+    useCallback(() => {
+      initData();
+    }, [initData]),
+  );
 
   const checkActiveAssesmentList = () => {
     return assesmentListNoFilter

@@ -1,5 +1,5 @@
 import { ActivityIndicator, View, Image, ScrollView } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import globalStyles from "utils/GlobalStyles";
 import Header from "components/Header";
 import images from "configs/images";
@@ -7,7 +7,7 @@ import colors from "configs/colors";
 import Space from "components/Space";
 import CardProgressProfile from "components/CardProgressProfile";
 import type { RouteProp } from "@react-navigation/core";
-import { useNavigation } from "@react-navigation/core";
+import { useFocusEffect } from "@react-navigation/core";
 import type { RootStackParamList } from "types/NavigatorTypes";
 import type { StackNavigationProp } from "@react-navigation/stack";
 import { useAuth } from "hooks/useAuth";
@@ -38,7 +38,6 @@ type Prop = {
 };
 const DetailTraininScreen = ({ route }: Prop) => {
   const {
-    getVirtualClassList,
     virtualClassList,
     getVirtualClassNoFilter,
     virtualClassNoFilter,
@@ -50,7 +49,6 @@ const DetailTraininScreen = ({ route }: Prop) => {
   const [selectedTab, setSelectedTab] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const { user } = useAuth();
-  const navigation = useNavigation();
   const toSafeNumber = (value?: number | string | null) => {
     const numericValue = Number(value);
 
@@ -128,22 +126,35 @@ const DetailTraininScreen = ({ route }: Prop) => {
     },
   ];
 
+  // Only the counts shown on the tab headers are needed up front. The filtered
+  // virtual-class list used to be fetched here as well, but the VirtualClass
+  // tab loads it again itself with the active filters, so the same endpoint
+  // was called twice on every entry -- and the second answer arriving late is
+  // what made the tab appear to reload on its own.
   const fetchData = async () => {
     await Promise.all([
-      getVirtualClassList(route?.params?.categoryCourse?.id, ""),
       getVirtualClassNoFilter(route?.params?.categoryCourse?.id, ""),
       getAssesmentListNoFilter(route?.params?.categoryCourse?.id),
     ]);
   };
 
-  const loadData = async () => {
-    setIsLoading(true);
+  const hasLoadedOnceRef = useRef(false);
+
+  const loadData = useCallback(async () => {
+    // Block the screen only while there is nothing to show. Returning from a
+    // module raised the same full-screen overlay over content that was already
+    // drawn and about to be replaced by identical data, so every entry and
+    // exit felt like it stalled. Later loads refresh quietly underneath.
+    if (!hasLoadedOnceRef.current) {
+      setIsLoading(true);
+    }
     try {
       await Promise.all([getTrainingModuleProgress(), fetchData()]);
     } finally {
+      hasLoadedOnceRef.current = true;
       setIsLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     if (user?.is_subscription_active !== 1) {
@@ -151,12 +162,16 @@ const DetailTraininScreen = ({ route }: Prop) => {
         price_type: 2,
       });
     }
-
-    loadData();
-    const unsubscribe = navigation.addListener("focus", loadData);
-
-    return unsubscribe;
   }, []);
+
+  // useFocusEffect fires on the first focus too, so the manual call that used
+  // to sit beside addListener("focus", ...) was a straight duplicate: entering
+  // the screen ran every request twice.
+  useFocusEffect(
+    useCallback(() => {
+      loadData();
+    }, [loadData]),
+  );
 
   const renderLoadingOverlay = () => {
     if (!isLoading) {

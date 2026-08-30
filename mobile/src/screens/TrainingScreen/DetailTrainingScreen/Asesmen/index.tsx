@@ -25,7 +25,7 @@ const Asesmen = ({ categoryId, icon }: AsesmenProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const actionSheetRef = useRef<BottomSheetModal>(null);
-  const snapPoints = useMemo(() => [330], []);
+  const snapPoints = useMemo(() => [400], []);
   const timeout: any = useRef(null);
   const isFocused = useIsFocused();
   const dataDate = [
@@ -84,28 +84,37 @@ const Asesmen = ({ categoryId, icon }: AsesmenProps) => {
     },
   );
 
+  // Same debounce, same reason as VirtualClass: it belongs to the filters, not
+  // to opening the tab. Paying it on the first run left the tab blank for a
+  // second and then flashed a spinner over freshly drawn content.
+  const hasFetchedRef = useRef(false);
+
   useEffect(() => {
     clearTimeout(timeout.current);
-    timeout.current = setTimeout(() => {
-      if (!categoryId || !isFocused) {
-        return;
-      }
-
-      setIsLoading(true);
-      setErrorMessage("");
-      getAssesmentList(
-        categoryId,
-        selectedDate?.start_date,
-        selectedDate?.end_date,
-        query?.highest,
-        query?.lowest,
-      ).then(result => {
-        setIsLoading(false);
-        if (result?.status !== "success") {
-          setErrorMessage("Asesmen belum bisa dimuat.");
+    timeout.current = setTimeout(
+      () => {
+        if (!categoryId || !isFocused) {
+          return;
         }
-      });
-    }, 1000);
+
+        hasFetchedRef.current = true;
+        setIsLoading(true);
+        setErrorMessage("");
+        getAssesmentList(
+          categoryId,
+          selectedDate?.start_date,
+          selectedDate?.end_date,
+          query?.highest,
+          query?.lowest,
+        ).then(result => {
+          setIsLoading(false);
+          if (result?.status !== "success") {
+            setErrorMessage("Asesmen belum bisa dimuat.");
+          }
+        });
+      },
+      hasFetchedRef.current ? 1000 : 0,
+    );
     return () => clearTimeout(timeout.current);
   }, [categoryId, isFocused, selectedDate, query?.highest, query?.lowest]);
 
