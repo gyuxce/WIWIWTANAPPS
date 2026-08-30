@@ -111,20 +111,37 @@ fi
 # Send through the application's own mailer rather than a system MTA, which may
 # not be installed or configured -- this is the transport already proven to
 # work by the pra-test result emails.
-# The sender has to be set explicitly. Laravel's mail.from.address is empty on
-# this server -- the application's own emails set their sender themselves -- so
-# leaving it to the config throws "An email must have a From or a Sender
-# header". Falls back to sending from the recipient, which every provider
-# accepts for mail addressed to that same account.
+# The sender has to be set explicitly: mail.from.address is empty on this
+# server -- the application's own mails set their sender themselves -- so
+# leaving it to config throws "An email must have a From or a Sender header".
+#
+# Every value is handed over through files rather than the environment.
+# Exported variables did not survive `sudo -u www-data`, so getenv() returned
+# nothing inside tinker and the sender was silently never set, which is what
+# that From error was actually reporting. Files have no such gap, and nothing
+# to quote wrongly either.
 cd "$BACKEND_DIR"
-SUBJECT="$SUBJECT" BODY="$BODY" TO="$DIGEST_TO" FROM="${DIGEST_FROM:-$DIGEST_TO}" \
-  sudo -u www-data --preserve-env=SUBJECT,BODY,TO,FROM env HOME=/tmp \
-  php artisan tinker --execute='
-    $from = getenv("FROM") ?: config("mail.from.address");
-    Illuminate\Support\Facades\Mail::raw(getenv("BODY"), function ($m) use ($from) {
-        $m->from($from, "Wiwitan Monitor")
-          ->to(getenv("TO"))
-          ->subject(getenv("SUBJECT"));
+
+MAILDIR="$(mktemp -d /tmp/wiwitan-digest.XXXXXX)"
+trap 'rm -rf "$MAILDIR"' EXIT
+
+printf '%s' "$BODY" > "$MAILDIR/body"
+printf '%s' "$SUBJECT" > "$MAILDIR/subject"
+printf '%s' "$DIGEST_TO" > "$MAILDIR/to"
+printf '%s' "${DIGEST_FROM:-$DIGEST_TO}" > "$MAILDIR/from"
+chmod 755 "$MAILDIR"
+chmod 644 "$MAILDIR"/body "$MAILDIR"/subject "$MAILDIR"/to "$MAILDIR"/from
+
+sudo -u www-data env HOME=/tmp php artisan tinker --execute="
+    \$d = '$MAILDIR';
+    \$body = file_get_contents(\$d . '/body');
+    \$subject = trim(file_get_contents(\$d . '/subject'));
+    \$to = trim(file_get_contents(\$d . '/to'));
+    \$from = trim(file_get_contents(\$d . '/from'));
+
+    Illuminate\\Support\\Facades\\Mail::raw(\$body, function (\$m) use (\$from, \$to, \$subject) {
+        \$m->from(\$from, 'Wiwitan Monitor')->to(\$to)->subject(\$subject);
     });
-    echo "terkirim\n";
-  '
+
+    echo 'terkirim ke ' . \$to . PHP_EOL;
+"
