@@ -1,0 +1,132 @@
+diff --git a/node_modules/react-native-pdf/index.js b/node_modules/react-native-pdf/index.js
+index 916faa5..4b178b9 100644
+--- a/node_modules/react-native-pdf/index.js
++++ b/node_modules/react-native-pdf/index.js
+@@ -161,8 +161,15 @@ export default class Pdf extends Component {
+     componentWillUnmount() {
+         this._mounted = false;
+         if (this.lastRNBFTask) {
+-            // this.lastRNBFTask.cancel(err => {
+-            // });
++            // Upstream ships this cancel commented out, which orphans an
++            // in-flight download every time the reader is closed early. The
++            // abandoned task keeps writing into the same temp file the next
++            // attempt uses, and the truncated result is what poisons the cache.
++            try {
++                this.lastRNBFTask.cancel(() => {});
++            } catch (e) {
++                // cancel() throws once the task has already settled.
++            }
+             this.lastRNBFTask = null;
+         }
+ 
+@@ -183,14 +190,23 @@ export default class Pdf extends Component {
+         if (source.cache) {
+             ReactNativeBlobUtil.fs
+                 .stat(cacheFile)
+-                .then(stats => {
+-                    if (!Boolean(source.expiration) || (source.expiration * 1000 + stats.lastModified) > (new Date().getTime())) {
+-                        if (this._mounted) {
+-                            this.setState({path: cacheFile, isDownloaded: true});
+-                        }
+-                    } else {
++                .then(async stats => {
++                    const isExpired = Boolean(source.expiration) &&
++                        (source.expiration * 1000 + stats.lastModified) <= (new Date().getTime());
++
++                    if (isExpired) {
+                         // cache expirated then reload it
+                         this._prepareFile(source);
++                        return;
++                    }
++
++                    if (!(await this._isCachedFileIntact(source, stats))) {
++                        this._prepareFile(source);
++                        return;
++                    }
++
++                    if (this._mounted) {
++                        this.setState({path: cacheFile, isDownloaded: true});
+                     }
+                 })
+                 .catch(() => {
+@@ -202,6 +218,57 @@ export default class Pdf extends Component {
+         }
+     };
+ 
++    // A cached file used to be trusted on sight: if stat() found one, it was
++    // handed straight to the viewer with nothing checking that it was complete.
++    //
++    // Because downloads were never cancelled on unmount (see
++    // componentWillUnmount above), closing a document mid-download left an
++    // orphan task still writing. The truncated file it left behind was then
++    // reused on every later open, for as long as the cache survived: no
++    // download was attempted, so no error was raised and no timeout fired --
++    // the reader simply sat at 0% forever, while documents whose cache
++    // happened to be sound kept working. Clearing the app cache was the only
++    // escape, which no student would ever find.
++    //
++    // One HEAD request against the stored size catches a truncated file. If
++    // the server cannot be reached the cache is used as-is, so reading
++    // offline still works.
++    _isCachedFileIntact = async (source, stats) => {
++        const localSize = Number(stats && stats.size);
++
++        if (!localSize) {
++            return false;
++        }
++
++        const uri = source.uri || "";
++
++        if (!uri.startsWith("http://") && !uri.startsWith("https://")) {
++            return true;
++        }
++
++        try {
++            const res = await ReactNativeBlobUtil.config({trusty: this.props.trustAllCerts})
++                .fetch("HEAD", uri, source.headers ? source.headers : {});
++            const responseInfo = res ? res.respInfo : undefined;
++
++            if (!responseInfo || typeof responseInfo.status !== "number" ||
++                responseInfo.status < 200 || responseInfo.status >= 300) {
++                return true;
++            }
++
++            const headers = responseInfo.headers || {};
++            const remoteSize = Number(headers["Content-Length"] || headers["content-length"]);
++
++            if (!remoteSize) {
++                return true;
++            }
++
++            return remoteSize === localSize;
++        } catch (e) {
++            return true;
++        }
++    };
++
+     _prepareFile = async (source) => {
+ 
+         try {
+@@ -215,11 +282,18 @@ export default class Pdf extends Component {
+                 const filename = source.cacheFileName || SHA1(uri) + '.pdf';
+                 const cacheFile = ReactNativeBlobUtil.fs.dirs.CacheDir + '/' + filename;
+ 
+-                // delete old cache file
+-                this._unlinkFile(cacheFile);
++                // Await the delete. Fire-and-forget here races the fresh
++                // copy that _downloadFile writes to this same path: the stale
++                // unlink can land *after* the new file is in place, removing
++                // it. The viewer is then pointed at a path that no longer
++                // exists and reports a load failure for a download that
++                // actually succeeded. Rare while a valid cache short-circuited
++                // this branch; routine once corrupt caches started being
++                // re-fetched through it.
++                await this._unlinkFile(cacheFile);
+ 
+                 if (isNetwork) {
+-                    this._downloadFile(source, cacheFile);
++                    await this._downloadFile(source, cacheFile);
+                 } else if (isAsset) {
+                     ReactNativeBlobUtil.fs
+                         .cp(uri, cacheFile)

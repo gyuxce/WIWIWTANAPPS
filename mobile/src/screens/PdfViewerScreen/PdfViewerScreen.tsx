@@ -1,12 +1,13 @@
 import type { RouteProp } from "@react-navigation/core";
 import type { StackNavigationProp } from "@react-navigation/stack";
+import Button from "components/Button";
 import Header from "components/Header";
 import Space from "components/Space";
 import Text from "components/Text";
 import colors from "configs/colors";
-import Button from "components/Button";
+import * as FileSystem from "expo-file-system";
 import { useAuth } from "hooks/useAuth";
-import React, { useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
 import Pdf from "react-native-pdf";
 import WebView from "react-native-webview";
@@ -30,13 +31,39 @@ type Prop = {
 /**
  * Full-screen PDF reader.
  *
- * Documents used to render inline on ContentDetailScreen inside a fixed 500px
- * box, which sat inside that screen's ScrollView. The outer ScrollView always
- * won the vertical drag, so the PDF's own page-scrolling never received any
- * gestures -- the document was visible but frozen on page one. Giving the PDF
- * its own screen with no scrollable ancestor is what makes scrolling and
- * pinch-zoom work, and it's the normal way to read a multi-page handbook.
+ * The document is fetched here rather than by react-native-pdf, and that is
+ * the whole point of this screen. Handing that library a network URL puts its
+ * own downloader and cache in the critical path, and both proved unusable:
+ *
+ *   - it never cancelled a download when the reader was closed, so an orphan
+ *     task kept writing into the file the next attempt would read;
+ *   - it trusted any cached file it found without checking that it was
+ *     complete, so one truncated file failed forever with no download
+ *     attempted, no error and no timeout -- the reader simply sat at 0%;
+ *   - and it treats a short read as fatal ("Download interrupted." from
+ *     react-native-blob-util, raised whenever the bytes received do not match
+ *     Content-Length) with no attempt to resume, which is exactly what a
+ *     student on mobile data runs into.
+ *
+ * expo-file-system is already a dependency of this app, runs on a different
+ * networking stack, and its download task can be cancelled and resumed. So we
+ * download, verify and store the file ourselves, then hand react-native-pdf a
+ * local file:// path -- at which point it only renders, and none of the code
+ * above is reachable.
  */
+
+const DOCUMENT_DIR = FileSystem.documentDirectory + "materi-pdf/";
+
+// The storage URLs already end in a server-generated random name, which is
+// unique per file and safe to reuse as a filename.
+const localFileNameFor = (url: string) => {
+  const pathPart = String(url).split("?")[0] || "";
+  const lastSegment = pathPart.substring(pathPart.lastIndexOf("/") + 1);
+  const safeName = lastSegment.replace(/[^a-zA-Z0-9._-]/g, "_") || "dokumen";
+
+  return safeName.toLowerCase().endsWith(".pdf") ? safeName : safeName + ".pdf";
+};
+
 const PdfViewerScreen = ({ route }: Prop) => {
   const fileUrl = route?.params?.url || "";
   const title = route?.params?.title || "";
@@ -46,9 +73,8 @@ const PdfViewerScreen = ({ route }: Prop) => {
   // Progress used to be recorded the moment a student opened (and left) the
   // material screen -- with duration 0 and no requirement to have seen
   // anything, so a handbook could be marked "Selesai" without being opened at
-  // all. Recording it here, only once the document has actually rendered,
-  // makes the status mean what it says. Videos already worked this way (they
-  // only complete once watched to the end).
+  // all. Recording it only once the document has actually rendered makes the
+  // status mean what it says.
   const hasReportedProgressRef = useRef(false);
   const reportOpened = () => {
     if (hasReportedProgressRef.current || !materialContentId) {
@@ -62,36 +88,146 @@ const PdfViewerScreen = ({ route }: Prop) => {
     });
   };
 
+  const [localUri, setLocalUri] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [progress, setProgress] = useState(0);
-  const [reloadKey, setReloadKey] = useState(0);
   const [errorMessage, setErrorMessage] = useState("");
   const [hasFailed, setHasFailed] = useState(false);
-
-  // There is deliberately NO automatic retry here.
-  //
-  // react-native-pdf downloads through react-native-blob-util, and its
-  // componentWillUnmount drops the task handle without cancelling it -- the
-  // cancel call is commented out in the library. Retrying by remounting the
-  // component (changing `key`) therefore leaves the previous download running
-  // as an orphan and starts another alongside it. Three retries meant four
-  // concurrent downloads of the same multi-MB file competing over one
-  // connection, which is slower than one attempt and eventually fails them
-  // all -- visible in the device log as repeated "connection was leaked"
-  // warnings. Adding retries made documents fail more often, not less.
-  //
-  // A single attempt, then an explicit "Coba Lagi" the student taps, keeps
-  // exactly one download in flight and also removes the flicker that
-  // remounting caused.
   const [useViewerFallback, setUseViewerFallback] = useState(false);
+  const [attempt, setAttempt] = useState(0);
+
+  const isMountedRef = useRef(true);
+  const downloadRef = useRef<FileSystem.DownloadResumable | null>(null);
+
+  const loadDocument = useCallback(async () => {
+    const targetUri = DOCUMENT_DIR + localFileNameFor(fileUrl);
+
+    // Ask the server how large the document is. This decides both whether a
+    // stored copy is complete and whether a finished download actually
+    // arrived in full. A server that will not answer is not a reason to fail:
+    // 0 means "unknown", and the caller then trusts what it already has.
+    const fetchExpectedSize = async () => {
+      try {
+        const response = await fetch(fileUrl, { method: "HEAD" });
+
+        return Number(response.headers.get("content-length")) || 0;
+      } catch (e) {
+        return 0;
+      }
+    };
+
+    const sizeOf = async (uri: string) => {
+      const info = await FileSystem.getInfoAsync(uri, { size: true });
+
+      return info.exists && !info.isDirectory ? Number(info.size) || 0 : 0;
+    };
+
+    try {
+      await FileSystem.makeDirectoryAsync(DOCUMENT_DIR, {
+        intermediates: true,
+      });
+
+      const expectedSize = await fetchExpectedSize();
+      const storedSize = await sizeOf(targetUri);
+
+      // A stored copy is reused only when it is provably whole.
+      if (
+        storedSize > 0 &&
+        (expectedSize === 0 || storedSize === expectedSize)
+      ) {
+        if (isMountedRef.current) {
+          setLocalUri(targetUri);
+        }
+        return;
+      }
+
+      if (storedSize > 0) {
+        await FileSystem.deleteAsync(targetUri, { idempotent: true });
+      }
+
+      const task = FileSystem.createDownloadResumable(
+        fileUrl,
+        targetUri,
+        {},
+        ({ totalBytesWritten, totalBytesExpectedToWrite }) => {
+          if (!isMountedRef.current || totalBytesExpectedToWrite <= 0) {
+            return;
+          }
+          setProgress(totalBytesWritten / totalBytesExpectedToWrite);
+        },
+      );
+      downloadRef.current = task;
+
+      await task.downloadAsync();
+
+      // A download reporting success is not proof that all of it arrived: a
+      // dropped connection ends the transfer quietly. Resuming asks only for
+      // the missing bytes instead of starting the multi-MB file over, which
+      // is what lets this survive a patchy mobile connection.
+      let downloadedSize = await sizeOf(targetUri);
+
+      if (expectedSize > 0 && downloadedSize !== expectedSize) {
+        await task.resumeAsync();
+        downloadedSize = await sizeOf(targetUri);
+      }
+
+      if (!isMountedRef.current) {
+        return;
+      }
+
+      if (downloadedSize === 0) {
+        throw new Error("Berkas tidak tersimpan di perangkat.");
+      }
+
+      if (expectedSize > 0 && downloadedSize !== expectedSize) {
+        // Leave nothing partial behind: a truncated file is exactly what used
+        // to be reused forever.
+        await FileSystem.deleteAsync(targetUri, { idempotent: true });
+        throw new Error(
+          "Unduhan terputus (" +
+            downloadedSize +
+            " dari " +
+            expectedSize +
+            " byte).",
+        );
+      }
+
+      setLocalUri(targetUri);
+    } catch (error: any) {
+      if (!isMountedRef.current) {
+        return;
+      }
+      setErrorMessage(String(error?.message || error || "").trim());
+      setIsLoading(false);
+      setHasFailed(true);
+    } finally {
+      downloadRef.current = null;
+    }
+  }, [fileUrl]);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    loadDocument();
+
+    return () => {
+      isMountedRef.current = false;
+      // Closing the reader stops the transfer. Leaving it running is how
+      // half-written files were produced in the first place.
+      downloadRef.current?.cancelAsync().catch(() => {
+        // Already finished or already gone -- nothing left to stop.
+      });
+      downloadRef.current = null;
+    };
+  }, [loadDocument, attempt]);
 
   const startOver = () => {
     setHasFailed(false);
     setErrorMessage("");
     setUseViewerFallback(false);
+    setLocalUri("");
     setProgress(0);
     setIsLoading(true);
-    setReloadKey(prev => prev + 1);
+    setAttempt(prev => prev + 1);
   };
 
   const googleViewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(
@@ -109,17 +245,6 @@ const PdfViewerScreen = ({ route }: Prop) => {
         onBackLeft={() => NavigationService.back()}
       />
       <Space height={10} />
-
-      {errorMessage !== "" && (
-        <Text
-          size={12}
-          textAlign="center"
-          color={colors.red}
-          style={{ marginBottom: 8 }}
-        >
-          {errorMessage}
-        </Text>
-      )}
 
       <View style={{ flex: 1, backgroundColor: colors.stone50 }}>
         {isLoading && !hasFailed && (
@@ -145,12 +270,6 @@ const PdfViewerScreen = ({ route }: Prop) => {
           </View>
         )}
 
-        {/*
-         * An actionable failure state. Previously this screen handed off to
-         * the Google viewer automatically, which frequently answered "No
-         * preview available" and left the student staring at a dark screen
-         * with no way forward.
-         */}
         {hasFailed && !useViewerFallback && (
           <View
             style={{
@@ -164,10 +283,21 @@ const PdfViewerScreen = ({ route }: Prop) => {
             </Text>
             <Space height={8} />
             <Text size={12} textAlign="center" color={colors.stone500}>
-              {
-                "Koneksi terputus saat mengunduh. Periksa jaringan lalu coba lagi."
-              }
+              {"Dokumen tidak dapat diunduh. Coba lagi dalam beberapa saat."}
             </Text>
+            {/*
+             * The underlying wording, kept on screen. A generic "check your
+             * connection" sent us chasing the network for days while the
+             * fault was local.
+             */}
+            {errorMessage !== "" && (
+              <>
+                <Space height={8} />
+                <Text size={10} textAlign="center" color={colors.stone400}>
+                  {errorMessage}
+                </Text>
+              </>
+            )}
             <Space height={20} />
             <Button
               title="Coba Lagi"
@@ -177,11 +307,6 @@ const PdfViewerScreen = ({ route }: Prop) => {
               variant="CenturyGothicBold"
             />
             <Space height={10} />
-            {/*
-             * Was plain coloured text, which readers did not recognise as
-             * tappable. Given the same visual weight as a secondary button so
-             * the second option is actually discoverable.
-             */}
             <Button
               title="Buka dengan penampil alternatif"
               onPress={() => {
@@ -204,33 +329,21 @@ const PdfViewerScreen = ({ route }: Prop) => {
         )}
 
         {/*
-         * Three exclusive states, not a two-way ternary: the previous version
-         * fell through to the WebView whenever hasFailed was true, so the
-         * Google viewer loaded underneath the error screen even though the
-         * student never chose it.
+         * A local path only. react-native-pdf resolves a file:// source
+         * straight to the renderer, so its downloader and cache -- the source
+         * of every failure this screen has seen -- are never entered.
          */}
-        {!hasFailed && !useViewerFallback && (
+        {!hasFailed && !useViewerFallback && localUri !== "" && (
           <Pdf
-            key={reloadKey}
-            source={{ uri: fileUrl, cache: true }}
-            // react-native-pdf defaults trustAllCerts to true, which routes the
-            // download through react-native-blob-util's "unsafe" OkHttp client.
-            // That path needs a TrustManager this app never registers, so it
-            // always threw. Our storage domain has a valid certificate anyway.
-            trustAllCerts={false}
-            // The library draws its own spinner on top of ours, so two
-            // indicators appeared side by side while loading.
+            source={{ uri: localUri }}
             renderActivityIndicator={() => <View />}
             style={{ flex: 1, backgroundColor: colors.stone50 }}
-            onLoadProgress={percent => {
-              setProgress(percent);
-              setIsLoading(true);
-            }}
             onLoadComplete={() => {
               setIsLoading(false);
               reportOpened();
             }}
-            onError={() => {
+            onError={(error: any) => {
+              setErrorMessage(String(error?.message || error || "").trim());
               setIsLoading(false);
               setHasFailed(true);
             }}
@@ -243,7 +356,6 @@ const PdfViewerScreen = ({ route }: Prop) => {
             style={{ flex: 1 }}
             javaScriptEnabled
             domStorageEnabled
-            startInLoadingState
             scalesPageToFit
             mixedContentMode="always"
             onLoadEnd={() => {
