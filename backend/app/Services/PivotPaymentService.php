@@ -38,16 +38,59 @@ class PivotPaymentService
         if (empty($payment) || empty($payment->transaction)) { return 'Payment was not found'; }
 
         $id = $data['data']['id'];
-        $status = $data['data']['status'];
-        $paid_at = $data['data']['chargeDetails'][0]['paidAt'] ?? null;
 
-        if (empty($id) || empty($status)) { return 'Invalid data'; }
+        if (empty($id)) { return 'Invalid data'; }
         if (in_array($payment->status, [PaymentStatusConstant::FAILED, PaymentStatusConstant::PAID])) { return 'Payment was already processed'; }
+
+        // Ask Pivot what the status actually is, rather than believing the
+        // callback.
+        //
+        // The callback route carries no middleware and no signature check, so
+        // anything in that request body is simply whatever the caller typed.
+        // The status field decided whether a student is recorded as having
+        // paid, which meant a request naming a known payment reference could
+        // settle an invoice that was never paid. Verified against production:
+        // the endpoint answers unauthenticated requests, while every student
+        // route beside it returns 401.
+        //
+        // The callback is now treated as nothing more than a signal that
+        // something changed; the provider is the only source of truth for what
+        // it changed to. Deliberately placed after the payment lookup above, so
+        // an unknown reference is rejected locally and cannot be used to aim
+        // outbound requests at Pivot.
+        try {
+            $verified = $this->access(
+                'get_payment',
+                null,
+                ['Content-Type' => 'application/json'],
+                ['payment_id' => $id]
+            );
+        } catch (\Throwable $e) {
+            // Leave the payment untouched. Pivot retries its callbacks, and a
+            // provider we cannot reach is not grounds to guess.
+            return 'Unable to verify payment with provider: ' . $e->getMessage();
+        }
+
+        // Pivot wraps its responses in `data` -- create_payment is read the
+        // same way over in TransactionController. The unwrapped fallback is
+        // insurance only: if this one endpoint ever answers differently, the
+        // cost of guessing wrong is that no payment is ever marked paid again,
+        // which is a worse failure than the one being fixed here.
+        $confirmed = $verified['data'] ?? $verified ?? [];
+        $status = $confirmed['status'] ?? null;
+        $paid_at = $confirmed['chargeDetails'][0]['paidAt'] ?? null;
+
+        if (empty($status)) {
+            return 'Provider returned no payment status for ' . $id;
+        }
 
         //update payment response
         if (!empty($payment)) {
             $json_data = json_decode($payment->data, true);
-            $json_data['response'] = $data['data'];
+            // Store what was verified, not what was posted: this is the record
+            // the decision below was actually made from.
+            $json_data['response'] = $confirmed;
+            $json_data['callback_payload'] = $data['data'];
             $payment->data = json_encode($json_data);
         }
 
