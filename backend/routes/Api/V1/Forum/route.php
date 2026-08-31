@@ -70,7 +70,7 @@ Route::prefix("cms")->group(function () {
             Route::post('/{id}', [ForumPostController::class, 'destroy']);
         });
 
-        Route::prefix("comments")->group(function () {
+        Route::prefix("comments")->middleware([Dolphin::class, CmsAccess::class])->group(function () {
             Route::get('/', [ForumCommentController::class, 'index']);
             Route::get('/childs', [ForumCommentController::class, 'getChild']);
             Route::get('/{id}', [ForumCommentController::class, 'show']);
