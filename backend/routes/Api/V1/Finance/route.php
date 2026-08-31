@@ -30,7 +30,7 @@ Route::prefix("pg")->group(function () {
 
 Route::prefix("cms")->group(function () {
     Route::prefix("finance")->group(function () {
-        Route::prefix("batches")->group(function () {
+        Route::prefix("batches")->middleware([Dolphin::class, CmsAccess::class])->group(function () {
             Route::get('/', [BatchController::class, 'index']);
             Route::get('/{id}', [BatchController::class, 'show']);
             Route::post('/', [BatchController::class, 'store']);
@@ -55,7 +55,7 @@ Route::prefix("cms")->group(function () {
             Route::delete('/{id}', [TransactionController::class, 'destroy']);
         });
     
-        Route::prefix("transaction-items")->group(function () {
+        Route::prefix("transaction-items")->middleware([Dolphin::class, CmsAccess::class])->group(function () {
             Route::get('/', [TransactionItemController::class, 'index']);
             Route::get('/{id}', [TransactionItemController::class, 'show']);
             Route::post('/', [TransactionItemController::class, 'store']);
@@ -63,7 +63,7 @@ Route::prefix("cms")->group(function () {
             Route::delete('/{id}', [TransactionItemController::class, 'destroy']);
         });
     
-        Route::prefix("payment-adpaters")->group(function () {
+        Route::prefix("payment-adpaters")->middleware([Dolphin::class, CmsAccess::class])->group(function () {
             Route::get('/', [PaymentAdapterController::class, 'index']);
             Route::get('/{id}', [PaymentAdapterController::class, 'show']);
             Route::post('/', [PaymentAdapterController::class, 'store']);
@@ -96,7 +96,7 @@ Route::prefix("cms")->group(function () {
             Route::delete('/{id}', [InstallmentController::class, 'destroy']);
         });
     
-        Route::prefix("bank-accounts")->group(function () {
+        Route::prefix("bank-accounts")->middleware([Dolphin::class, CmsAccess::class])->group(function () {
             Route::get('/', [BankAccountController::class, 'index']);
             Route::get('/{id}', [BankAccountController::class, 'show']);
             Route::post('/', [BankAccountController::class, 'store']);
@@ -104,7 +104,7 @@ Route::prefix("cms")->group(function () {
             Route::delete('/{id}', [BankAccountController::class, 'destroy']);
         });
     
-        Route::prefix("banks")->group(function () {
+        Route::prefix("banks")->middleware([Dolphin::class, CmsAccess::class])->group(function () {
             Route::get('/', [BankController::class, 'index']);
             Route::get('/{id}', [BankController::class, 'show']);
             Route::post('/', [BankController::class, 'store']);
